@@ -1,78 +1,48 @@
-// ── Navbar scroll effect ──────────────────────────────
-const navbar = document.getElementById('navbar');
-window.addEventListener('scroll', () => {
-  navbar.classList.toggle('scrolled', window.scrollY > 40);
+/* ── Apply project accent colors from data attr ─────── */
+document.querySelectorAll('.proj-card').forEach(card => {
+  const color = card.dataset.color;
+  if (color) card.querySelector('.proj-accent').style.background = color;
 });
 
-// ── Hamburger menu ────────────────────────────────────
-const hamburger = document.getElementById('hamburger');
-const navLinks  = document.querySelector('.nav-links');
-hamburger.addEventListener('click', () => {
-  navLinks.classList.toggle('open');
-});
-document.querySelectorAll('.nav-links a').forEach(link => {
-  link.addEventListener('click', () => navLinks.classList.remove('open'));
-});
+/* ── Tab switching ───────────────────────────────────── */
+const btns   = document.querySelectorAll('.nav-btn');
+const panels = document.querySelectorAll('.panel');
+const main   = document.getElementById('main-panel');
 
-// ── Publication tabs ──────────────────────────────────
-const tabs        = document.querySelectorAll('.pub-tab');
-const pubSections = document.querySelectorAll('.pub-list');
-
-tabs.forEach(tab => {
-  tab.addEventListener('click', () => {
-    tabs.forEach(t => t.classList.remove('active'));
-    tab.classList.add('active');
-    const target = tab.dataset.tab;
-    pubSections.forEach(s => {
-      s.classList.toggle('hidden', s.id !== `pub-${target}`);
-    });
+function switchTo(id) {
+  btns.forEach(b => {
+    const active = b.dataset.panel === id;
+    b.classList.toggle('active', active);
+    b.setAttribute('aria-pressed', active);
   });
+  panels.forEach(p => {
+    p.classList.toggle('active', p.id === 'panel-' + id);
+  });
+  main.scrollTop = 0;
+}
+
+btns.forEach(btn => {
+  btn.addEventListener('click', () => switchTo(btn.dataset.panel));
 });
 
-// ── Scroll reveal animation ───────────────────────────
-const revealObserver = new IntersectionObserver((entries) => {
-  entries.forEach(entry => {
-    if (entry.isIntersecting) {
-      entry.target.classList.add('visible');
-      revealObserver.unobserve(entry.target);
-    }
-  });
-}, { threshold: 0.12, rootMargin: '0px 0px -40px 0px' });
+/* ── Keyboard shortcuts 1–4 ──────────────────────────── */
+const panelIds = ['experience', 'publications', 'projects', 'skills'];
+const hint     = document.getElementById('kbd-hint');
+let hintTimer;
 
-// Elements to animate
-const revealTargets = [
-  '.timeline-card',
-  '.pub-card',
-  '.project-card',
-  '.skill-group',
-  '.contact-card',
-  '.info-card',
-  '.edu-card',
-  '.about-text',
-];
-
-revealTargets.forEach(selector => {
-  document.querySelectorAll(selector).forEach((el, i) => {
-    el.classList.add('reveal');
-    el.style.transitionDelay = `${i * 0.07}s`;
-    revealObserver.observe(el);
-  });
+document.addEventListener('keydown', e => {
+  const n = parseInt(e.key);
+  if (n >= 1 && n <= 4 && !e.metaKey && !e.ctrlKey && !e.altKey) {
+    switchTo(panelIds[n - 1]);
+    // show hint briefly on first use
+    clearTimeout(hintTimer);
+    hint.classList.add('show');
+    hintTimer = setTimeout(() => hint.classList.remove('show'), 2000);
+  }
 });
 
-// ── Active nav link highlight on scroll ───────────────
-const sections = document.querySelectorAll('section[id]');
-const navAnchs = document.querySelectorAll('.nav-links a[href^="#"]');
-
-const sectionObserver = new IntersectionObserver((entries) => {
-  entries.forEach(entry => {
-    if (entry.isIntersecting) {
-      navAnchs.forEach(a => {
-        a.style.color = a.getAttribute('href') === `#${entry.target.id}`
-          ? 'var(--text-primary)'
-          : '';
-      });
-    }
-  });
-}, { threshold: 0.4 });
-
-sections.forEach(s => sectionObserver.observe(s));
+/* Show hint once on load after 1.5s */
+setTimeout(() => {
+  hint.classList.add('show');
+  hintTimer = setTimeout(() => hint.classList.remove('show'), 3000);
+}, 1500);

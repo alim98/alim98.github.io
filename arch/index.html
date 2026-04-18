@@ -1,0 +1,1154 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>3D Vesicle Instance Segmentation Architecture</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;700&display=swap"
+        rel="stylesheet">
+    <style>
+        :root {
+            --bg-void: #02040a;
+            --bg-glass: rgba(13, 17, 23, 0.85);
+            --border-glass: rgba(255, 255, 255, 0.1);
+            --neon-emerald: #10b981;
+            --neon-purple: #8b5cf6;
+            --neon-cyan: #06b6d4;
+            --neon-pink: #ec4899;
+            --neon-gold: #f59e0b;
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: var(--bg-void);
+            color: #e5e7eb;
+            margin: 0;
+            overflow: hidden;
+        }
+
+        .mono {
+            font-family: 'JetBrains Mono', monospace;
+        }
+
+        ::-webkit-scrollbar {
+            width: 6px;
+            height: 6px;
+        }
+
+        ::-webkit-scrollbar-track {
+            background: transparent;
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 10px;
+        }
+
+        ::-webkit-scrollbar-thumb:hover {
+            background: rgba(255, 255, 255, 0.2);
+        }
+
+        /* Grid Backgrounds */
+        .tech-grid {
+            background-image:
+                linear-gradient(rgba(255, 255, 255, 0.02) 1px, transparent 1px),
+                linear-gradient(90deg, rgba(255, 255, 255, 0.02) 1px, transparent 1px);
+            background-size: 30px 30px;
+        }
+
+        /* Swimlanes (Stage 1 & Stage 2) */
+        .swimlane {
+            position: absolute;
+            left: 2%;
+            right: 2%;
+            border: 1px dashed rgba(255, 255, 255, 0.1);
+            border-radius: 16px;
+            background: linear-gradient(90deg, rgba(255, 255, 255, 0.01) 0%, transparent 100%);
+            z-index: 1;
+            pointer-events: none;
+        }
+
+        .swimlane-title {
+            position: absolute;
+            top: -12px;
+            left: 24px;
+            background: var(--bg-void);
+            padding: 0 12px;
+            font-size: 10px;
+            font-weight: 700;
+            letter-spacing: 0.1em;
+            text-transform: uppercase;
+        }
+
+        /* SVG Flow Lines */
+        .flow-base {
+            fill: none;
+            stroke: rgba(255, 255, 255, 0.1);
+            stroke-width: 2px;
+            transition: all 0.4s ease;
+        }
+
+        .flow-glow {
+            fill: none;
+            stroke-width: 4px;
+            stroke-linecap: round;
+            opacity: 0;
+            transition: opacity 0.4s ease;
+        }
+
+        .flow-packet {
+            fill: none;
+            stroke: #fff;
+            stroke-width: 2.5px;
+            stroke-linecap: round;
+            stroke-dasharray: 2 12;
+            opacity: 0;
+            animation: dashPacket 1.2s linear infinite;
+        }
+
+        @keyframes dashPacket {
+            0% {
+                stroke-dashoffset: 100;
+            }
+
+            100% {
+                stroke-dashoffset: 0;
+            }
+        }
+
+        /* Specific Link Types */
+        .path-active .flow-base {
+            stroke: rgba(255, 255, 255, 0.2);
+        }
+
+        .path-active .flow-packet {
+            opacity: 1;
+        }
+
+        .path-active .flow-glow {
+            opacity: 0.4;
+        }
+
+        .path-pretrain .flow-glow {
+            stroke: var(--neon-purple);
+            filter: drop-shadow(0 0 6px var(--neon-purple));
+        }
+
+        .path-transfer .flow-glow {
+            stroke: var(--neon-gold);
+            filter: drop-shadow(0 0 8px var(--neon-gold));
+        }
+
+        .path-transfer .flow-base {
+            stroke-dasharray: 6 6;
+            stroke: rgba(245, 158, 11, 0.4);
+        }
+
+        .path-unetr .flow-glow {
+            stroke: var(--neon-cyan);
+            filter: drop-shadow(0 0 6px var(--neon-cyan));
+        }
+
+        .path-head .flow-glow {
+            stroke: var(--neon-pink);
+            filter: drop-shadow(0 0 6px var(--neon-pink));
+        }
+
+        /* Nodes */
+        .arch-node {
+            background: var(--bg-glass);
+            backdrop-filter: blur(12px);
+            border: 1px solid var(--border-glass);
+            border-radius: 12px;
+            padding: 0.75rem;
+            position: absolute;
+            transform: translate(-50%, -50%);
+            transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.5);
+            z-index: 10;
+            width: 175px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            text-align: center;
+        }
+
+        .arch-node.inactive {
+            opacity: 0.35;
+            filter: grayscale(80%) brightness(0.6);
+            transform: translate(-50%, -50%) scale(0.95);
+        }
+
+        .arch-node.active {
+            transform: translate(-50%, -52%) scale(1.02);
+            z-index: 20;
+        }
+
+        /* Glow States based on data-type */
+        .arch-node.active[data-type="input"] {
+            box-shadow: 0 0 25px rgba(16, 185, 129, 0.15);
+            border-color: rgba(16, 185, 129, 0.4);
+        }
+
+        .arch-node.active[data-type="mae"] {
+            box-shadow: 0 0 25px rgba(139, 92, 246, 0.2);
+            border-color: rgba(139, 92, 246, 0.5);
+        }
+
+        .arch-node.active[data-type="transfer"] {
+            box-shadow: 0 0 30px rgba(245, 158, 11, 0.2);
+            border-color: rgba(245, 158, 11, 0.5);
+        }
+
+        .arch-node.active[data-type="unetr"] {
+            box-shadow: 0 0 25px rgba(6, 182, 212, 0.2);
+            border-color: rgba(6, 182, 212, 0.4);
+        }
+
+        .arch-node.active[data-type="head"] {
+            box-shadow: 0 0 25px rgba(236, 72, 153, 0.2);
+            border-color: rgba(236, 72, 153, 0.4);
+        }
+
+        /* Tensor Badges */
+        .tensor-badge {
+            margin-top: 6px;
+            font-size: 8px;
+            font-family: 'JetBrains Mono', monospace;
+            background: rgba(0, 0, 0, 0.5);
+            color: #9ca3af;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            padding: 3px 6px;
+            border-radius: 4px;
+            width: 100%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            letter-spacing: 0.05em;
+        }
+
+        /* Visual Simulations (Mini grids for Semantic and Flow) */
+        .sim-box {
+            width: 48px;
+            height: 48px;
+            background: #02040a;
+            border: 1px solid rgba(255, 255, 255, 0.15);
+            border-radius: 6px;
+            margin-bottom: 8px;
+            position: relative;
+            overflow: hidden;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        /* Code Block */
+        .ide-container {
+            background: #0d1117;
+            border-radius: 10px;
+            border: 1px solid #30363d;
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .ide-header {
+            background: #161b22;
+            border-bottom: 1px solid #30363d;
+            padding: 6px 12px;
+            display: flex;
+            gap: 6px;
+            align-items: center;
+        }
+
+        .mac-dot {
+            width: 10px;
+            height: 10px;
+            border-radius: 50%;
+        }
+
+        .ide-body {
+            padding: 14px;
+            font-size: 11px;
+            line-height: 1.5;
+            color: #c9d1d9;
+            overflow-y: auto;
+        }
+
+        .s-kw {
+            color: #ff7b72;
+        }
+
+        .s-fn {
+            color: #d2a8ff;
+        }
+
+        .s-st {
+            color: #a5d6ff;
+        }
+
+        .s-cm {
+            color: #8b949e;
+            font-style: italic;
+        }
+
+        .s-nm {
+            color: #79c0ff;
+        }
+
+        .s-ty {
+            color: #ffeb3b;
+        }
+
+        /* MAE Deep Dive Modal */
+        .mae-modal {
+            position: fixed;
+            inset: 0;
+            background: rgba(2, 4, 10, 0.9);
+            backdrop-filter: blur(20px);
+            z-index: 100;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            opacity: 0;
+            pointer-events: none;
+            transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+
+        .mae-modal.show {
+            opacity: 1;
+            pointer-events: all;
+        }
+
+        .mae-content {
+            background: #0d1117;
+            border: 1px solid #30363d;
+            border-radius: 20px;
+            width: 95vw;
+            max-width: 1400px;
+            height: 85vh;
+            display: flex;
+            flex-direction: column;
+            transform: scale(0.95) translateY(20px);
+            transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+            box-shadow: 0 30px 60px rgba(0, 0, 0, 0.8), 0 0 100px rgba(139, 92, 246, 0.15);
+            overflow: hidden;
+        }
+
+        .mae-modal.show .mae-content {
+            transform: scale(1) translateY(0);
+        }
+
+        /* 3D Isometric Elements for MAE Modal */
+        .isometric-container {
+            perspective: 1000px;
+            transform-style: preserve-3d;
+        }
+
+        .iso-grid {
+            transform: rotateX(60deg) rotateZ(-45deg);
+            transform-style: preserve-3d;
+            display: grid;
+            grid-template-columns: repeat(4, 20px);
+            grid-template-rows: repeat(4, 20px);
+            gap: 4px;
+        }
+
+        .iso-patch {
+            width: 20px;
+            height: 20px;
+            background: rgba(139, 92, 246, 0.8);
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            box-shadow: 2px 2px 0 rgba(0, 0, 0, 0.5);
+            transition: all 0.3s;
+        }
+
+        .iso-patch.masked {
+            background: rgba(30, 41, 59, 0.3);
+            border: 1px dashed rgba(100, 116, 139, 0.5);
+            box-shadow: none;
+            transform: translateZ(-10px);
+            opacity: 0.5;
+        }
+
+        .iso-patch.decoder-mask {
+            background: rgba(245, 158, 11, 0.6);
+            border: 1px solid rgba(255, 255, 255, 0.4);
+            box-shadow: 2px 2px 0 rgba(0, 0, 0, 0.5);
+        }
+
+        .layer-stack {
+            position: relative;
+            width: 100px;
+            height: 150px;
+            transform-style: preserve-3d;
+            transform: rotateX(60deg) rotateZ(-45deg);
+        }
+
+        .layer-plate {
+            position: absolute;
+            width: 80px;
+            height: 80px;
+            background: rgba(139, 92, 246, 0.15);
+            border: 1px solid rgba(139, 92, 246, 0.5);
+            box-shadow: 0 0 15px rgba(139, 92, 246, 0.2);
+            backdrop-filter: blur(4px);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: rgba(255, 255, 255, 0.5);
+            font-size: 8px;
+            font-family: monospace;
+        }
+
+        .layer-plate.decoder-plate {
+            background: rgba(6, 182, 212, 0.15);
+            border-color: rgba(6, 182, 212, 0.5);
+            box-shadow: 0 0 15px rgba(6, 182, 212, 0.2);
+        }
+    </style>
+</head>
+
+<body class="h-screen flex flex-col">
+
+    <!-- Header -->
+    <header
+        class="bg-[#0d1117]/90 backdrop-blur border-b border-[#30363d] px-6 py-3 flex items-center justify-between z-30 shrink-0">
+        <div class="flex items-center gap-4">
+            <div
+                class="w-10 h-10 flex items-center justify-center bg-gradient-to-br from-purple-600 to-cyan-600 rounded-lg shadow-[0_0_15px_rgba(139,92,246,0.3)]">
+                <i data-lucide="split" class="text-white w-5 h-5"></i>
+            </div>
+            <div>
+                <h1 class="text-base font-bold text-white tracking-wide">3D Vesicle <span
+                        class="text-purple-400">Instance Segmentation</span></h1>
+                <div class="flex items-center gap-3 mt-0.5">
+                    <span
+                        class="text-[9px] text-purple-400 font-mono bg-purple-900/30 px-1.5 py-0.5 rounded border border-purple-800/50">Stage
+                        1: Pretraining</span>
+                    <i data-lucide="arrow-right" class="w-3 h-3 text-gray-600"></i>
+                    <span
+                        class="text-[9px] text-cyan-400 font-mono bg-cyan-900/30 px-1.5 py-0.5 rounded border border-cyan-800/50">Stage
+                        2: Segmentation</span>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <div class="flex flex-1 overflow-hidden relative">
+
+        <!-- Sidebar Navigation -->
+        <aside class="w-[300px] bg-[#0d1117] border-r border-[#30363d] flex flex-col shrink-0 z-20 shadow-2xl">
+            <div class="p-5 border-b border-[#30363d]">
+                <h2 class="text-[10px] font-bold text-gray-500 uppercase tracking-widest mb-4 flex items-center gap-2">
+                    <i data-lucide="fast-forward" class="w-3 h-3"></i> Pipeline Execution
+                </h2>
+                <nav class="space-y-2 relative" id="stage-nav">
+                    <div class="absolute left-3 top-2 bottom-2 w-0.5 bg-[#30363d] z-0 rounded-full"></div>
+                    <div id="sidebar-progress"
+                        class="absolute left-3 top-2 w-0.5 bg-purple-500 z-10 transition-all duration-500 shadow-[0_0_10px_#a85cf6] rounded-full"
+                        style="height: 0%;"></div>
+                </nav>
+            </div>
+
+            <!-- Controls -->
+            <div class="p-5 bg-[#0a0c10] border-b border-[#30363d]">
+                <div class="flex gap-2 mb-3">
+                    <button id="btn-prev"
+                        class="flex-1 py-2 bg-[#21262d] border border-[#30363d] text-gray-300 rounded hover:bg-[#30363d] transition-all disabled:opacity-30 text-xs font-semibold flex justify-center items-center gap-1">
+                        <i data-lucide="chevron-left" class="w-4 h-4"></i> Prev
+                    </button>
+                    <button id="btn-next"
+                        class="flex-1 py-2 bg-purple-600/20 border border-purple-500/50 text-purple-400 rounded hover:bg-purple-600 hover:text-white transition-all disabled:opacity-30 text-xs font-semibold flex justify-center items-center gap-1">
+                        Next <i data-lucide="chevron-right" class="w-4 h-4"></i>
+                    </button>
+                </div>
+                <button id="btn-play"
+                    class="w-full py-2.5 bg-blue-600/10 border border-blue-500/30 text-blue-400 rounded hover:bg-blue-600/20 transition-all text-[10px] font-bold uppercase tracking-widest flex justify-center items-center gap-2">
+                    <i data-lucide="play" class="w-3 h-3"></i> Auto-Play Sequence
+                </button>
+            </div>
+        </aside>
+
+        <!-- Main Content Canvas -->
+        <main class="flex-1 flex flex-col relative tech-grid">
+
+            <div class="flex-1 relative overflow-hidden" id="canvas-container">
+
+                <!-- Swimlane Backgrounds -->
+                <div class="swimlane" style="top: 3%; bottom: 53%;">
+                    <div class="swimlane-title text-purple-400"><i data-lucide="unlock"
+                            class="inline w-3 h-3 mr-1"></i>Stage 1: Self-Supervised Pretraining</div>
+                </div>
+                <div class="swimlane" style="top: 48%; bottom: 3%;">
+                    <div class="swimlane-title text-cyan-400"><i data-lucide="target"
+                            class="inline w-3 h-3 mr-1"></i>Stage 2: Supervised Fine-Tuning (Segmentation)</div>
+                </div>
+
+                <!-- SVG Connections Layer -->
+                <svg class="absolute inset-0 w-full h-full pointer-events-none z-0" id="svg-layer">
+                    <defs>
+                        <marker id="arrow-pretrain" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6"
+                            markerHeight="6" orient="auto-start-reverse">
+                            <path d="M 0 0 L 10 5 L 0 10 z" fill="#8b5cf6" />
+                        </marker>
+                        <marker id="arrow-unetr" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6"
+                            orient="auto-start-reverse">
+                            <path d="M 0 0 L 10 5 L 0 10 z" fill="#06b6d4" />
+                        </marker>
+                        <marker id="arrow-transfer" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6"
+                            markerHeight="6" orient="auto-start-reverse">
+                            <path d="M 0 0 L 10 5 L 0 10 z" fill="#f59e0b" />
+                        </marker>
+                        <marker id="arrow-head" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6"
+                            orient="auto-start-reverse">
+                            <path d="M 0 0 L 10 5 L 0 10 z" fill="#ec4899" />
+                        </marker>
+                    </defs>
+                </svg>
+
+                <!-- ================= STAGE 1 NODES ================= -->
+
+                <div id="s1-input" class="arch-node" data-type="input" style="left: 12%; top: 25%;">
+                    <i data-lucide="box" class="w-5 h-5 text-emerald-500 mb-1"></i>
+                    <span class="text-[12px] font-bold text-gray-100">Unlabeled EM Crop</span>
+                    <span class="text-[8px] text-gray-400 mt-0.5">20k Masked Samples</span>
+                    <div class="tensor-badge text-emerald-300 border-emerald-900/50 bg-emerald-900/10">[B, 1, 40, 40,
+                        40]</div>
+                </div>
+
+                <!-- Clickable MAE Nodes -->
+                <div id="s1-mae"
+                    class="arch-node cursor-pointer hover:border-purple-400 hover:shadow-[0_0_30px_rgba(139,92,246,0.4)] group transition-all"
+                    data-type="mae" style="left: 36%; top: 25%;" onclick="openMaeModal()">
+                    <div
+                        class="absolute -top-3 -right-3 bg-[#0d1117] border border-purple-500 rounded-full p-1.5 shadow-[0_0_15px_rgba(139,92,246,0.4)] z-20 group-hover:scale-110 group-hover:bg-purple-600 transition-all">
+                        <i data-lucide="maximize-2" class="w-3 h-3 text-purple-300 group-hover:text-white"></i>
+                    </div>
+                    <i data-lucide="cpu"
+                        class="w-5 h-5 text-purple-400 mb-1 group-hover:scale-110 transition-transform"></i>
+                    <span class="text-[12px] font-bold text-white group-hover:text-purple-300 transition-colors">ViT
+                        Encoder (MAE)</span>
+                    <span class="text-[8px] text-gray-400 mt-0.5">Patch: 2 | Drops 75%</span>
+                    <div class="tensor-badge text-purple-300 border-purple-900/50 bg-purple-900/10">[B, 2000, 192]</div>
+                </div>
+
+                <div id="s1-decoder"
+                    class="arch-node cursor-pointer hover:border-purple-400 hover:shadow-[0_0_30px_rgba(139,92,246,0.4)] group transition-all"
+                    data-type="mae" style="left: 60%; top: 25%;" onclick="openMaeModal()">
+                    <div
+                        class="absolute -top-3 -right-3 bg-[#0d1117] border border-purple-500 rounded-full p-1.5 shadow-[0_0_15px_rgba(139,92,246,0.4)] z-20 group-hover:scale-110 group-hover:bg-purple-600 transition-all">
+                        <i data-lucide="maximize-2" class="w-3 h-3 text-purple-300 group-hover:text-white"></i>
+                    </div>
+                    <i data-lucide="cpu"
+                        class="w-5 h-5 text-purple-400 mb-1 group-hover:scale-110 transition-transform"></i>
+                    <span class="text-[12px] font-bold text-white group-hover:text-purple-300 transition-colors">MAE
+                        Decoder</span>
+                    <span class="text-[8px] text-gray-400 mt-0.5">+ [MASK] Tokens (Full Res)</span>
+                    <div class="tensor-badge text-purple-300 border-purple-900/50 bg-purple-900/10">[B, 8000, 192]</div>
+                </div>
+
+                <div id="s1-out" class="arch-node" data-type="mae" style="left: 85%; top: 25%;">
+                    <i data-lucide="image-minus" class="w-5 h-5 text-red-400 mb-1"></i>
+                    <span class="text-[12px] font-bold text-white">Reconstruction Objective</span>
+                    <span class="text-[8px] text-gray-400 mt-0.5">Masked MSE Loss</span>
+                    <div class="tensor-badge text-red-300 border-red-900/50 bg-red-900/10">[B, 1, 40, 40, 40]</div>
+                </div>
+
+                <!-- ================= BRIDGE NODE (Virtual) ================= -->
+                <div id="transfer-badge"
+                    class="absolute z-30 flex items-center gap-1 bg-amber-900/40 border border-amber-500/50 px-3 py-1 rounded-full shadow-[0_0_15px_rgba(245,158,11,0.3)] transition-all duration-500 opacity-0"
+                    style="left: 36%; top: 48%; transform: translate(-50%, -50%);">
+                    <i data-lucide="download" class="w-3 h-3 text-amber-400"></i>
+                    <span class="text-[9px] text-amber-400 font-mono font-bold">Transfer Weights</span>
+                </div>
+
+                <!-- ================= STAGE 2 NODES ================= -->
+
+                <div id="s2-input" class="arch-node" data-type="input" style="left: 10%; top: 75%;">
+                    <i data-lucide="check-square" class="w-5 h-5 text-emerald-400 mb-1"></i>
+                    <span class="text-[12px] font-bold text-gray-100">Labeled EM Dataset</span>
+                    <span class="text-[8px] text-gray-400 mt-0.5">8nm + 6nm Annotations</span>
+                    <div class="tensor-badge text-emerald-300 border-emerald-900/50 bg-emerald-900/10">[B, 1, 40, 40,
+                        40]</div>
+                </div>
+
+                <div id="s2-stem" class="arch-node" data-type="unetr" style="left: 28%; top: 88%;">
+                    <i data-lucide="layers" class="w-5 h-5 text-cyan-500 mb-1"></i>
+                    <span class="text-[11px] font-bold text-gray-100">CNN Stem</span>
+                    <span class="text-[8px] text-gray-400 mt-0.5">Preserves Hi-Res details</span>
+                    <div class="tensor-badge text-cyan-300 border-cyan-900/50 bg-cyan-900/10">[B, 16, 40, 40, 40]</div>
+                </div>
+
+                <div id="s2-mae" class="arch-node" data-type="transfer" style="left: 36%; top: 68%;">
+                    <i data-lucide="lock"
+                        class="absolute -top-2 -right-2 w-4 h-4 text-amber-400 bg-[#0d1117] rounded-full"></i>
+                    <i data-lucide="cpu" class="w-5 h-5 text-amber-400 mb-1"></i>
+                    <span class="text-[12px] font-bold text-white">Pretrained Encoder</span>
+                    <span class="text-[8px] text-amber-300 mt-0.5">Frozen MAE Backbone</span>
+                    <div class="tensor-badge text-amber-300 border-amber-900/50 bg-amber-900/10">[B, 8000, 192]</div>
+                </div>
+
+                <div id="s2-unetr" class="arch-node" data-type="unetr" style="left: 60%; top: 80%;">
+                    <i data-lucide="git-merge" class="w-5 h-5 text-cyan-400 mb-1"></i>
+                    <span class="text-[12px] font-bold text-white">UNETR Decoder</span>
+                    <span class="text-[8px] text-gray-400 mt-0.5">Fuses Skips 3,6,9,12 + Stem</span>
+                    <div class="tensor-badge text-cyan-300 border-cyan-900/50 bg-cyan-900/10">[B, 32, 30, 30, 30]</div>
+                </div>
+
+                <!-- Simulation Visual Nodes -->
+                <div id="s2-sem" class="arch-node" data-type="head" style="left: 85%; top: 65%;">
+                    <div class="sim-box border-pink-500/40 shadow-[0_0_10px_rgba(236,72,153,0.2)]">
+                        <!-- Binary Mask Visual -->
+                        <svg width="40" height="40" viewBox="0 0 40 40">
+                            <!-- Background Grid -->
+                            <path
+                                d="M 0 10 L 40 10 M 0 20 L 40 20 M 0 30 L 40 30 M 10 0 L 10 40 M 20 0 L 20 40 M 30 0 L 30 40"
+                                stroke="rgba(255,255,255,0.1)" stroke-width="1" />
+                            <!-- Semantic Blob -->
+                            <path d="M 12 12 Q 20 8 28 12 T 28 28 Q 20 32 12 28 T 12 12 Z" fill="rgba(236,72,153,0.6)"
+                                filter="blur(2px)" />
+                            <path d="M 12 12 Q 20 8 28 12 T 28 28 Q 20 32 12 28 T 12 12 Z"
+                                fill="rgba(236,72,153,0.8)" />
+                        </svg>
+                    </div>
+                    <span class="text-[11px] font-bold text-white">Semantic Map</span>
+                    <span class="text-[8px] text-pink-300 font-mono mt-0.5">Binary Mask (BCE+Dice)</span>
+                    <div class="tensor-badge text-pink-300 border-pink-900/50 bg-pink-900/10">[B, 1, 30, 30, 30]</div>
+                </div>
+
+                <div id="s2-flow" class="arch-node" data-type="head" style="left: 85%; top: 92%;">
+                    <div class="sim-box border-cyan-500/40 shadow-[0_0_10px_rgba(6,182,212,0.2)]">
+                        <!-- 3D Flow Visual -->
+                        <svg width="40" height="40" viewBox="0 0 40 40">
+                            <!-- Target Center -->
+                            <circle cx="20" cy="20" r="2" fill="#06b6d4" shadow="0 0 5px #06b6d4" />
+                            <!-- Arrows -->
+                            <path
+                                d="M 5 5 L 15 15 M 35 5 L 25 15 M 5 35 L 15 25 M 35 35 L 25 25 M 20 5 L 20 15 M 5 20 L 15 20"
+                                stroke="#06b6d4" stroke-width="1.5" marker-end="url(#arrow-unetr)" />
+                        </svg>
+                    </div>
+                    <span class="text-[11px] font-bold text-white">3D Flow Field</span>
+                    <span class="text-[8px] text-cyan-300 font-mono mt-0.5">Vector to Center (MSE)</span>
+                    <div class="tensor-badge text-cyan-300 border-cyan-900/50 bg-cyan-900/10">[B, 3, 30, 30, 30]</div>
+                </div>
+
+            </div>
+
+            <!-- Detail Panel (IDE Style) -->
+            <div
+                class="h-[240px] bg-[#0d1117] border-t border-[#30363d] p-5 flex flex-col shrink-0 z-20 shadow-[0_-20px_40px_rgba(0,0,0,0.6)]">
+                <div class="flex items-center gap-4 mb-3 border-b border-[#30363d] pb-2">
+                    <span id="detail-badge"
+                        class="px-2 py-0.5 text-[9px] font-bold rounded-md mono uppercase tracking-widest bg-purple-500/10 border border-purple-500/30 text-purple-400">Step
+                        1</span>
+                    <h2 id="detail-title" class="text-sm font-bold text-white tracking-tight">Stage 1: Pretraining</h2>
+                </div>
+
+                <div class="flex gap-6 h-full min-h-0">
+                    <div class="flex-1 text-gray-300 text-[12px] leading-relaxed overflow-y-auto pr-2" id="detail-desc">
+                    </div>
+
+                    <div class="w-[45%] ide-container shadow-xl">
+                        <div class="ide-header">
+                            <div class="mac-dot bg-[#ff5f56]"></div>
+                            <div class="mac-dot bg-[#ffbd2e]"></div>
+                            <div class="mac-dot bg-[#27c93f]"></div>
+                            <span class="ml-2 text-[9px] text-gray-500 font-mono" id="detail-file">train_mae.py</span>
+                        </div>
+                        <div class="ide-body relative">
+                            <pre id="detail-code" class="whitespace-pre-wrap m-0"></pre>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <!-- MAE DEEP DIVE MODAL -->
+    <div id="mae-modal" class="mae-modal">
+        <div class="mae-content">
+            <!-- Modal Header -->
+            <div class="flex items-center justify-between p-6 border-b border-[#30363d] bg-[#161b22]">
+                <div class="flex items-center gap-4">
+                    <div
+                        class="p-2.5 bg-purple-500/10 rounded-xl border border-purple-500/30 shadow-[0_0_20px_rgba(139,92,246,0.2)]">
+                        <i data-lucide="cpu" class="text-purple-400 w-6 h-6"></i>
+                    </div>
+                    <div>
+                        <h2 class="text-xl font-bold text-white tracking-wide">3D Masked Autoencoder <span
+                                class="text-gray-500 font-normal text-sm ml-2">Pretraining Architecture</span></h2>
+                        <div class="flex items-center gap-2 mt-1">
+                            <i data-lucide="file-code" class="w-3 h-3 text-gray-500"></i>
+                            <p class="text-[11px] text-gray-400 font-mono">
+                                /experiments3/syn_mae_vesicle/runs/.../mae_full_step995000.pt</p>
+                        </div>
+                    </div>
+                </div>
+                <button onclick="closeMaeModal()"
+                    class="p-2 text-gray-400 hover:text-white hover:bg-[#30363d] rounded-lg transition-colors border border-transparent hover:border-[#4b5563]">
+                    <i data-lucide="x" class="w-5 h-5"></i>
+                </button>
+            </div>
+
+            <!-- Modal Body: Advanced 3D Interactive Pipeline -->
+            <div class="flex-1 p-8 flex flex-col bg-[#0d1117] relative">
+
+                <!-- Background Grid for Modal -->
+                <div class="absolute inset-0 tech-grid opacity-30"></div>
+
+                <div class="flex-1 flex items-center justify-between px-10 relative z-10">
+
+                    <!-- 1. Input 3D Crop -->
+                    <div class="flex flex-col items-center">
+                        <div class="bg-[#21262d] border border-[#30363d] px-3 py-1 rounded-full mb-6 shadow-lg">
+                            <span class="text-[10px] font-bold text-gray-300 uppercase tracking-widest">Input
+                                Crop</span>
+                        </div>
+                        <div class="isometric-container">
+                            <div
+                                class="w-20 h-20 bg-[#161b22] border border-[#4b5563] shadow-[10px_10px_0_rgba(0,0,0,0.5)] transform rotateX(60deg) rotateZ(-45deg) flex items-center justify-center relative">
+                                <div
+                                    class="absolute inset-0 bg-gradient-to-tr from-emerald-800/30 to-transparent opacity-50">
+                                </div>
+                                <span
+                                    class="text-white font-mono font-bold text-lg transform rotateZ(45deg) rotateX(-60deg)">40³</span>
+                            </div>
+                        </div>
+                        <span class="text-[10px] text-gray-400 mt-6 font-mono">[B, 1, 40, 40, 40]</span>
+                    </div>
+
+                    <div class="h-0.5 w-10 bg-gradient-to-r from-gray-600 to-purple-600 relative"></div>
+
+                    <!-- 2. Patchify & Mask (Encoder Prep) -->
+                    <div class="flex flex-col items-center">
+                        <div
+                            class="bg-purple-900/30 border border-purple-500/30 px-3 py-1 rounded-full mb-6 shadow-[0_0_15px_rgba(139,92,246,0.2)]">
+                            <span class="text-[10px] font-bold text-purple-300 uppercase tracking-widest">Patch &
+                                Mask</span>
+                        </div>
+                        <div class="isometric-container">
+                            <div class="iso-grid">
+                                <!-- 16 patches for visual representation -->
+                                <script>
+                                    for (let i = 0; i < 16; i++) {
+                                        const isVisible = Math.random() > 0.75;
+                                        document.write(`<div class="iso-patch ${isVisible ? '' : 'masked'}"></div>`);
+                                    }
+                                </script>
+                            </div>
+                        </div>
+                        <div class="mt-6 flex gap-2 flex-col items-center">
+                            <span
+                                class="text-[9px] text-purple-300 mono bg-purple-900/30 px-2 py-0.5 rounded border border-purple-700/50">Patch:
+                                2 | Mask Ratio: 75%</span>
+                            <span class="text-[9px] text-gray-400 font-mono">[B, 2000, 192]</span>
+                        </div>
+                    </div>
+
+                    <div class="h-0.5 w-10 bg-purple-600 relative"></div>
+
+                    <!-- 3. ViT Encoder (Layer Stack) -->
+                    <div class="flex flex-col items-center">
+                        <div
+                            class="bg-purple-900/50 border border-purple-500/50 px-3 py-1 rounded-full mb-10 shadow-[0_0_20px_rgba(139,92,246,0.4)]">
+                            <span class="text-[10px] font-bold text-purple-200 uppercase tracking-widest">ViT
+                                Encoder</span>
+                        </div>
+                        <div class="isometric-container">
+                            <div class="layer-stack h-[120px]">
+                                <!-- Create 12 layers stacked in 3D -->
+                                <script>
+                                    for (let i = 0; i < 12; i++) {
+                                        const zOffset = i * 10;
+                                        document.write(`<div class="layer-plate" style="transform: translateZ(${zOffset}px); border-color: rgba(139,92,246,${0.2 + i * 0.05}); background: rgba(139,92,246,${0.05 + i * 0.02});">L${i + 1}</div>`);
+                                    }
+                                </script>
+                            </div>
+                        </div>
+                        <div
+                            class="mt-6 text-[9px] text-purple-300 mono grid grid-cols-2 gap-x-3 gap-y-1.5 bg-[#161b22] border border-[#30363d] p-2.5 rounded-lg shadow-lg">
+                            <span>Depth: <b class="text-white">12</b></span>
+                            <span>Heads: <b class="text-white">6</b></span>
+                            <span>Dim: <b class="text-white">192</b></span>
+                            <span>MLP: <b class="text-white">4.0</b></span>
+                        </div>
+                    </div>
+
+                    <div class="h-0.5 w-10 bg-gradient-to-r from-purple-600 to-cyan-600 relative"></div>
+
+                    <!-- 4. Decoder Processing -->
+                    <div class="flex flex-col items-center">
+                        <div
+                            class="bg-cyan-900/30 border border-cyan-500/30 px-3 py-1 rounded-full mb-6 shadow-[0_0_15px_rgba(6,182,212,0.2)]">
+                            <span class="text-[10px] font-bold text-cyan-300 uppercase tracking-widest">+ [MASK]
+                                Tokens</span>
+                        </div>
+                        <div class="isometric-container">
+                            <div class="iso-grid">
+                                <!-- Re-expanding with mask tokens -->
+                                <script>
+                                    for (let i = 0; i < 16; i++) {
+                                        const isVisible = Math.random() > 0.75;
+                                        if (isVisible) {
+                                            document.write(`<div class="iso-patch" style="background: rgba(6,182,212,0.6); border-color: rgba(6,182,212,0.5);"></div>`);
+                                        } else {
+                                            document.write(`<div class="iso-patch decoder-mask" title="Learnable MASK token"></div>`);
+                                        }
+                                    }
+                                </script>
+                            </div>
+                        </div>
+                        <div class="mt-6 flex gap-2 flex-col items-center">
+                            <span
+                                class="text-[9px] text-cyan-300 mono bg-cyan-900/30 px-2 py-0.5 rounded border border-cyan-700/50">Restores
+                                Full Sequence</span>
+                            <span class="text-[9px] text-gray-400 font-mono">[B, 8000, 192]</span>
+                        </div>
+                    </div>
+
+                    <div class="h-0.5 w-10 bg-gradient-to-r from-cyan-600 to-red-600 relative"></div>
+
+                    <!-- 5. Output / Target -->
+                    <div class="flex flex-col items-center">
+                        <div
+                            class="bg-red-900/30 border border-red-500/30 px-3 py-1 rounded-full mb-6 shadow-[0_0_15px_rgba(239,68,68,0.2)]">
+                            <span
+                                class="text-[10px] font-bold text-red-300 uppercase tracking-widest">Reconstruction</span>
+                        </div>
+                        <div class="isometric-container">
+                            <div
+                                class="w-20 h-20 bg-[#0d1117] border-2 border-red-500/50 shadow-[0_0_30px_rgba(239,68,68,0.2),10px_10px_0_rgba(0,0,0,0.5)] transform rotateX(60deg) rotateZ(-45deg) flex items-center justify-center relative">
+                                <div
+                                    class="absolute inset-0 bg-[url('data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIyMCIgaGVpZ2h0PSIyMCI+PGNpcmNsZSBjeD0iMTAiIGN5PSIxMCIgcj0iMiIgZmlsbD0icmdiYSgyMzksNjgsNjgsMC41KSIvPjwvc3ZnPg==')] opacity-50 blur-[1px]">
+                                </div>
+                                <i data-lucide="image"
+                                    class="w-6 h-6 text-red-500 relative z-10 transform rotateZ(45deg) rotateX(-60deg)"></i>
+                            </div>
+                        </div>
+                        <span class="text-[10px] text-gray-400 mt-6 font-mono">[B, 1, 40, 40, 40]</span>
+                    </div>
+
+                </div>
+
+                <!-- Technical Description -->
+                <div class="mt-auto border-t border-[#30363d] pt-6 flex gap-8">
+                    <div class="flex-1">
+                        <h3 class="text-sm font-bold text-white mb-2 flex items-center gap-2"><i data-lucide="info"
+                                class="w-4 h-4 text-purple-400"></i> Architectural Concept</h3>
+                        <p class="text-[13px] text-gray-400 leading-relaxed text-justify mb-3">
+                            The foundation model is a custom 3D MAE. Operating on <span
+                                class="text-white mono">40x40x40</span> input crops with a patch size of <span
+                                class="text-white mono">2</span>, it processes local ultrastructure. By randomly masking
+                            <span class="text-red-400 font-bold">75%</span> of the patches, the network is forced to
+                            understand the deep geometric and contextual relationships of vesicle membranes rather than
+                            relying on local interpolation.
+                        </p>
+                        <p class="text-[13px] text-gray-400 leading-relaxed text-justify">
+                            Trained on 20,000 unlabeled vesicle-centered crops, the 12-layer ViT encoder learns a
+                            powerful <span class="text-emerald-400 font-bold">representation prior</span>. The Decoder
+                            injects learnable <code>[MASK]</code> tokens to restore the sequence length, predicting the
+                            original raw EM. Once trained, the Decoder is discarded and the Encoder acts as the
+                            segmentation backbone.
+                        </p>
+                    </div>
+                    <div class="w-[40%] ide-container shadow-xl">
+                        <div class="ide-header border-b border-[#30363d] bg-[#161b22]">
+                            <i data-lucide="settings" class="w-3 h-3 text-gray-500"></i>
+                            <span class="text-[10px] text-gray-400 font-mono">training_params.yaml</span>
+                        </div>
+                        <div class="ide-body bg-[#050505] text-[10px]">
+                            <pre class="m-0"><span class="s-kw">MAE3D_MODEL_CONFIG</span> = {
+    <span class="s-st">"crop_size"</span>: [<span class="s-nm">40</span>, <span class="s-nm">40</span>, <span class="s-nm">40</span>],
+    <span class="s-st">"patch_size"</span>: <span class="s-nm">2</span>,
+    <span class="s-st">"in_chans"</span>: <span class="s-nm">1</span>,
+    <span class="s-st">"embed_dim"</span>: <span class="s-nm">192</span>,
+    <span class="s-st">"depth"</span>: <span class="s-nm">12</span>,
+    <span class="s-st">"num_heads"</span>: <span class="s-nm">6</span>,
+    <span class="s-st">"mlp_ratio"</span>: <span class="s-nm">4.0</span>,
+    <span class="s-st">"mask_ratio"</span>: <span class="s-nm">0.75</span>,
+    <span class="s-st">"norm_pix_loss"</span>: <span class="s-ty">False</span>,
+    <span class="s-st">"max_samples"</span>: <span class="s-nm">20000</span>
+}</pre>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        lucide.createIcons();
+
+        // ----------------------------------------------------
+        // Pipeline Story Data
+        // ----------------------------------------------------
+        const pipelineStages = [
+            {
+                navTitle: "Stage 1: MAE Pretraining",
+                title: "Self-Supervised Representation Learning",
+                file: "mae_encoder.py",
+                type: "mae",
+                desc: "<p class='mb-2'>The pipeline begins with <b>Stage 1</b>, isolated from any segmentation labels. We use a 3D MAE/ViT encoder on 20,000 unlabeled EM vesicle crops.</p><p>Notice the architecture shapes: The raw input <code>[B, 1, 40, 40, 40]</code> is patchified. The Encoder drops 75% of patches, outputting a dense latent representation <code>[B, N, 192]</code>. The <b>MAE Decoder</b> then injects [MASK] tokens to restore full spatial resolution <code>[B, N_full, 192]</code> before predicting the missing raw EM signal.</p><div class='mt-3 p-2 bg-purple-900/20 border border-purple-500/30 rounded-lg text-purple-300 text-[10px] font-mono flex items-center gap-2 shadow-[0_0_15px_rgba(139,92,246,0.1)]'><i data-lucide='mouse-pointer-click' class='w-4 h-4 text-purple-400'></i> <span><b>Click the MAE Nodes</b> in the diagram above to inspect the architecture.</span></div>",
+                code: `<span class="s-cm"># Stage 1: Train Foundation Model</span>\nmae_config = {\n  <span class="s-st">"crop_size"</span>: [<span class="s-nm">40</span>, <span class="s-nm">40</span>, <span class="s-nm">40</span>],\n  <span class="s-st">"patch_size"</span>: <span class="s-nm">2</span>,\n  <span class="s-st">"embed_dim"</span>: <span class="s-nm">192</span>, <span class="s-st">"depth"</span>: <span class="s-nm">12</span>,\n  <span class="s-st">"mask_ratio"</span>: <span class="s-nm">0.75</span>,\n  <span class="s-st">"norm_pix_loss"</span>: <span class="s-ty">False</span>\n}\n<span class="s-cm"># Decoder reconstructs full volume</span>\nlatent = mae_encoder(masked_raw_em)\nloss = mse_loss(mae_decoder(latent), raw_em)`,
+                nodes: ['s1-input', 's1-mae', 's1-decoder', 's1-out'],
+                paths: [{ f: 's1-input', t: 's1-mae', ty: 'pretrain' }, { f: 's1-mae', t: 's1-decoder', ty: 'pretrain' }, { f: 's1-decoder', t: 's1-out', ty: 'pretrain' }],
+                showTransfer: false
+            },
+            {
+                navTitle: "Weight Transfer",
+                title: "Loading the Backbone into Stage 2",
+                file: "decoder.py",
+                type: "transfer",
+                desc: "<p class='mb-2'>Moving to <b>Stage 2</b>, we discard the MAE Decoder and extract the trained weights from the MAE Encoder: <code class='text-amber-400 bg-amber-900/30 px-1 rounded'>mae_full_step995000.pt</code>.</p><p>This pre-trained encoder is loaded and frozen as the feature backbone for the supervised segmentation task. It will process labeled crops, providing robust structural embeddings to the UNETR decoder.</p>",
+                code: `<span class="s-cm"># Bridge: Load Weights into Segmentation Arch</span>\ncheckpoint = <span class="s-st">'/experiments3/.../mae_full_step995000.pt'</span>\n\n<span class="s-kw">class</span> <span class="s-ty">VesicleSegModel</span>(nn.Module):\n    <span class="s-kw">def</span> <span class="s-fn">__init__</span>(<span class="s-ty">self</span>):\n        <span class="s-cm"># Load Foundation Model from Stage 1</span>\n        self.encoder = load_pretrained_mae(checkpoint)\n        self.stem = CNNStem(in_channels=<span class="s-nm">1</span>)\n        self.decoder = UNETRDecoder()`,
+                nodes: ['s1-mae', 's2-input', 's2-mae'],
+                paths: [{ f: 's1-mae', t: 's2-mae', ty: 'transfer', marker: 'arrow-transfer' }, { f: 's2-input', t: 's2-mae', ty: 'unetr' }],
+                showTransfer: true
+            },
+            {
+                navTitle: "UNETR Fusion",
+                title: "Stage 2: Hybrid CNN-ViT Decoder",
+                file: "decoder.py",
+                type: "unetr",
+                desc: "<p class='mb-2'>In Stage 2, the raw labeled crop <code>[B, 1, 40³]</code> is sent through two parallel paths: a shallow <b>CNN stem</b> <code>[B, 16, 40³]</code> and the <b>pretrained MAE backbone</b>.</p><p>We extract multi-scale 1x1 projected features from Transformer <b>blocks 3, 6, 9, and 12</b>. The UNETR decoder fuses these global skip connections with the local CNN stem, outputting a consolidated dense feature map <code>[B, 32, 30³]</code> (note the center-crop to 30³).</p>",
+                code: `<span class="s-cm"># Stage 2: UNETR Forward Pass</span>\n<span class="s-kw">def</span> <span class="s-fn">forward</span>(<span class="s-ty">self</span>, x_padded):\n    <span class="s-cm"># 1. Local detail from raw input</span>\n    stem_features = self.stem(x_padded)\n    \n    <span class="s-cm"># 2. Global context from S1 Backbone</span>\n    skips = self.encoder.extract_skips(x_padded, \n                                       blocks=[<span class="s-nm">3</span>, <span class="s-nm">6</span>, <span class="s-nm">9</span>, <span class="s-nm">12</span>])\n    \n    <span class="s-cm"># 3. Fuse in UNETR Decoder</span>\n    decoded_vol = self.decoder(skips, stem_features)\n    <span class="s-kw">return</span> decoded_vol`,
+                nodes: ['s2-input', 's2-stem', 's2-mae', 's2-unetr'],
+                paths: [{ f: 's2-input', t: 's2-stem', ty: 'unetr' }, { f: 's2-input', t: 's2-mae', ty: 'unetr' }, { f: 's2-stem', t: 's2-unetr', ty: 'unetr' }, { f: 's2-mae', t: 's2-unetr', ty: 'unetr' }],
+                showTransfer: false
+            },
+            {
+                navTitle: "Dual Head Output",
+                title: "Stage 2: Semantic Map & 3D Flow",
+                file: "losses.py",
+                type: "head",
+                desc: "<p class='mb-2'>To achieve instance-level separation, the UNETR decoder branches into two visual outputs:</p><ul class='list-disc pl-4 space-y-1 text-gray-300 text-[11px]'><li><b>Semantic Map <code>[B, 1, 30³]</code>:</b> A binary mask indicating foreground vesicle voxels (shown as the pink blob). Supervised via BCE + Dice Loss.</li><li><b>3D Flow Field <code>[B, 3, 30³]</code>:</b> A vector field pointing every foreground voxel toward its instance center (shown as cyan arrows). Supervised via Euclidean Distance Transform targets (Masked MSE Loss).</li></ul>",
+                code: `<span class="s-cm"># Stage 2: Dual Head Loss Calculation</span>\nsem_logits = self.head_sem(decoded_vol)\nflow_pred = self.head_flow(decoded_vol)\n\n<span class="s-cm"># Semantic Supervision</span>\nloss_sem = BCE(sem_logits, tgt_sem) + Dice(sem_logits, tgt_sem)\n\n<span class="s-cm"># Flow Supervision (Foreground masked)</span>\nloss_flow = MSE(flow_pred * tgt_sem, tgt_flow * tgt_sem)\n\nloss_total = loss_sem + (<span class="s-nm">5.0</span> * loss_flow)`,
+                nodes: ['s2-unetr', 's2-sem', 's2-flow'],
+                paths: [{ f: 's2-unetr', t: 's2-sem', ty: 'head' }, { f: 's2-unetr', t: 's2-flow', ty: 'head' }],
+                showTransfer: false
+            },
+            {
+                navTitle: "Flow Integration",
+                title: "Postprocessing: Extracting Instances",
+                file: "postprocess.py",
+                type: "head",
+                desc: "<p class='mb-2'>At inference time, we rely on a dynamical system. The outputs from Stage 2 are combined using <b>Euler Integration</b>.</p><p>For every foreground voxel (from Semantic Map), we integrate the predicted 3D Flow Field over multiple steps, effectively 'moving' the voxel along the arrows to the instance center. We then detect density peaks and assign original voxels to these peaks to form distinct 3D vesicles.</p>",
+                code: `<span class="s-cm"># Postprocessing: Flow to Instances</span>\n<span class="s-kw">def</span> <span class="s-fn">extract_instances</span>(sem_prob, flow_pred, steps=<span class="s-nm">15</span>):\n    <span class="s-cm"># Start with all foreground voxels</span>\n    pts = get_coordinates(sem_prob > <span class="s-nm">0.5</span>)\n    \n    <span class="s-cm"># Euler steps toward center</span>\n    <span class="s-kw">for</span> _ <span class="s-kw">in</span> <span class="s-fn">range</span>(steps):\n        pts = pts + sample_flow(flow_pred, pts)\n        \n    <span class="s-cm"># Cluster endpoints</span>\n    peaks = detect_density_peaks(pts)\n    <span class="s-kw">return</span> assign_to_clusters(original_voxels, peaks)`,
+                nodes: ['s2-sem', 's2-flow'], // We imply the combination conceptually here
+                paths: [], // No extra nodes drawn, we keep focus on the heads
+                showTransfer: false
+            }
+        ];
+
+        // ----------------------------------------------------
+        // SVG & Node Logic
+        // ----------------------------------------------------
+        const svgLayer = document.getElementById('svg-layer');
+        let currentStage = 0;
+        let playInterval = null;
+
+        function getCenter(id) {
+            const el = document.getElementById(id);
+            if (!el) return { x: 0, y: 0 };
+            const rect = el.getBoundingClientRect();
+            const container = svgLayer.getBoundingClientRect();
+            return {
+                x: rect.left + rect.width / 2 - container.left,
+                y: rect.top + rect.height / 2 - container.top
+            };
+        }
+
+        function drawConnections(activePaths) {
+            svgLayer.innerHTML = `
+                <defs>
+                    <marker id="arrow-pretrain" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="5" markerHeight="5" orient="auto">
+                        <path d="M 0 0 L 10 5 L 0 10 z" fill="#8b5cf6" />
+                    </marker>
+                    <marker id="arrow-unetr" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="5" markerHeight="5" orient="auto">
+                        <path d="M 0 0 L 10 5 L 0 10 z" fill="#06b6d4" />
+                    </marker>
+                    <marker id="arrow-head" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="5" markerHeight="5" orient="auto">
+                        <path d="M 0 0 L 10 5 L 0 10 z" fill="#ec4899" />
+                    </marker>
+                </defs>`;
+
+            if (!activePaths) return;
+
+            activePaths.forEach(p => {
+                const p1 = getCenter(p.f);
+                const p2 = getCenter(p.t);
+
+                // SVG Curve Logic
+                let pathString = "";
+                if (p.ty === 'transfer') {
+                    // Straight vertical line for transfer
+                    pathString = `M ${p1.x} ${p1.y} L ${p2.x} ${p2.y}`;
+                } else {
+                    const dx = Math.abs(p2.x - p1.x);
+                    const control = Math.max(dx * 0.4, 30);
+                    pathString = `M ${p1.x} ${p1.y} C ${p1.x + control} ${p1.y}, ${p2.x - control} ${p2.y}, ${p2.x} ${p2.y}`;
+                }
+
+                const group = document.createElementNS("http://www.w3.org/2000/svg", "g");
+                group.setAttribute('class', `path-active path-${p.ty}`);
+
+                const base = document.createElementNS("http://www.w3.org/2000/svg", "path");
+                base.setAttribute('d', pathString);
+                base.setAttribute('class', 'flow-base');
+
+                const glow = document.createElementNS("http://www.w3.org/2000/svg", "path");
+                glow.setAttribute('d', pathString);
+                glow.setAttribute('class', 'flow-glow');
+                if (p.ty !== 'transfer') {
+                    glow.setAttribute('marker-end', `url(#arrow-${p.ty})`);
+                }
+
+                const packet = document.createElementNS("http://www.w3.org/2000/svg", "path");
+                packet.setAttribute('d', pathString);
+                packet.setAttribute('class', 'flow-packet');
+
+                group.appendChild(base);
+                group.appendChild(glow);
+                group.appendChild(packet);
+                svgLayer.appendChild(group);
+            });
+        }
+
+        function updateStage(index) {
+            currentStage = index;
+            const data = pipelineStages[index];
+
+            // 1. Sidebar UI Update
+            document.getElementById('sidebar-progress').style.height = `${(index / 4) * 100}%`;
+            document.querySelectorAll('#stage-nav button').forEach((btn, i) => {
+                const dot = btn.querySelector('div');
+                if (i === index) {
+                    btn.className = 'w-full text-left px-8 py-2 relative z-10 font-bold text-[11px] rounded-lg text-white bg-white/5 transition-all';
+                    dot.className = 'absolute left-2.5 top-1/2 -translate-y-1/2 rounded-full w-3 h-3 bg-purple-500 shadow-[0_0_8px_#a85cf6] transition-all';
+                } else {
+                    btn.className = 'w-full text-left px-8 py-2 relative z-10 font-medium text-[11px] rounded-lg text-gray-500 hover:text-gray-300 transition-all';
+                    dot.className = `absolute left-3 top-1/2 -translate-y-1/2 rounded-full w-2 h-2 ${i < index ? 'bg-purple-800' : 'bg-gray-700'} transition-all`;
+                }
+            });
+            document.getElementById('btn-prev').disabled = index === 0;
+            document.getElementById('btn-next').disabled = index === 4;
+
+            // 2. Detail Panel Update
+            const badge = document.getElementById('detail-badge');
+            badge.innerText = `Step ${index + 1}`;
+            badge.className = `px-2 py-0.5 text-[9px] font-bold rounded-md mono uppercase tracking-widest border `;
+            if (data.type === 'mae') badge.className += `bg-purple-500/10 border-purple-500/30 text-purple-400`;
+            else if (data.type === 'transfer') badge.className += `bg-amber-500/10 border-amber-500/30 text-amber-400`;
+            else if (data.type === 'unetr') badge.className += `bg-cyan-500/10 border-cyan-500/30 text-cyan-400`;
+            else badge.className += `bg-pink-500/10 border-pink-500/30 text-pink-400`;
+
+            document.getElementById('detail-title').innerText = data.title;
+            document.getElementById('detail-desc').innerHTML = data.desc;
+            document.getElementById('detail-file').innerText = data.file;
+            document.getElementById('detail-code').innerHTML = data.code;
+
+            // 3. Canvas Nodes Update
+            document.querySelectorAll('.arch-node').forEach(node => {
+                if (data.nodes.includes(node.id)) {
+                    node.classList.remove('inactive');
+                    node.classList.add('active');
+                } else {
+                    node.classList.add('inactive');
+                    node.classList.remove('active');
+                }
+            });
+
+            // Handle virtual Transfer badge
+            const tBadge = document.getElementById('transfer-badge');
+            if (data.showTransfer) {
+                tBadge.style.opacity = '1';
+                tBadge.style.transform = 'translate(-50%, -50%) scale(1)';
+            } else {
+                tBadge.style.opacity = '0';
+                tBadge.style.transform = 'translate(-50%, -50%) scale(0.8)';
+            }
+
+            // 4. Draw SVG paths
+            drawConnections(data.paths);
+            lucide.createIcons();
+        }
+
+        // ----------------------------------------------------
+        // Initialization & Controls
+        // ----------------------------------------------------
+        function init() {
+            const nav = document.getElementById('stage-nav');
+            pipelineStages.forEach((stage, i) => {
+                const btn = document.createElement('button');
+                btn.onclick = () => { stopAutoPlay(); updateStage(i); };
+                const dot = document.createElement('div');
+                btn.appendChild(dot);
+                btn.appendChild(document.createTextNode(" " + stage.navTitle));
+                nav.appendChild(btn);
+            });
+
+            document.getElementById('btn-prev').onclick = () => { stopAutoPlay(); if (currentStage > 0) updateStage(currentStage - 1); };
+            document.getElementById('btn-next').onclick = () => { stopAutoPlay(); if (currentStage < 4) updateStage(currentStage + 1); };
+            document.getElementById('btn-play').onclick = toggleAutoPlay;
+
+            window.addEventListener('resize', () => { drawConnections(pipelineStages[currentStage].paths); });
+
+            // Small delay to ensure DOM is rendered before drawing SVG
+            setTimeout(() => updateStage(0), 100);
+        }
+
+        function toggleAutoPlay() {
+            const btn = document.getElementById('btn-play');
+            if (playInterval) {
+                stopAutoPlay();
+            } else {
+                btn.innerHTML = `<i data-lucide="square" class="w-3 h-3 fill-current"></i> Stop Sequence`;
+                btn.classList.replace('bg-blue-600/10', 'bg-blue-900/40');
+                btn.classList.replace('text-blue-400', 'text-blue-300');
+                lucide.createIcons();
+                if (currentStage === 4) updateStage(0);
+                playInterval = setInterval(() => {
+                    if (currentStage < 4) updateStage(currentStage + 1);
+                    else stopAutoPlay();
+                }, 5000);
+            }
+        }
+
+        function stopAutoPlay() {
+            if (playInterval) {
+                clearInterval(playInterval);
+                playInterval = null;
+                const btn = document.getElementById('btn-play');
+                btn.innerHTML = `<i data-lucide="play" class="w-3 h-3"></i> Auto-Play Sequence`;
+                btn.classList.replace('bg-blue-900/40', 'bg-blue-600/10');
+                btn.classList.replace('text-blue-300', 'text-blue-400');
+                lucide.createIcons();
+            }
+        }
+
+        // MAE Modal Functions
+        function openMaeModal() {
+            document.getElementById('mae-modal').classList.add('show');
+            stopAutoPlay();
+        }
+
+        function closeMaeModal() {
+            document.getElementById('mae-modal').classList.remove('show');
+        }
+
+        // Close modal on outside click
+        document.getElementById('mae-modal').addEventListener('click', function (e) {
+            if (e.target === this) closeMaeModal();
+        });
+
+        window.addEventListener('load', init);
+    </script>
+</body>
+
+</html>

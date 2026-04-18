@@ -1,0 +1,524 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Deep Learning Pipeline Visualizer - MAE</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Fira+Code:wght@400;500&display=swap"
+        rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #0f1117;
+            color: #e2e8f0;
+        }
+
+        .mono {
+            font-family: 'Fira Code', monospace;
+        }
+
+        /* Custom Scrollbar */
+        ::-webkit-scrollbar {
+            width: 8px;
+            height: 8px;
+        }
+
+        ::-webkit-scrollbar-track {
+            background: #1e212b;
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background: #4b5563;
+            border-radius: 4px;
+        }
+
+        ::-webkit-scrollbar-thumb:hover {
+            background: #6b7280;
+        }
+
+        /* Animations & Transitions */
+        .stage-card {
+            transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        .stage-card:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.3);
+        }
+
+        .stage-active {
+            border-color: #3b82f6;
+            box-shadow: 0 0 25px rgba(59, 130, 246, 0.2);
+            transform: translateY(-2px);
+            opacity: 1 !important;
+            filter: grayscale(0%) !important;
+        }
+
+        .stage-inactive {
+            border-color: #1f2937;
+            opacity: 0.5;
+            filter: grayscale(70%);
+        }
+
+        /* Flow Arrows */
+        .flow-arrow {
+            transition: all 0.4s ease;
+            color: #374151;
+        }
+
+        .flow-arrow.active {
+            color: #3b82f6;
+            filter: drop-shadow(0 0 8px rgba(59, 130, 246, 0.6));
+            transform: scale(1.3);
+        }
+
+        /* Grid Patches */
+        .patch {
+            transition: all 0.5s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 0.7rem;
+            font-weight: bold;
+            border-radius: 3px;
+        }
+
+        .patch:hover {
+            transform: scale(1.05);
+        }
+
+        .patch-visible {
+            background-color: #10b981;
+            color: #022c22;
+        }
+
+        /* Emerald */
+        .patch-masked {
+            background-color: #1f2937;
+            color: #4b5563;
+            border: 1px dashed #374151;
+        }
+
+        /* Dark Gray */
+        .patch-token {
+            background-color: #f59e0b;
+            color: #451a03;
+        }
+
+        /* Amber */
+        .patch-recon {
+            background-color: #34d399;
+            color: #022c22;
+            opacity: 0.85;
+        }
+
+        /* Light Emerald */
+
+        /* Python Code Highlighting */
+        .code-keyword {
+            color: #c678dd;
+        }
+
+        .code-function {
+            color: #61afef;
+        }
+
+        .code-string {
+            color: #98c379;
+        }
+
+        .code-comment {
+            color: #7f848e;
+            font-style: italic;
+        }
+
+        .code-number {
+            color: #d19a66;
+        }
+    </style>
+</head>
+
+<body class="h-screen overflow-hidden flex flex-col">
+
+    <!-- Header -->
+    <header class="bg-[#151821] border-b border-gray-800 px-6 py-4 flex items-center justify-between z-10 shrink-0">
+        <div class="flex items-center gap-3">
+            <div class="p-2 bg-blue-500/10 rounded-lg">
+                <i data-lucide="network" class="text-blue-400"></i>
+            </div>
+            <div>
+                <h1 class="text-lg font-bold text-white leading-tight">Architecture Visualizer</h1>
+                <p class="text-xs text-gray-400">Interactive Deep Learning Pipelines</p>
+            </div>
+        </div>
+        <div class="flex items-center gap-4 text-sm">
+            <a href="#" class="text-gray-400 hover:text-white transition-colors"><i data-lucide="github"
+                    class="w-5 h-5"></i></a>
+        </div>
+    </header>
+
+    <div class="flex flex-1 overflow-hidden">
+
+        <!-- Sidebar -->
+        <aside class="w-72 bg-[#151821] border-r border-gray-800 flex flex-col shrink-0">
+            <div class="p-5 border-b border-gray-800">
+                <h2 class="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-4">Vision Models</h2>
+                <nav class="space-y-2">
+                    <button
+                        class="w-full text-left px-4 py-2.5 bg-blue-500/10 text-blue-400 rounded-lg font-medium flex items-center justify-between border border-blue-500/20 transition-all hover:bg-blue-500/20">
+                        <span>Masked Autoencoder <br><span class="text-xs opacity-80">(MAE)</span></span>
+                        <div class="w-2.5 h-2.5 rounded-full bg-blue-400 shadow-[0_0_8px_rgba(96,165,250,0.6)]"></div>
+                    </button>
+                    <button
+                        class="w-full text-left px-4 py-2.5 text-gray-400 hover:bg-gray-800 hover:text-gray-200 rounded-lg font-medium transition-colors cursor-not-allowed opacity-50 flex items-center justify-between"
+                        title="Coming soon">
+                        <span>Vision Transformer <br><span class="text-xs opacity-80">(ViT)</span></span>
+                        <i data-lucide="lock" class="w-4 h-4 text-gray-500"></i>
+                    </button>
+                    <button
+                        class="w-full text-left px-4 py-2.5 text-gray-400 hover:bg-gray-800 hover:text-gray-200 rounded-lg font-medium transition-colors cursor-not-allowed opacity-50 flex items-center justify-between"
+                        title="Coming soon">
+                        <span>Residual Network <br><span class="text-xs opacity-80">(ResNet)</span></span>
+                        <i data-lucide="lock" class="w-4 h-4 text-gray-500"></i>
+                    </button>
+                </nav>
+            </div>
+            <div class="p-5">
+                <h2 class="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-4">Controls</h2>
+                <div class="flex gap-2 mb-4">
+                    <button id="btn-prev"
+                        class="flex-1 py-2 px-3 bg-gray-800 hover:bg-gray-700 text-white rounded-lg flex justify-center items-center gap-1.5 transition-colors disabled:opacity-40 disabled:cursor-not-allowed text-sm">
+                        <i data-lucide="chevron-left" class="w-4 h-4"></i> Prev
+                    </button>
+                    <button id="btn-next"
+                        class="flex-1 py-2 px-3 bg-blue-600 hover:bg-blue-500 text-white rounded-lg flex justify-center items-center gap-1.5 transition-colors disabled:opacity-40 text-sm">
+                        Next <i data-lucide="chevron-right" class="w-4 h-4"></i>
+                    </button>
+                </div>
+                <button id="btn-play"
+                    class="w-full py-2.5 px-3 border border-gray-700 hover:bg-gray-800 text-gray-300 rounded-lg flex justify-center items-center gap-2 transition-all font-medium">
+                    <i data-lucide="play" class="w-4 h-4"></i> Auto-Play
+                </button>
+            </div>
+        </aside>
+
+        <!-- Main Content Area -->
+        <main class="flex-1 flex flex-col relative bg-[#0f1117] overflow-hidden">
+
+            <!-- Diagram Canvas -->
+            <div class="flex-1 p-8 overflow-auto relative min-h-[400px] flex items-center justify-center">
+
+                <div class="flex items-center gap-4 max-w-full">
+
+                    <!-- Stage 0: Input Image -->
+                    <div id="stage-0"
+                        class="stage-card relative z-10 w-32 h-44 bg-gray-800 border-2 border-gray-700 rounded-xl p-3 flex flex-col items-center justify-center cursor-pointer">
+                        <div class="text-xs text-gray-400 mb-3 font-medium text-center">Original Image</div>
+                        <div
+                            class="grid grid-cols-4 grid-rows-4 gap-1 w-24 h-24 bg-gray-900 p-1 rounded-md shadow-inner">
+                            <script>for (let i = 0; i < 16; i++) document.write(`<div class="patch patch-visible opacity-80"></div>`);</script>
+                        </div>
+                    </div>
+
+                    <i data-lucide="arrow-right" id="arrow-0" class="flow-arrow w-8 h-8"></i>
+
+                    <!-- Stage 1: Masking -->
+                    <div id="stage-1"
+                        class="stage-card relative z-10 w-32 h-44 bg-gray-800 border-2 border-gray-700 rounded-xl p-3 flex flex-col items-center justify-center cursor-pointer">
+                        <div class="text-xs text-gray-400 mb-3 font-medium text-center">Masking (75%)</div>
+                        <div
+                            class="grid grid-cols-4 grid-rows-4 gap-1 w-24 h-24 bg-gray-900 p-1 rounded-md shadow-inner">
+                            <script>
+                                const visibleIndices = [2, 5, 11, 14];
+                                for (let i = 0; i < 16; i++) {
+                                    if (visibleIndices.includes(i)) document.write(`<div class="patch patch-visible shadow-[0_0_5px_rgba(16,185,129,0.3)]"></div>`);
+                                    else document.write(`<div class="patch patch-masked"></div>`);
+                                }
+                            </script>
+                        </div>
+                    </div>
+
+                    <i data-lucide="arrow-right" id="arrow-1" class="flow-arrow w-8 h-8"></i>
+
+                    <!-- Stage 2: Encoder -->
+                    <div id="stage-2"
+                        class="stage-card relative z-10 w-36 h-44 bg-indigo-900/30 border-2 border-indigo-600 rounded-xl p-3 flex flex-col items-center justify-center cursor-pointer">
+                        <div class="text-xs text-indigo-300 mb-3 font-bold text-center">ViT Encoder<br><span
+                                class="text-[9px] font-normal opacity-70">(Visible Only)</span></div>
+                        <div
+                            class="grid grid-cols-2 grid-rows-2 gap-1 w-12 h-12 bg-gray-900/50 p-1 rounded-md mb-2 shadow-inner">
+                            <div class="patch patch-visible"></div>
+                            <div class="patch patch-visible"></div>
+                            <div class="patch patch-visible"></div>
+                            <div class="patch patch-visible"></div>
+                        </div>
+                        <div class="text-[10px] text-indigo-400 mono bg-indigo-950/50 px-2 py-1 rounded">~25% Compute
+                        </div>
+                    </div>
+
+                    <i data-lucide="arrow-right" id="arrow-2" class="flow-arrow w-8 h-8"></i>
+
+                    <!-- Stage 3: Add Mask Tokens -->
+                    <div id="stage-3"
+                        class="stage-card relative z-10 w-32 h-44 bg-gray-800 border-2 border-gray-700 rounded-xl p-3 flex flex-col items-center justify-center cursor-pointer">
+                        <div class="text-xs text-gray-400 mb-3 font-medium text-center">+ Mask Tokens</div>
+                        <div
+                            class="grid grid-cols-4 grid-rows-4 gap-1 w-24 h-24 bg-gray-900 p-1 rounded-md shadow-inner">
+                            <script>
+                                for (let i = 0; i < 16; i++) {
+                                    if (visibleIndices.includes(i)) document.write(`<div class="patch patch-visible shadow-[0_0_8px_rgba(16,185,129,0.5)]"></div>`);
+                                    else document.write(`<div class="patch patch-token">M</div>`);
+                                }
+                            </script>
+                        </div>
+                    </div>
+
+                    <i data-lucide="arrow-right" id="arrow-3" class="flow-arrow w-8 h-8"></i>
+
+                    <!-- Stage 4: Decoder -->
+                    <div id="stage-4"
+                        class="stage-card relative z-10 w-36 h-44 bg-emerald-900/30 border-2 border-emerald-600 rounded-xl p-3 flex flex-col items-center justify-center cursor-pointer">
+                        <div class="text-xs text-emerald-300 mb-3 font-bold text-center">ViT Decoder<br><span
+                                class="text-[9px] font-normal opacity-70">(Lightweight)</span></div>
+                        <div
+                            class="grid grid-cols-4 grid-rows-4 gap-1 w-24 h-24 bg-gray-900/50 p-1 rounded-md shadow-inner opacity-90">
+                            <script>
+                                for (let i = 0; i < 16; i++) {
+                                    if (visibleIndices.includes(i)) document.write(`<div class="patch patch-visible"></div>`);
+                                    else document.write(`<div class="patch patch-token opacity-70"></div>`);
+                                }
+                            </script>
+                        </div>
+                    </div>
+
+                    <i data-lucide="arrow-right" id="arrow-4" class="flow-arrow w-8 h-8"></i>
+
+                    <!-- Stage 5: Target/Loss -->
+                    <div id="stage-5"
+                        class="stage-card relative z-10 w-32 h-44 bg-gray-800 border-2 border-gray-700 rounded-xl p-3 flex flex-col items-center justify-center cursor-pointer">
+                        <div class="text-xs text-gray-400 mb-3 font-medium text-center">Reconstruction</div>
+                        <div
+                            class="grid grid-cols-4 grid-rows-4 gap-1 w-24 h-24 bg-gray-900 p-1 rounded-md shadow-inner">
+                            <script>
+                                for (let i = 0; i < 16; i++) {
+                                    if (visibleIndices.includes(i)) document.write(`<div class="patch patch-visible"></div>`);
+                                    else document.write(`<div class="patch patch-recon"></div>`);
+                                }
+                            </script>
+                        </div>
+                        <div
+                            class="absolute -bottom-4 bg-red-900/80 text-red-200 border border-red-700/50 text-[10px] px-3 py-1 rounded-full font-bold mono shadow-lg">
+                            MSE Loss</div>
+                    </div>
+
+                </div>
+            </div>
+
+            <!-- Detail Panel (Bottom) -->
+            <div
+                class="h-72 bg-[#1a1d27] border-t border-gray-800 p-7 flex flex-col shrink-0 shadow-[0_-10px_40px_rgba(0,0,0,0.5)] z-20">
+                <div class="flex items-center gap-3 mb-5">
+                    <span id="step-badge"
+                        class="px-3 py-1 bg-blue-500/20 text-blue-400 text-xs font-bold rounded-md mono">Step 0/5</span>
+                    <h2 id="step-title" class="text-xl font-bold text-white">Input Image Partitioning</h2>
+                </div>
+
+                <div class="flex gap-8 h-full">
+                    <!-- Description -->
+                    <div class="flex-1 text-gray-300 text-sm leading-8 overflow-y-auto pr-4 text-justify"
+                        id="step-description">
+                        The MAE model begins with an unlabeled input image...
+                    </div>
+
+                    <!-- Code Block -->
+                    <div
+                        class="w-5/12 bg-[#0d1117] rounded-xl p-5 border border-gray-700 font-mono text-[13px] text-gray-300 overflow-y-auto relative group shadow-inner">
+                        <div
+                            class="absolute top-3 right-3 text-gray-600 group-hover:text-gray-400 transition-colors bg-[#0d1117] pl-2 pb-2">
+                            <i data-lucide="code-2" class="w-5 h-5"></i>
+                        </div>
+                        <div id="step-code" class="leading-relaxed">
+                            <!-- Code injected via JS -->
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Stepper Progress Bar -->
+            <div class="absolute bottom-[288px] left-0 w-full h-1 bg-gray-800 z-30">
+                <div id="progress-bar"
+                    class="h-full bg-blue-500 shadow-[0_0_10px_rgba(59,130,246,0.8)] transition-all duration-500 w-0">
+                </div>
+            </div>
+
+        </main>
+    </div>
+
+    <script>
+        // Initialize Lucide icons
+        lucide.createIcons();
+
+        // Data for each step of the MAE pipeline
+        const steps = [
+            {
+                title: "Input Image Partitioning",
+                description: "<p class='mb-3'>The MAE model begins with an unlabeled input image. This image is divided into regular, non-overlapping patches (e.g., 16x16 pixels).</p><p>Instead of processing the entire image as a grid of pixels, it is flattened into a sequence of patches, which forms the basis for the Transformer architecture.</p>",
+                code: `<span class="code-comment"># 1. Image to Patches</span>\nimg = torch.randn(<span class="code-number">1</span>, <span class="code-number">3</span>, <span class="code-number">224</span>, <span class="code-number">224</span>)\n\n<span class="code-comment"># Using PatchEmbed layer</span>\npatches = patch_embed(img)\n<span class="code-comment"># Shape: [B, 196, 768]</span>\n\n<span class="code-function">print</span>(<span class="code-string">f"Total patches: {patches.shape[1]}"</span>)`
+            },
+            {
+                title: "Random Masking (75%)",
+                description: "<p class='mb-3'>This is the core innovation of the MAE architecture. A very high proportion of the patches (typically 75%) are randomly selected and removed (masked).</p><p>Unlike BERT in NLP (which masks ~15%), masking <span class='text-blue-400 font-bold'>75%</span> of an image removes heavy spatial redundancy. This forces the model to develop a deeper, global understanding of the image to reconstruct the missing parts.</p>",
+                code: `<span class="code-comment"># 2. Random Masking</span>\nmask_ratio = <span class="code-number">0.75</span>\nN = patches.shape[<span class="code-number">1</span>]\n\n<span class="code-comment"># Generate random noise to shuffle patches</span>\nnoise = torch.rand(B, N)\nids_shuffle = torch.argsort(noise)\n\n<span class="code-comment"># Keep only 25% of patches</span>\nlen_keep = <span class="code-function">int</span>(N * (<span class="code-number">1</span> - mask_ratio))\nids_keep = ids_shuffle[:, :len_keep]\n\nvisible_patches = torch.gather(patches, ...)`
+            },
+            {
+                title: "ViT Encoder (Visible Only)",
+                description: "<p class='mb-3'>The visible (unmasked) patches are linearly projected, added with positional embeddings, and fed into a standard Vision Transformer (ViT) encoder.</p><div class='p-3 bg-blue-900/20 border border-blue-800/50 rounded-lg'><span class='text-blue-300 font-bold'>Key Advantage:</span> Since the encoder only operates on ~25% of the patches, it requires a fraction of the compute and memory. This allows training massive models very efficiently.</div>",
+                code: `<span class="code-comment"># 3. Encode visible patches</span>\n<span class="code-comment"># Add positional embeddings to remaining patches</span>\nvisible_patches = visible_patches + pos_embed_keep\n\n<span class="code-comment"># Pass through Encoder blocks</span>\n<span class="code-keyword">for</span> blk <span class="code-keyword">in</span> encoder_blocks:\n    visible_patches = blk(visible_patches)\n\n<span class="code-comment"># Encoded features shape: [B, 49, 1024]</span>`
+            },
+            {
+                title: "Append Mask Tokens & Padding",
+                description: "<p class='mb-3'>Before entering the decoder, the sequence must be restored to its original full length (e.g., 196 tokens).</p><p>The encoded visible patches are combined with learnable <span class='px-1.5 py-0.5 bg-amber-500/20 text-amber-400 rounded text-xs font-mono border border-amber-500/30'>[MASK]</span> tokens corresponding to the removed positions. Crucially, <b>full positional embeddings</b> are added to all tokens here so the decoder knows the exact original location of each token.</p>",
+                code: `<span class="code-comment"># 4. Prepare Decoder Input</span>\n<span class="code-comment"># Expand mask token to batch size and mask length</span>\nmask_tokens = mask_token.repeat(B, num_masked, <span class="code-number">1</span>)\n\n<span class="code-comment"># Restore original image ordering</span>\nfull_sequence = torch.cat([encoded_visible, mask_tokens], dim=<span class="code-number">1</span>)\nfull_sequence = torch.gather(full_sequence, ids_restore)\n\n<span class="code-comment"># Add full pos embeddings to all tokens</span>\ndecoder_input = full_sequence + full_pos_embed`
+            },
+            {
+                title: "Lightweight ViT Decoder",
+                description: "<p class='mb-3'>The full sequence of tokens passes through a Vision Transformer decoder. Unlike the encoder, the decoder processes <span class='text-emerald-400 font-bold'>100%</span> of the tokens.</p><p>However, the decoder is specifically designed to be highly lightweight (narrower and shallower than the encoder). This design ensures that despite processing the full sequence, the bulk of computations remains in the optimized encoder.</p>",
+                code: `<span class="code-comment"># 5. Decode operations</span>\n\n<span class="code-comment"># Pass through smaller ViT decoder</span>\nx = decoder_input\n<span class="code-keyword">for</span> blk <span class="code-keyword">in</span> decoder_blocks:\n    x = blk(x)\n\n<span class="code-comment"># Project to pixel values (e.g., 16*16*3 = 768)</span>\npred = decoder_pred(x)\n<span class="code-comment"># Output shape: [B, 196, 768]</span>`
+            },
+            {
+                title: "Reconstruction & MSE Loss",
+                description: "<p class='mb-3'>The decoder's output predicts the original pixel values for all patches.</p><p>The loss function is the <b>Mean Squared Error (MSE)</b> calculated between the predicted pixels and the original image pixels. <span class='text-red-400 font-bold'>Key detail:</span> The loss is computed <i>only</i> on the masked patches. This forces the model to actually learn to reconstruct rather than just copying visible inputs.</p>",
+                code: `<span class="code-comment"># 6. Calculate Loss (MSE)</span>\n\n<span class="code-comment"># Target: normalized original image pixels</span>\ntarget = patchify(original_img)\n\n<span class="code-comment"># Calculate MSE between prediction and target</span>\nloss = (pred - target) ** <span class="code-number">2</span>\nloss = loss.mean(dim=<span class="code-number">-1</span>)  <span class="code-comment"># [B, N]</span>\n\n<span class="code-comment"># Apply mask: calc loss ONLY on masked areas</span>\nloss = (loss * mask).sum() / mask.sum()\nloss.backward()`
+            }
+        ];
+
+        let currentStep = 0;
+        let playInterval = null;
+
+        // DOM Elements
+        const btnPrev = document.getElementById('btn-prev');
+        const btnNext = document.getElementById('btn-next');
+        const btnPlay = document.getElementById('btn-play');
+        const stepBadge = document.getElementById('step-badge');
+        const stepTitle = document.getElementById('step-title');
+        const stepDesc = document.getElementById('step-description');
+        const stepCode = document.getElementById('step-code');
+        const progressBar = document.getElementById('progress-bar');
+
+        function init() {
+            // Attach click events to stage cards
+            for (let i = 0; i <= 5; i++) {
+                const stage = document.getElementById(`stage-${i}`);
+                stage.addEventListener('click', () => goToStep(i));
+            }
+
+            btnPrev.addEventListener('click', () => {
+                stopAutoPlay();
+                if (currentStep > 0) goToStep(currentStep - 1);
+            });
+
+            btnNext.addEventListener('click', () => {
+                stopAutoPlay();
+                if (currentStep < 5) goToStep(currentStep + 1);
+            });
+
+            btnPlay.addEventListener('click', toggleAutoPlay);
+
+            // Render initial state
+            renderStep(0);
+        }
+
+        function goToStep(stepIndex) {
+            currentStep = stepIndex;
+            renderStep(currentStep);
+        }
+
+        function renderStep(index) {
+            // Update Texts
+            const data = steps[index];
+            stepBadge.innerText = `Step ${index + 1} of ${steps.length}`;
+            stepTitle.innerText = data.title;
+            stepDesc.innerHTML = data.description;
+            stepCode.innerHTML = `<pre class="whitespace-pre-wrap">${data.code}</pre>`;
+
+            // Update Progress Bar
+            progressBar.style.width = `${(index / 5) * 100}%`;
+
+            // Button States
+            btnPrev.disabled = index === 0;
+            btnNext.disabled = index === 5;
+
+            // Update Visual Nodes and Flow Arrows
+            for (let i = 0; i <= 5; i++) {
+                const stage = document.getElementById(`stage-${i}`);
+                if (i === index) {
+                    stage.classList.remove('stage-inactive');
+                    stage.classList.add('stage-active');
+                } else if (i < index) {
+                    stage.classList.remove('stage-active', 'stage-inactive');
+                    stage.classList.add('opacity-90');
+                } else {
+                    stage.classList.remove('stage-active');
+                    stage.classList.add('stage-inactive');
+                }
+
+                // Arrow Animations
+                if (i < 5) {
+                    const arrow = document.getElementById(`arrow-${i}`);
+                    if (i < index) {
+                        // Past paths
+                        arrow.classList.add('active');
+                        arrow.classList.remove('opacity-40');
+                    } else if (i === index) {
+                        // Current active path
+                        arrow.classList.add('active');
+                        arrow.classList.remove('opacity-40');
+                    } else {
+                        // Future paths
+                        arrow.classList.remove('active');
+                        arrow.classList.add('opacity-40');
+                    }
+                }
+            }
+        }
+
+        function toggleAutoPlay() {
+            if (playInterval) {
+                stopAutoPlay();
+            } else {
+                btnPlay.innerHTML = `<i data-lucide="square" class="w-4 h-4 fill-current"></i> Stop Play`;
+                btnPlay.classList.add('text-blue-400', 'border-blue-800', 'bg-blue-900/20');
+                lucide.createIcons();
+
+                if (currentStep === 5) goToStep(0);
+
+                playInterval = setInterval(() => {
+                    if (currentStep < 5) {
+                        goToStep(currentStep + 1);
+                    } else {
+                        stopAutoPlay();
+                    }
+                }, 4000); // 4 seconds per step
+            }
+        }
+
+        function stopAutoPlay() {
+            if (playInterval) {
+                clearInterval(playInterval);
+                playInterval = null;
+                btnPlay.innerHTML = `<i data-lucide="play" class="w-4 h-4"></i> Auto-Play`;
+                btnPlay.classList.remove('text-blue-400', 'border-blue-800', 'bg-blue-900/20');
+                lucide.createIcons();
+            }
+        }
+
+        document.addEventListener('DOMContentLoaded', init);
+
+    </script>
+</body>
+
+</html>

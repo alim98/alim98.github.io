@@ -1,524 +1,470 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Ali Mikaeili — AI Researcher</title>
-  <meta name="description" content="Personal website of Ali Mikaeili, AI Researcher at the Max Planck Institute for Brain Research. Specializing in representation learning, spiking neural networks, and medical image analysis." />
+  <title>Ali Mikaeili</title>
+  <meta name="description"
+    content="Ali Mikaeili — AI Researcher at Max Planck Institute for Brain Research, Frankfurt." />
+  <meta name="theme-color" content="#ffffff" />
   <link rel="preconnect" href="https://fonts.googleapis.com" />
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Playfair+Display:wght@700&display=swap" rel="stylesheet" />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet" />
   <link rel="stylesheet" href="style.css" />
 </head>
+
 <body>
 
-  <!-- ── NAV ── -->
-  <nav id="navbar">
-    <div class="nav-inner">
-      <a class="nav-logo" href="#hero">AM</a>
-      <ul class="nav-links">
-        <li><a href="#about">About</a></li>
-        <li><a href="#experience">Experience</a></li>
-        <li><a href="#publications">Publications</a></li>
-        <li><a href="#projects">Projects</a></li>
-        <li><a href="#skills">Skills</a></li>
-        <li><a href="#contact" class="nav-cta">Contact</a></li>
-      </ul>
-      <button class="hamburger" id="hamburger" aria-label="Toggle menu">
-        <span></span><span></span><span></span>
-      </button>
-    </div>
-  </nav>
+  <div class="layout">
 
-  <!-- ── HERO ── -->
-  <section id="hero">
-    <div class="hero-bg">
-      <div class="blob blob-1"></div>
-      <div class="blob blob-2"></div>
-      <div class="blob blob-3"></div>
-      <div class="grid-overlay"></div>
-    </div>
-    <div class="hero-content">
-      <div class="hero-badge">
-        <span class="badge-dot"></span>
-        Research Assistant · Max Planck Institute
-      </div>
-      <h1 class="hero-name">Ali Mikaeili</h1>
-      <p class="hero-tagline">AI Researcher crafting intelligence<br/>at the intersection of <span class="gradient-text">neuroscience & deep learning</span></p>
-      <div class="hero-buttons">
-        <a href="#publications" class="btn btn-primary">View Research</a>
-        <a href="#contact" class="btn btn-ghost">Get in Touch</a>
-      </div>
-      <div class="hero-stats">
-        <div class="stat">
-          <span class="stat-num">3+</span>
-          <span class="stat-label">Publications</span>
-        </div>
-        <div class="stat-divider"></div>
-        <div class="stat">
-          <span class="stat-num">5+</span>
-          <span class="stat-label">Years Research</span>
-        </div>
-        <div class="stat-divider"></div>
-        <div class="stat">
-          <span class="stat-num">10+</span>
-          <span class="stat-label">Projects</span>
+    <!-- ── SIDEBAR ── -->
+    <aside class="sidebar">
+
+      <!-- Profile -->
+      <div class="profile-block">
+        <img class="avatar" src="assets/profile.jpg" alt="Ali Mikaeili" />
+        <div class="profile-text">
+          <h1>Ali Mikaeili</h1>
+          <p class="role">AI Researcher</p>
         </div>
       </div>
-    </div>
-    <div class="scroll-indicator">
-      <div class="scroll-line"></div>
-      <span>Scroll</span>
-    </div>
-  </section>
 
-  <!-- ── ABOUT ── -->
-  <section id="about">
-    <div class="container">
-      <div class="section-label">About Me</div>
-      <div class="about-grid">
-        <div class="about-text">
-          <h2>Building the future of <span class="gradient-text">computational intelligence</span></h2>
-          <p>I'm an AI researcher based in Frankfurt, Germany, currently working as a Research Assistant at the Max Planck Institute for Brain Research under Prof. Gilles Laurent. My work sits at the crossroads of AI and neuroscience—designing learning systems inspired by the brain.</p>
-          <p>My research focuses on representation learning, spiking neural networks, and medical image analysis. I hold an M.Sc. in Artificial Intelligence & Robotics from the University of Tehran and I'm passionate about pushing the boundaries of what's possible with deep learning.</p>
-          <div class="about-tags">
-            <span class="tag">Connectomics</span>
-            <span class="tag">Spiking Neural Networks</span>
-            <span class="tag">Medical Imaging</span>
-            <span class="tag">Contrastive Learning</span>
-            <span class="tag">Vision Transformers</span>
-          </div>
-        </div>
-        <div class="about-card-col">
-          <div class="info-card">
-            <div class="info-row">
-              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>
-              <span>Frankfurt, Germany</span>
-            </div>
-            <div class="info-row">
-              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg>
-              <a href="mailto:Ali.Mikaeili@brain.mpg.de">Ali.Mikaeili@brain.mpg.de</a>
-            </div>
-            <div class="info-row">
-              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07A19.5 19.5 0 0 1 4.69 13.1 19.79 19.79 0 0 1 1.58 4.5 2 2 0 0 1 3.55 2.32h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L7.91 9.91a16 16 0 0 0 6.18 6.18l.88-.88a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 21.73 17z"/></svg>
-              <span>(+49) 1575 7252 676</span>
-            </div>
-            <div class="info-row">
-              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 19c-5 1.5-5-2.5-7-3m14 6v-3.87a3.37 3.37 0 0 0-.94-2.61c3.14-.35 6.44-1.54 6.44-7A5.44 5.44 0 0 0 20 4.77 5.07 5.07 0 0 0 19.91 1S18.73.65 16 2.48a13.38 13.38 0 0 0-7 0C6.27.65 5.09 1 5.09 1A5.07 5.07 0 0 0 5 4.77a5.44 5.44 0 0 0-1.5 3.78c0 5.42 3.3 6.61 6.44 7A3.37 3.37 0 0 0 9 18.13V22"/></svg>
-              <a href="https://github.com/alim98" target="_blank" rel="noopener">github.com/alim98</a>
-            </div>
-            <div class="info-row">
-              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M16 8a6 6 0 0 1 6 6v7h-4v-7a2 2 0 0 0-2-2 2 2 0 0 0-2 2v7h-4v-7a6 6 0 0 1 6-6z"/><rect x="2" y="9" width="4" height="12"/><circle cx="4" cy="4" r="2"/></svg>
-              <a href="https://linkedin.com/in/mikaeiliali" target="_blank" rel="noopener">mikaeiliali</a>
-            </div>
-          </div>
-          <div class="edu-card">
-            <h3>Education</h3>
-            <div class="edu-item">
-              <div class="edu-dot"></div>
-              <div>
-                <strong>M.Sc. AI & Robotics</strong>
-                <span>University of Tehran · 2023–2025</span>
-                <small>Grade 17/20 — SpikeReg thesis</small>
-              </div>
-            </div>
-            <div class="edu-item">
-              <div class="edu-dot"></div>
-              <div>
-                <strong>B.Eng. Computer Engineering</strong>
-                <span>Payame Noor University · 2020–2023</span>
-                <small>Grade 16.5/20</small>
-              </div>
-            </div>
-            <div class="edu-item">
-              <div class="edu-dot edu-dot-sm"></div>
-              <div>
-                <strong>B.Sc. Educational Sciences</strong>
-                <span>Farhangian University · 2017–2021</span>
-                <small>Grade 17.5/20</small>
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
-    </div>
-  </section>
-
-  <!-- ── EXPERIENCE ── -->
-  <section id="experience">
-    <div class="container">
-      <div class="section-label">Career</div>
-      <h2>Work <span class="gradient-text">Experience</span></h2>
-      <div class="timeline">
-
-        <div class="timeline-item">
-          <div class="timeline-marker current"></div>
-          <div class="timeline-card">
-            <div class="tcard-header">
-              <div>
-                <h3>Research Assistant</h3>
-                <p class="tcard-org">Max Planck Institute for Brain Research · Frankfurt, Germany</p>
-                <p class="tcard-dept">Dept. of Neural Systems — Prof. Gilles Laurent</p>
-              </div>
-              <span class="tcard-period current-badge">2024 – Present</span>
-            </div>
-            <ul class="tcard-list">
-              <li>Designing a network for unsupervised synapse clustering based on morphological features using Contrastive Learning.</li>
-              <li>Designing a representation learning framework for Cell Classification using Vision Transformers.</li>
-            </ul>
-          </div>
-        </div>
-
-        <div class="timeline-item">
-          <div class="timeline-marker"></div>
-          <div class="timeline-card">
-            <div class="tcard-header">
-              <div>
-                <h3>Data Analyst</h3>
-                <p class="tcard-org">Hamrahe Aval (MCI) · Tehran, Iran</p>
-                <p class="tcard-dept">Image Analysis Group, R&D Department</p>
-              </div>
-              <span class="tcard-period">2023 – 2024</span>
-            </div>
-            <ul class="tcard-list">
-              <li>Developed Text-to-Speech (TTS) and Emotion Speech Recognition (ESR) projects for the GITEX exhibition.</li>
-              <li>Product Manager for the Persian-Interactive Dog Robot Project.</li>
-            </ul>
-          </div>
-        </div>
-
-        <div class="timeline-item">
-          <div class="timeline-marker"></div>
-          <div class="timeline-card">
-            <div class="tcard-header">
-              <div>
-                <h3>Teaching Assistant</h3>
-                <p class="tcard-org">University of Tehran · Tehran, Iran</p>
-                <p class="tcard-dept">Dept. of Computer Science & Electrical Engineering</p>
-              </div>
-              <span class="tcard-period">2023 – 2024</span>
-            </div>
-            <ul class="tcard-list">
-              <li>Head of Four Research Teams in AI-Driven Medical Imaging and deep learning under Prof. Moshiri & Prof. Khoshnevisan.</li>
-              <li>Assisted in teaching Statistical Inference and Artificial Intelligence courses.</li>
-            </ul>
-          </div>
-        </div>
-
-        <div class="timeline-item">
-          <div class="timeline-marker"></div>
-          <div class="timeline-card">
-            <div class="tcard-header">
-              <div>
-                <h3>Teaching Assistant</h3>
-                <p class="tcard-org">Payame Noor University · Ardabil, Iran</p>
-                <p class="tcard-dept">Dept. of Computer Science & Engineering</p>
-              </div>
-              <span class="tcard-period">2020 – 2023</span>
-            </div>
-            <ul class="tcard-list">
-              <li>Assisted in teaching Data Structures & Algorithms with interactive video demonstrations.</li>
-              <li>Crafted homework assignments and led hands-on AI sessions.</li>
-              <li>Facilitated Operating Systems lab classes and designed midterm assessments.</li>
-            </ul>
-          </div>
-        </div>
-
-      </div>
-    </div>
-  </section>
-
-  <!-- ── PUBLICATIONS ── -->
-  <section id="publications">
-    <div class="container">
-      <div class="section-label">Research</div>
-      <h2>Selected <span class="gradient-text">Publications</span></h2>
-
-      <div class="pub-tabs">
-        <button class="pub-tab active" data-tab="published">Published</button>
-        <button class="pub-tab" data-tab="review">Under Review</button>
+      <!-- Status -->
+      <div class="status-row">
+        <span class="badge-live">
+          <span class="dot"></span>
+          Frankfurt, Germany
+        </span>
       </div>
 
-      <div class="pub-list" id="pub-published">
-
-        <div class="pub-card">
-          <div class="pub-index">01</div>
-          <div class="pub-content">
-            <span class="pub-venue">AREE 2025 · IEEE</span>
-            <h3>Attention-Based Segmentation of Brain Tumors Using Feature Level Fusion and UNet Architecture</h3>
-            <p class="pub-authors">A. M. Barzili & B. Moshiri</p>
-            <a href="https://doi.org/10.1109/AREE63378.2025.10880261" target="_blank" rel="noopener" class="pub-doi">
-              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>
-              DOI: 10.1109/AREE63378.2025.10880261
-            </a>
-          </div>
-        </div>
-
-        <div class="pub-card">
-          <div class="pub-index">02</div>
-          <div class="pub-content">
-            <span class="pub-venue">AI2E 2025 · IEEE</span>
-            <h3>Detection of Autism Spectrum Disorder Using Quantum Support Vector Machines Algorithm</h3>
-            <p class="pub-authors">A. E. Zadeh, A. M. Barzili, M. R. Nemati, M. Khoshnevisan, H. Azadegan & B. Moshiri</p>
-            <a href="https://doi.org/10.1109/AI2E64943.2025.10983511" target="_blank" rel="noopener" class="pub-doi">
-              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>
-              DOI: 10.1109/AI2E64943.2025.10983511
-            </a>
-          </div>
-        </div>
-
-        <div class="pub-card">
-          <div class="pub-index">03</div>
-          <div class="pub-content">
-            <span class="pub-venue">arXiv Preprint · 2025</span>
-            <h3>MedFedPure: A Medical Federated Framework with MAE-based Detection and Diffusion Purification for Inference-Time Attacks</h3>
-            <p class="pub-authors">M. Karami, M. R. Nemati, A. Kazemi, A. M. Barzili, H. Azadegan & B. Moshiri</p>
-            <a href="https://doi.org/10.48550/arXiv.2511.11625" target="_blank" rel="noopener" class="pub-doi">
-              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>
-              arXiv: 2511.11625
-            </a>
-          </div>
-        </div>
-
+      <!-- Current position logo -->
+      <div class="affil-block">
+        <img src="assets/mpi.png" alt="Max Planck Institute" class="affil-logo" />
+        <p class="affil-name">Dept. of Neural Systems<br /> Prof. Gilles Laurent</p>
       </div>
 
-      <div class="pub-list hidden" id="pub-review">
+      <p class="bio">
+        Building intelligent systems at the intersection of AI and neuroscience — from synapse clustering to deformable
+        brain registration.
+      </p>
 
-        <div class="pub-card">
-          <div class="pub-index">01</div>
-          <div class="pub-content">
-            <span class="pub-venue review-badge">Under Review</span>
-            <h3>SpikeReg: A Spiking-UNet for Iterative Deformable Brain Image Registration</h3>
-            <p class="pub-authors">A. M. Barzili & B. Moshiri</p>
-          </div>
-        </div>
+      <!-- Nav -->
+      <nav class="side-nav" aria-label="Sections">
+        <button class="nav-btn active" data-panel="experience" aria-pressed="true">
+          <span>Experience</span><kbd>1</kbd>
+        </button>
+        <button class="nav-btn" data-panel="publications" aria-pressed="false">
+          <span>Publications</span><kbd>2</kbd>
+        </button>
+        <button class="nav-btn" data-panel="projects" aria-pressed="false">
+          <span>Projects</span><kbd>3</kbd>
+        </button>
+        <button class="nav-btn" data-panel="skills" aria-pressed="false">
+          <span>Skills &amp; Education</span><kbd>4</kbd>
+        </button>
+      </nav>
 
-        <div class="pub-card">
-          <div class="pub-index">02</div>
-          <div class="pub-content">
-            <span class="pub-venue review-badge">Under Review</span>
-            <h3>LiquidReg: An Adaptive ODE Engine for Deformable Registration</h3>
-            <p class="pub-authors">A. M. Barzili & B. Moshiri</p>
-          </div>
-        </div>
-
-        <div class="pub-card">
-          <div class="pub-index">03</div>
-          <div class="pub-content">
-            <span class="pub-venue review-badge">Under Review</span>
-            <h3>Deep Learning Methods for Deformable Brain MRI Registration: A Systematic Review</h3>
-            <p class="pub-authors">A. M. Barzili, A. Firoozi, S. Asadollahi, S. Famil Feizi & B. Moshiri</p>
-          </div>
-        </div>
-
-      </div>
-    </div>
-  </section>
-
-  <!-- ── PROJECTS ── -->
-  <section id="projects">
-    <div class="container">
-      <div class="section-label">Portfolio</div>
-      <h2>Featured <span class="gradient-text">Projects</span></h2>
-      <div class="projects-grid">
-
-        <div class="project-card featured">
-          <div class="project-icon">🧠</div>
-          <span class="project-tag">Connectomics · MPIBR</span>
-          <h3>Synapse Clustering Framework</h3>
-          <p>A deep learning framework for analyzing and clustering 3D synapse structures from electron microscopy (EM) data, developed at the Max Planck Institute for Brain Research.</p>
-          <div class="project-techs">
-            <span>Contrastive Learning</span><span>3D EM</span><span>PyTorch</span>
-          </div>
-        </div>
-
-        <div class="project-card featured">
-          <div class="project-icon">⚡</div>
-          <span class="project-tag">Spiking Neural Networks</span>
-          <h3>SpikeReg</h3>
-          <p>A novel approach to deformable medical image registration leveraging Spiking Neural Networks (SNNs) to achieve orders-of-magnitude energy savings while maintaining high accuracy.</p>
-          <div class="project-techs">
-            <span>SNN</span><span>Medical Imaging</span><span>UNet</span>
-          </div>
-        </div>
-
-        <div class="project-card">
-          <div class="project-icon">🌊</div>
-          <span class="project-tag">ODE Networks</span>
-          <h3>LiquidReg</h3>
-          <p>Revolutionary deformable medical image registration combining Liquid Time-constant Networks (LTC), diffeomorphic transformations, and hyper-networks for pair-specific parameter generation.</p>
-          <div class="project-techs">
-            <span>LTC</span><span>ODE Solvers</span><span>Diffeomorphic</span>
-          </div>
-        </div>
-
-        <div class="project-card">
-          <div class="project-icon">🔬</div>
-          <span class="project-tag">Cell Biology</span>
-          <h3>Chromatin Classification</h3>
-          <p>Tools for analyzing and classifying 3D nuclei samples using deep learning, enabling automated identification of chromatin structures.</p>
-          <div class="project-techs">
-            <span>3D CNN</span><span>Classification</span><span>PyTorch</span>
-          </div>
-        </div>
-
-        <div class="project-card">
-          <div class="project-icon">💬</div>
-          <span class="project-tag">NLP · Mental Health</span>
-          <h3>Suicidal Ideation Detection</h3>
-          <p>A predictive model for identifying suicidal thoughts in social network users based on tweet content, contributing to mental health awareness and intervention efforts.</p>
-          <div class="project-techs">
-            <span>BERT</span><span>NLP</span><span>Classification</span>
-          </div>
-        </div>
-
-        <div class="project-card">
-          <div class="project-icon">🎤</div>
-          <span class="project-tag">Speech Processing</span>
-          <h3>Speech Emotion Recognition</h3>
-          <p>A robust Speech Emotion Recognition system using the Shemo Persian speech emotion detection database, enabling accurate classification of emotional states from speech signals.</p>
-          <div class="project-techs">
-            <span>Audio ML</span><span>Persian</span><span>Deep Learning</span>
-          </div>
-        </div>
-
-      </div>
-      <div class="projects-more">
-        <a href="https://github.com/alim98" target="_blank" rel="noopener" class="btn btn-ghost">
-          View All on GitHub
-          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 12h14"/><path d="M12 5l7 7-7 7"/></svg>
+      <!-- Contact links -->
+      <div class="sidebar-links">
+        <a href="mailto:Ali.Mikaeili@brain.mpg.de" class="link-chip">
+          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+            stroke-linecap="round" stroke-linejoin="round">
+            <path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z" />
+            <polyline points="22,6 12,13 2,6" />
+          </svg>
+          Email
+        </a>
+        <a href="https://github.com/alim98" target="_blank" rel="noopener" class="link-chip">
+          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+            stroke-linecap="round" stroke-linejoin="round">
+            <path
+              d="M9 19c-5 1.5-5-2.5-7-3m14 6v-3.87a3.37 3.37 0 0 0-.94-2.61c3.14-.35 6.44-1.54 6.44-7A5.44 5.44 0 0 0 20 4.77 5.07 5.07 0 0 0 19.91 1S18.73.65 16 2.48a13.38 13.38 0 0 0-7 0C6.27.65 5.09 1 5.09 1A5.07 5.07 0 0 0 5 4.77a5.44 5.44 0 0 0-1.5 3.78c0 5.42 3.3 6.61 6.44 7A3.37 3.37 0 0 0 9 18.13V22" />
+          </svg>
+          GitHub
+        </a>
+        <a href="https://linkedin.com/in/mikaeiliali" target="_blank" rel="noopener" class="link-chip">
+          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+            stroke-linecap="round" stroke-linejoin="round">
+            <path d="M16 8a6 6 0 0 1 6 6v7h-4v-7a2 2 0 0 0-2-2 2 2 0 0 0-2 2v7h-4v-7a6 6 0 0 1 6-6z" />
+            <rect x="2" y="9" width="4" height="12" />
+            <circle cx="4" cy="4" r="2" />
+          </svg>
+          LinkedIn
         </a>
       </div>
-    </div>
-  </section>
 
-  <!-- ── SKILLS ── -->
-  <section id="skills">
-    <div class="container">
-      <div class="section-label">Expertise</div>
-      <h2>Skills &amp; <span class="gradient-text">Technologies</span></h2>
-      <div class="skills-grid">
+    </aside>
 
-        <div class="skill-group">
-          <div class="skill-group-icon">🤖</div>
-          <h3>Artificial Intelligence</h3>
-          <div class="skill-pills">
-            <span>Representation Learning</span>
-            <span>Contrastive Learning</span>
-            <span>Vision Transformers</span>
-            <span>Diffusion Models</span>
-            <span>GANs</span>
-            <span>BERT / NLP</span>
-            <span>RAG</span>
-            <span>VLMs</span>
-            <span>Digital Twin</span>
-          </div>
+    <!-- ── MAIN ── -->
+    <main class="main-panel" id="main-panel">
+
+      <!-- ─ EXPERIENCE ─ -->
+      <div class="panel active" id="panel-experience">
+        <div class="panel-header">
+          <h2>Experience</h2>
+          <span class="panel-meta">4 positions</span>
         </div>
 
-        <div class="skill-group">
-          <div class="skill-group-icon">🧬</div>
-          <h3>Neuroscience & Bio</h3>
-          <div class="skill-pills">
-            <span>Spiking Neural Networks</span>
-            <span>Connectomics</span>
-            <span>WebKnossos</span>
-            <span>Medical Image Analysis</span>
-            <span>Deformable Registration</span>
-          </div>
-        </div>
+        <div class="entries">
 
-        <div class="skill-group">
-          <div class="skill-group-icon">💻</div>
-          <h3>Programming</h3>
-          <div class="skill-pills">
-            <span>Python</span>
-            <span>Java</span>
-            <span>Kotlin</span>
-            <span>C / C++</span>
-            <span>Flutter</span>
-          </div>
-        </div>
-
-        <div class="skill-group">
-          <div class="skill-group-icon">🛠️</div>
-          <h3>ML Tools & Frameworks</h3>
-          <div class="skill-pills">
-            <span>PyTorch</span>
-            <span>TensorFlow</span>
-            <span>Keras</span>
-            <span>NumPy</span>
-            <span>Pandas</span>
-            <span>Scikit-Learn</span>
-            <span>Matplotlib</span>
-          </div>
-        </div>
-
-        <div class="skill-group">
-          <div class="skill-group-icon">⚙️</div>
-          <h3>DevOps & Tools</h3>
-          <div class="skill-pills">
-            <span>Git</span>
-            <span>Docker</span>
-            <span>Linux</span>
-            <span>LaTeX</span>
-          </div>
-        </div>
-
-        <div class="skill-group">
-          <div class="skill-group-icon">🌐</div>
-          <h3>Languages</h3>
-          <div class="skill-pills lang-pills">
-            <span>🇬🇧 English — Advanced</span>
-            <span>🇮🇷 Persian — Native</span>
-            <span>🇦🇿 Azerbaijani — Native</span>
-            <span>🇹🇷 Turkish — Advanced</span>
-          </div>
-        </div>
-
-      </div>
-    </div>
-  </section>
-
-  <!-- ── CONTACT ── -->
-  <section id="contact">
-    <div class="container">
-      <div class="contact-inner">
-        <div class="section-label">Get in Touch</div>
-        <h2>Let's <span class="gradient-text">Connect</span></h2>
-        <p class="contact-sub">I'm always open to research collaborations, academic discussions, and new opportunities.</p>
-        <div class="contact-links">
-          <a href="mailto:Ali.Mikaeili@brain.mpg.de" class="contact-card" id="contact-email">
-            <div class="contact-card-icon">✉️</div>
-            <div>
-              <strong>Email</strong>
-              <span>Ali.Mikaeili@brain.mpg.de</span>
+          <div class="entry stagger">
+            <div class="entry-left">
+              <div class="org-logo-wrap">
+                <img src="assets/mpi.png" alt="MPI" class="org-logo" />
+              </div>
+              <div class="tline">
+                <div class="tdot active"></div>
+              </div>
             </div>
-          </a>
-          <a href="https://linkedin.com/in/mikaeiliali" target="_blank" rel="noopener" class="contact-card" id="contact-linkedin">
-            <div class="contact-card-icon">💼</div>
-            <div>
-              <strong>LinkedIn</strong>
-              <span>mikaeiliali</span>
+            <div class="entry-content">
+              <div class="entry-top">
+                <strong>Research Assistant</strong>
+                <span class="chip-green">Now</span>
+              </div>
+              <p class="entry-org">Max Planck Institute for Brain Research · Frankfurt</p>
+              <p class="entry-desc">Unsupervised synapse clustering via contrastive learning on 3D EM data. Cell
+                classification using Vision Transformers Prof. Gilles Laurent.</p>
+              <div class="entry-tags">
+                <span>Contrastive Learning</span><span>Vision Transformers</span><span>Connectomics</span>
+              </div>
+              <span class="entry-year">2024 – present</span>
             </div>
-          </a>
-          <a href="https://github.com/alim98" target="_blank" rel="noopener" class="contact-card" id="contact-github">
-            <div class="contact-card-icon">👾</div>
-            <div>
-              <strong>GitHub</strong>
-              <span>alim98</span>
+          </div>
+
+          <div class="entry stagger">
+            <div class="entry-left">
+              <div class="org-logo-wrap">
+                <img src="assets/mci.png" alt="MCI" class="org-logo" />
+              </div>
+              <div class="tline"></div>
             </div>
-          </a>
+            <div class="entry-content">
+              <div class="entry-top"><strong>Data Analyst</strong></div>
+              <p class="entry-org">Hamrahe Aval (MCI), R&amp;D · Tehran</p>
+              <p class="entry-desc">TTS and speech emotion recognition for the GITEX exhibition. Product manager for the
+                Persian-Interactive Dog Robot.</p>
+              <div class="entry-tags">
+                <span>TTS</span><span>Speech Emotion</span><span>Product Management</span>
+              </div>
+              <span class="entry-year">2023 – 2024</span>
+            </div>
+          </div>
+
+          <div class="entry stagger">
+            <div class="entry-left">
+              <div class="org-logo-wrap">
+                <img src="assets/ut.png" alt="University of Tehran" class="org-logo" />
+              </div>
+              <div class="tline"></div>
+            </div>
+            <div class="entry-content">
+              <div class="entry-top"><strong>Teaching Assistant</strong></div>
+              <p class="entry-org">University of Tehran · Dept. of CS &amp; EE</p>
+              <p class="entry-desc">Led four AI medical imaging research teams. Assisted in Statistical Inference and
+                Artificial Intelligence courses.</p>
+              <div class="entry-tags">
+                <span>Medical Imaging</span><span>Research Leadership</span><span>Deep Learning</span>
+              </div>
+              <span class="entry-year">2023 – 2024</span>
+            </div>
+          </div>
+
+          <div class="entry stagger">
+            <div class="entry-left">
+              <div class="org-logo-wrap letter-logo">PNU</div>
+              <div class="tline last"></div>
+            </div>
+            <div class="entry-content">
+              <div class="entry-top"><strong>Teaching Assistant</strong></div>
+              <p class="entry-org">Payame Noor University · Ardabil</p>
+              <p class="entry-desc">Data Structures, Algorithms, AI, and Operating Systems labs and assessments.</p>
+              <div class="entry-tags">
+                <span>Algorithms</span><span>AI</span><span>Operating Systems</span>
+              </div>
+              <span class="entry-year">2020 – 2023</span>
+            </div>
+          </div>
+
         </div>
       </div>
-    </div>
-  </section>
 
-  <!-- ── FOOTER ── -->
-  <footer>
-    <div class="container">
-      <p>© 2025 Ali Mikaeili · Built with care in Frankfurt 🇩🇪</p>
-    </div>
-  </footer>
+      <!-- ─ PUBLICATIONS ─ -->
+      <div class="panel" id="panel-publications">
+        <div class="panel-header">
+          <h2>Publications</h2>
+          <span class="panel-meta">6 papers · 3 published</span>
+        </div>
+
+        <div class="pub-group">
+          <div class="pub-group-label">Published</div>
+          <div class="pub-list">
+
+            <a href="https://doi.org/10.1109/AREE63378.2025.10880261" target="_blank" rel="noopener"
+              class="pub-row stagger">
+              <span class="pub-n">01</span>
+              <div class="pub-body">
+                <p class="pub-title">Attention-Based Segmentation of Brain Tumors Using Feature Level Fusion and UNet
+                </p>
+                <p class="pub-byline">A. M. Barzili &amp; B. Moshiri</p>
+              </div>
+              <div class="pub-right">
+                <span class="pub-badge">IEEE · 2025</span>
+                <svg class="pub-ext" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                  stroke-width="2">
+                  <path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6" />
+                  <polyline points="15 3 21 3 21 9" />
+                  <line x1="10" y1="14" x2="21" y2="3" />
+                </svg>
+              </div>
+            </a>
+
+            <a href="https://doi.org/10.1109/AI2E64943.2025.10983511" target="_blank" rel="noopener"
+              class="pub-row stagger">
+              <span class="pub-n">02</span>
+              <div class="pub-body">
+                <p class="pub-title">Detection of Autism Spectrum Disorder Using Quantum Support Vector Machines</p>
+                <p class="pub-byline">Zadeh, Barzili et al.</p>
+              </div>
+              <div class="pub-right">
+                <span class="pub-badge">IEEE · 2025</span>
+                <svg class="pub-ext" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                  stroke-width="2">
+                  <path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6" />
+                  <polyline points="15 3 21 3 21 9" />
+                  <line x1="10" y1="14" x2="21" y2="3" />
+                </svg>
+              </div>
+            </a>
+
+            <a href="https://doi.org/10.48550/arXiv.2511.11625" target="_blank" rel="noopener" class="pub-row stagger">
+              <span class="pub-n">03</span>
+              <div class="pub-body">
+                <p class="pub-title">MedFedPure: Federated Framework with MAE Detection and Diffusion Purification</p>
+                <p class="pub-byline">Karami, Barzili et al.</p>
+              </div>
+              <div class="pub-right">
+                <span class="pub-badge">arXiv · 2025</span>
+                <svg class="pub-ext" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                  stroke-width="2">
+                  <path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6" />
+                  <polyline points="15 3 21 3 21 9" />
+                  <line x1="10" y1="14" x2="21" y2="3" />
+                </svg>
+              </div>
+            </a>
+
+          </div>
+        </div>
+
+        <div class="pub-group">
+          <div class="pub-group-label">Under Review</div>
+          <div class="pub-list dimmed-group">
+
+            <div class="pub-row stagger">
+              <span class="pub-n">04</span>
+              <div class="pub-body">
+                <p class="pub-title">SpikeReg: A Spiking-UNet for Iterative Deformable Brain Image Registration</p>
+                <p class="pub-byline">A. M. Barzili &amp; B. Moshiri</p>
+              </div>
+              <div class="pub-right"><span class="pub-badge pending">In Review</span></div>
+            </div>
+
+            <div class="pub-row stagger">
+              <span class="pub-n">05</span>
+              <div class="pub-body">
+                <p class="pub-title">LiquidReg: An Adaptive ODE Engine for Deformable Registration</p>
+                <p class="pub-byline">A. M. Barzili &amp; B. Moshiri</p>
+              </div>
+              <div class="pub-right"><span class="pub-badge pending">In Review</span></div>
+            </div>
+
+            <div class="pub-row stagger">
+              <span class="pub-n">06</span>
+              <div class="pub-body">
+                <p class="pub-title">Deep Learning Methods for Deformable Brain MRI Registration: A Systematic Review
+                </p>
+                <p class="pub-byline">Barzili, Firoozi et al.</p>
+              </div>
+              <div class="pub-right"><span class="pub-badge pending">In Review</span></div>
+            </div>
+
+          </div>
+        </div>
+      </div>
+
+      <!-- ─ PROJECTS ─ -->
+      <div class="panel" id="panel-projects">
+        <div class="panel-header">
+          <h2>Projects</h2>
+          <a href="https://github.com/alim98" target="_blank" rel="noopener" class="panel-ext-link">
+            github.com/alim98
+            <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6" />
+              <polyline points="15 3 21 3 21 9" />
+              <line x1="10" y1="14" x2="21" y2="3" />
+            </svg>
+          </a>
+        </div>
+
+        <div class="proj-grid">
+          <div class="proj-card stagger" data-color="#6366f1">
+            <div class="proj-accent"></div>
+            <span class="proj-icon">🧠</span>
+            <h3>Synapse Clustering</h3>
+            <p>3D synapse analysis from electron microscopy data via contrastive learning (MPIBR).</p>
+            <div class="proj-chips"><span>Contrastive Learning</span><span>3D EM</span><span>PyTorch</span></div>
+          </div>
+
+          <div class="proj-card stagger" data-color="#f59e0b">
+            <div class="proj-accent"></div>
+            <span class="proj-icon">⚡</span>
+            <h3>SpikeReg</h3>
+            <p>Deformable brain image registration using Spiking Neural Networks — energy-efficient alternative.</p>
+            <div class="proj-chips"><span>SNN</span><span>Medical Imaging</span><span>UNet</span></div>
+          </div>
+
+          <div class="proj-card stagger" data-color="#06b6d4">
+            <div class="proj-accent"></div>
+            <span class="proj-icon">🌊</span>
+            <h3>LiquidReg</h3>
+            <p>Deformable registration via Liquid Time-constant Networks and continuous-time ODE solvers.</p>
+            <div class="proj-chips"><span>LTC</span><span>ODE</span><span>Diffeomorphic</span></div>
+          </div>
+
+          <div class="proj-card stagger" data-color="#10b981">
+            <div class="proj-accent"></div>
+            <span class="proj-icon">🔬</span>
+            <h3>Chromatin Classification</h3>
+            <p>3D nuclei classification from microscopy images using deep learning pipelines.</p>
+            <div class="proj-chips"><span>3D CNN</span><span>Cell Biology</span></div>
+          </div>
+
+          <div class="proj-card stagger" data-color="#ec4899">
+            <div class="proj-accent"></div>
+            <span class="proj-icon">🎤</span>
+            <h3>Speech Emotion Recognition</h3>
+            <p>Persian speech emotion detection using the Shemo database.</p>
+            <div class="proj-chips"><span>Audio ML</span><span>Persian NLP</span></div>
+          </div>
+
+          <div class="proj-card stagger" data-color="#8b5cf6">
+            <div class="proj-accent"></div>
+            <span class="proj-icon">💬</span>
+            <h3>Suicidal Ideation Detection</h3>
+            <p>BERT-based NLP model for mental health monitoring on social media.</p>
+            <div class="proj-chips"><span>BERT</span><span>NLP</span><span>Mental Health</span></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ─ SKILLS & EDUCATION ─ -->
+      <div class="panel" id="panel-skills">
+        <div class="panel-header">
+          <h2>Skills &amp; Education</h2>
+        </div>
+
+        <div class="se-grid">
+
+          <div class="se-block">
+            <div class="se-label">AI &amp; Machine Learning</div>
+            <div class="pill-group stagger">
+              <span class="pill">Representation Learning</span>
+              <span class="pill">Contrastive Learning</span>
+              <span class="pill">Spiking Neural Networks</span>
+              <span class="pill">Vision Transformers</span>
+              <span class="pill">Diffusion Models</span>
+              <span class="pill">GANs</span>
+              <span class="pill">NLP · BERT · RAG</span>
+              <span class="pill">VLMs</span>
+            </div>
+          </div>
+
+          <div class="se-block">
+            <div class="se-label">Neuroscience</div>
+            <div class="pill-group stagger">
+              <span class="pill">Connectomics</span>
+              <span class="pill">WebKnossos</span>
+              <span class="pill">Medical Image Analysis</span>
+              <span class="pill">Deformable Registration</span>
+            </div>
+          </div>
+
+          <div class="se-block">
+            <div class="se-label">Programming</div>
+            <div class="pill-group stagger">
+              <span class="pill">Python</span>
+              <span class="pill">C / C++</span>
+              <span class="pill">Java</span>
+              <span class="pill">Kotlin</span>
+              <span class="pill">Flutter</span>
+            </div>
+          </div>
+
+          <div class="se-block">
+            <div class="se-label">Frameworks &amp; Tools</div>
+            <div class="pill-group stagger">
+              <span class="pill">PyTorch</span>
+              <span class="pill">TensorFlow</span>
+              <span class="pill">Scikit-Learn</span>
+              <span class="pill">NumPy · Pandas</span>
+              <span class="pill">Docker</span>
+              <span class="pill">Git</span>
+              <span class="pill">Linux</span>
+              <span class="pill">LaTeX</span>
+            </div>
+          </div>
+
+          <div class="se-block">
+            <div class="se-label">Languages</div>
+            <div class="pill-group stagger">
+              <span class="pill">🇬🇧 English — Advanced</span>
+              <span class="pill">🇮🇷 Persian — Native</span>
+              <span class="pill">🇦🇿 Azerbaijani — Native</span>
+              <span class="pill">🇹🇷 Turkish — Advanced</span>
+            </div>
+          </div>
+
+          <div class="se-block edu-block">
+            <div class="se-label">Education</div>
+            <div class="edu-list">
+
+              <div class="edu-row stagger">
+                <img src="assets/ut.png" alt="University of Tehran" class="edu-logo" />
+                <div>
+                  <strong>M.Sc. AI &amp; Robotics</strong>
+                  <p>University of Tehran &middot; 2023–2025 &middot; 17/20</p>
+                  <p class="edu-note">Thesis: SpikeReg — A Spiking-UNet for Deformable Registration</p>
+                </div>
+              </div>
+
+              <div class="edu-row stagger">
+                <div class="edu-logo-placeholder">PNU</div>
+                <div>
+                  <strong>B.Eng. Computer Engineering</strong>
+                  <p>Payame Noor University &middot; 2020–2023 &middot; 16.5/20</p>
+                </div>
+              </div>
+
+              <div class="edu-row stagger">
+                <div class="edu-logo-placeholder">FU</div>
+                <div>
+                  <strong>B.Sc. Educational Sciences</strong>
+                  <p>Farhangian University &middot; 2017–2021 &middot; 17.5/20</p>
+                </div>
+              </div>
+
+            </div>
+          </div>
+
+        </div>
+      </div>
+
+    </main>
+  </div>
+
+  <div class="kbd-hint" id="kbd-hint">Press <kbd>1</kbd>–<kbd>4</kbd> to switch sections</div>
 
   <script src="script.js"></script>
 </body>
+
 </html>
