@@ -293,6 +293,17 @@
       <li><a href="#s13">13. Parametric to Non-Parametric</a></li>
       <li><a href="#s14">14. Advanced Math &amp; Constraints</a></li>
       <li><a href="#s15">15. Final Limitations</a></li>
+      <li style="margin-top:.8rem"><div class="toc-label" style="margin-bottom:.4rem">Lecture 3</div></li>
+      <li><a href="#s3-1">1. Gauss-Markov Processes</a></li>
+      <li><a href="#s3-2">2. Brownian Motion Kernel</a></li>
+      <li><a href="#s3-3">3. Multi-Output GPs</a></li>
+      <li><a href="#s3-4">4. Implicit GPs in Science</a></li>
+      <li><a href="#s3-5">5. Re-imagining PCA</a></li>
+      <li><a href="#s3-6">6. Dual PPCA</a></li>
+      <li><a href="#s3-7">7. The GPLVM</a></li>
+      <li><a href="#s3-8">8. Deriving min(t, t')</a></li>
+      <li><a href="#s3-9">9. Advanced Coregionalization</a></li>
+      <li><a href="#s3-10">10. Origin of Kernels</a></li>
     </ul>
   </nav>
 
@@ -821,6 +832,292 @@
           <li><strong>Financial Crises &amp; Jumps:</strong> Standard stationary GPs are extremely smooth. They do not handle sudden discontinuities (like stock market crashes) well. To model sudden jumps, you must either manually inject parameterized step functions into the covariance, or abandon standard GPs in favor of far more complex probabilist structures like <strong>Lévy Jump Processes</strong>.</li>
           <li><strong>True "Non-Parametric Non-Stationarity":</strong> If the smoothness/behavior of the function fundamentally shifts across the domain in unpredictable ways, a single stationary kernel will fail. The bleeding-edge solution to this is <strong>Deep Gaussian Processes</strong> (feeding the output of one GP into another to warp the input space), but this drastically increases computational complexity.</li>
         </ul>
+      </div>
+    </div>
+
+
+    <!-- ═══════════════════════════════════════════════════════════════ -->
+    <!-- LECTURE 3: Markov Chains, Multi-Output GPs, and GPLVM           -->
+    <!-- ═══════════════════════════════════════════════════════════════ -->
+    <div style="border-top:2px solid var(--border);margin:2.5rem 0 0;padding-top:2rem">
+      <p style="font-size:.65rem;font-weight:600;letter-spacing:.12em;text-transform:uppercase;color:var(--ink-4);margin-bottom:.4rem">Lecture 3</p>
+      <h2 style="font-size:1.05rem;font-weight:600;color:var(--ink);margin-bottom:.25rem">Markov Chains, Multi-Output GPs &amp; Dimensionality Reduction</h2>
+      <p style="font-size:.83rem;color:var(--ink-3)">Neil Lawrence · MLSS 2015 · Tübingen</p>
+    </div>
+
+    <!-- ─ L3 Row 1 ─ -->
+    <div class="note-row" id="s3-1">
+      <div class="cue-column">
+        <h2>1. Gauss-Markov Processes</h2>
+        <ul>
+          <li>Kalman Filters</li>
+          <li>Discrete Time Steps</li>
+          <li>Additive Variance</li>
+        </ul>
+      </div>
+      <div class="content-column">
+        <h3>From Markov Chains to Covariances</h3>
+        <p>A Markov chain describes a system where the state today depends <em>only</em> on the state yesterday, plus some random corruption. If that corruption is Gaussian, we call it a <strong>Gauss-Markov process</strong> (the foundation of the Kalman Filter).</p>
+        <div class="math-block">$$x_i = x_{i-1} + \epsilon_i \quad \text{where} \quad \epsilon_i \sim \mathcal{N}(0, \alpha)$$</div>
+        <p>If we trace this back to time \(t=0\) (assuming \(x_0 = 0\)), the state at time \(i\) is simply the sum of all previous noises: \( x_i = \epsilon_1 + \epsilon_2 + \dots + \epsilon_i \).</p>
+        <p><strong>Crucial Insight:</strong> The sum of independent Gaussians is a Gaussian, and their variances add up. Therefore, the variance of \(x_i\) grows linearly over time.</p>
+      </div>
+    </div>
+
+    <!-- ─ L3 Row 2 ─ -->
+    <div class="note-row" id="s3-2">
+      <div class="cue-column">
+        <h2>2. Brownian Motion Kernel</h2>
+        <ul>
+          <li>Continuous Time (\(dt \to 0\))</li>
+          <li>\(k(t, t') = \min(t, t')\)</li>
+          <li>Tri-diagonal Inverses</li>
+        </ul>
+      </div>
+      <div class="content-column">
+        <h3>The Continuous Limit</h3>
+        <p>If we shrink our discrete time steps \(\Delta t\) to zero, adjusting the injected variance proportionally, we get a continuous-time random walk, famously known as <strong>Brownian Motion</strong> (or a Wiener process).</p>
+
+        <div class="callout callout-blue">
+          <h4>The Minimum Covariance Function</h4>
+          <p>What is the covariance between time \(t\) and time \(t'\)? Because the path after the earlier time is just independent noise added on top, the shared correlation between the two points is entirely dictated by the history they shared up to the <em>earlier</em> time point.</p>
+          <div class="math-block" style="margin:.6rem 0">$$k(t, t') = \alpha \min(t, t')$$</div>
+          <p>This implies the variance at any time \(t\) (when \(t=t'\)) is exactly \(t\). The standard deviation grows as \(\sqrt{t}\), creating a recognizable expanding funnel of uncertainty.</p>
+        </div>
+
+        <!-- Visualizer: Brownian Motion -->
+        <div class="viz-wrap">
+          <div class="viz-title">Interactive: Brownian Motion / Gauss-Markov Path</div>
+          <div class="viz-hint">Notice how the marginal error bars (shaded blue) grow as \(\pm 2\sqrt{t}\). The path is continuous but wildly jagged (non-differentiable).</div>
+          <canvas id="brownianCanvas" height="200" class="interactive-canvas"></canvas>
+          <button id="resampleBrownianBtn" class="viz-btn">Generate New Random Walk</button>
+        </div>
+
+        <div class="callout callout-yellow">
+          <h4>📌 Advanced Insight: The Tri-Diagonal Inverse</h4>
+          <p>If you construct the \(\min(t, t')\) covariance matrix and calculate its inverse (the precision matrix), you get a <strong>tri-diagonal matrix</strong> (zeros everywhere except the main diagonal and the adjacent diagonals). In Gaussian distributions, a zero in the precision matrix means <em>conditional independence</em>. The tri-diagonal structure perfectly encodes the Markov property: given the present, the future is completely independent of the past!</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- ─ L3 Row 3 ─ -->
+    <div class="note-row" id="s3-3">
+      <div class="cue-column">
+        <h2>3. Multi-Output GPs</h2>
+        <ul>
+          <li>Multitask Learning</li>
+          <li>Coregionalization (\(B\))</li>
+          <li>Kronecker Products (\(\otimes\))</li>
+        </ul>
+      </div>
+      <div class="content-column">
+        <h3>Modeling Correlated Tasks</h3>
+        <p>What if we are tracking multiple things over time that interact with each other? (e.g., several distinct stock prices, or multiple sensors on a robot). If we assume that \(Q\) independent latent processes are mixed together linearly to produce \(P\) outputs, we arrive at the <strong>Linear Model of Coregionalization (LMC)</strong>.</p>
+        <p style="font-size:.85rem">Mathematically, we construct a giant covariance matrix using the <strong>Kronecker Product (\(\otimes\))</strong>:</p>
+        <div class="math-block">$$K_{multi} = K_{time} \otimes B_{tasks}$$</div>
+        <ul>
+          <li>\(K_{time}\) dictates how values correlate across time (e.g., smoothly or jaggedly).</li>
+          <li>\(B_{tasks} = WW^T\) is the <em>Coregionalization Matrix</em>. It dictates how Task 1 correlates with Task 2 globally.</li>
+        </ul>
+        <p>In Machine Learning, this is often called <strong>Multi-Task Gaussian Processes</strong>. The downside? The combined matrix is of size \((NT) \times (NT)\), leading to a massive \(O(N^3T^3)\) computational nightmare. To solve this, practitioners exploit the algebra of Kronecker products to invert the smaller matrices separately.</p>
+      </div>
+    </div>
+
+    <!-- ─ L3 Row 4 ─ -->
+    <div class="note-row" id="s3-4">
+      <div class="cue-column">
+        <h2>4. Implicit GPs in Science</h2>
+        <ul>
+          <li>Climate Science Smoothing</li>
+          <li>Hardware Sensor Filters</li>
+          <li>The Danger of "Algorithms"</li>
+        </ul>
+      </div>
+      <div class="content-column">
+        <h3>You're Probably Using a GP Without Knowing It</h3>
+        <p>The lecturer notes a powerful philosophical point: many fields apply "smoothing algorithms" (like Kriging in spatial mining, or Kalman smoothers in time-series) without realizing they are implicitly asserting a massive joint Gaussian Process over their data.</p>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:1rem;margin-bottom:1rem">
+          <div class="callout callout-indigo" style="margin:0">
+            <h4>The Climate Record</h4>
+            <p style="font-size:.8rem">When climate scientists take sparse spatial ice-core measurements and historical sea-surface temperatures (often corrupted by World War II sailors taking warm water from the engine room instead of throwing buckets overboard), and run a spatial "smoothing algorithm" over the globe, they are mathematically fitting a GP. Treating the algorithm as a black box instead of a probabilistic model hides the massive assumptions being made about spatial correlation.</p>
+          </div>
+          <div class="callout callout-indigo" style="margin:0">
+            <h4>The Bicycle Altimeter</h4>
+            <p style="font-size:.8rem">The lecturer strapped a handheld barometric altimeter to a moving bicycle. When the cyclist hit a bump, the data looked completely wrong. Why? Because the manufacturer built a Kalman filter (an implicit GP) into the hardware firmware to smooth the data, assuming it would be held by a stationary pedestrian. Hardware filters are often just hardcoded GPs!</p>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ─ L3 Row 5 ─ -->
+    <div class="note-row" id="s3-5">
+      <div class="cue-column">
+        <h2>5. Re-imagining PCA</h2>
+        <ul>
+          <li>Dimensionality Reduction</li>
+          <li>Probabilistic PCA</li>
+          <li>Integrating out the Latent Space</li>
+        </ul>
+      </div>
+      <div class="content-column">
+        <h3>PCA is a Latent Variable Model</h3>
+        <p>High dimensional data (like a 1000-pixel image of the digit "6") often lives on a much smaller, low-dimensional manifold (e.g., just the angle of rotation). Principal Component Analysis (PCA) finds this.</p>
+        <p>Historically, PCA was viewed algorithmically: "Just take the top eigenvectors of the covariance matrix." But in 1999, Tipping and Bishop formulated <strong>Probabilistic PCA (PPCA)</strong>. They showed PCA is actually a generative probabilistic model:</p>
+        <div class="math-block">$$\mathbf{y}_i = W \mathbf{x}_i + \epsilon \quad \text{where} \quad \mathbf{x}_i \sim \mathcal{N}(0, I), \; \epsilon \sim \mathcal{N}(0, \sigma^2 I)$$</div>
+        <p>Here, \(\mathbf{x}\) is the hidden low-dimensional coordinate, and \(W\) is the transformation matrix. Because \(\mathbf{x}\) is Gaussian, and \(\mathbf{y}\) is a linear transform of it, we can analytically <em>integrate out</em> the latent space \(\mathbf{x}\) using our golden rule of Gaussians:</p>
+        <div class="math-block math-block-sm">$$\mathbf{y}_i \sim \mathcal{N}(0, \; WW^T + \sigma^2 I)$$</div>
+        <p>To fit PPCA, we find the matrix \(W\) that maximizes the likelihood of our data \(\mathbf{y}\). Unsurprisingly, the optimal \(W\) spans the principal eigenvectors of the data covariance.</p>
+      </div>
+    </div>
+
+    <!-- ─ L3 Row 6 ─ -->
+    <div class="note-row" id="s3-6">
+      <div class="cue-column">
+        <h2>6. Dual PPCA</h2>
+        <ul>
+          <li>Integrating out Weights</li>
+          <li>The Dual Model</li>
+          <li>The "Large P, Small N" Myth</li>
+        </ul>
+      </div>
+      <div class="content-column">
+        <h3>Flipping the Integration</h3>
+        <p>The lecturer introduces a critical mind-shift. In PPCA, we integrated out the latent positions \(X\) to find the mapping weights \(W\). What if we flip it? Let's put a Gaussian prior over the mapping weights \(W\), and integrate <em>them</em> out to find the latent positions \(X\).</p>
+        <p>If we integrate out \(W\), the covariance over our data features becomes:</p>
+        <div class="math-block">$$K = \alpha XX^T + \sigma^2 I$$</div>
+        <p>This is exactly a Gaussian Process with a linear kernel (\(XX^T\))! By optimizing the latent locations \(X\) directly to maximize the marginal likelihood, we recover the exact same principal components as PCA. This is called <strong>Dual Probabilistic PCA</strong>.</p>
+
+        <div class="callout callout-red">
+          <h4>The "Large P, Small N" Myth</h4>
+          <p>In biology, researchers often have 10 patients (\(N=10\)) but sequence 6,000 genes per patient (\(P=6000\)). Statisticians call this the "Curse of Dimensionality" or the "Large P, Small N" problem, claiming the model will fail because there are more features than data points.</p>
+          <br>
+          <p><strong>The lecturer forcefully rejects this:</strong> <em>"It is an absurd, stupid, ridiculous thing to say."</em> If a biologist collects more features about an animal, they are giving you <em>more</em> information, not less! The perceived problem is a flaw in the <em>model</em> (standard PPCA), not the data. If you use Dual PPCA (the GP view), as \(P\) increases, the latent positions \(X\) actually become <em>better</em> determined. A proper model thrives on large \(P\).</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- ─ L3 Row 7 ─ -->
+    <div class="note-row" id="s3-7">
+      <div class="cue-column">
+        <h2>7. The GPLVM</h2>
+        <ul>
+          <li>Non-linear dimensionality reduction</li>
+          <li>Latent Space Interpolation</li>
+          <li>Bill Baxter's Animation</li>
+        </ul>
+      </div>
+      <div class="content-column">
+        <h3>Gaussian Process Latent Variable Model</h3>
+        <p>The leap from Dual PPCA to the <strong>GPLVM</strong> is one simple substitution: If Dual PPCA is just a GP with a restrictive linear kernel (\(k(x, x') = x^T x'\)), what happens if we replace it with a powerful, non-linear kernel like the Squared Exponential?</p>
+        <div class="math-block callout-blue" style="background:var(--accent-bg);border:1px solid var(--accent-bd)">$$K_{ij} = \alpha^2 \exp\left( - \frac{||x_i - x_j||^2}{2l^2} \right) + \sigma^2 I$$</div>
+        <p>By doing this, we get a fully <strong>non-linear</strong> dimensionality reduction technique. We treat the low-dimensional positions \(X\) as hyperparameters and optimize them using gradient descent on the marginal likelihood. The GP maps these low-dimensional points to the high-dimensional observation space perfectly.</p>
+
+        <!-- Visualizer: GPLVM -->
+        <div class="viz-wrap">
+          <div class="viz-title">Interactive: The GPLVM Animation Concept</div>
+          <div class="viz-hint">In the lecture's video example, Bill Baxter trained a GPLVM on just 4 hand-drawn frames. The model discovered a 2D latent space. Drag the blue dot around the Latent Space below to see how non-linear GP interpolation creates smooth, novel facial expressions!</div>
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:1.5rem;align-items:center;margin-top:.5rem">
+            <div style="position:relative;width:100%;padding-bottom:100%;border:2px solid var(--border);background:var(--off);border-radius:var(--r);overflow:hidden" id="latentBox">
+              <span style="position:absolute;top:6px;left:8px;font-size:.65rem;color:var(--ink-4);font-weight:600">Sad / Closed</span>
+              <span style="position:absolute;top:6px;right:8px;font-size:.65rem;color:var(--ink-4);font-weight:600;text-align:right">Happy / Closed</span>
+              <span style="position:absolute;bottom:6px;left:8px;font-size:.65rem;color:var(--ink-4);font-weight:600">Sad / Open</span>
+              <span style="position:absolute;bottom:6px;right:8px;font-size:.65rem;color:var(--ink-4);font-weight:600;text-align:right">Happy / Open</span>
+              <div id="latentCursor" style="position:absolute;width:22px;height:22px;background:var(--accent);border-radius:50%;border:2px solid #fff;box-shadow:0 2px 6px rgba(0,0,0,.3);transform:translate(-50%,-50%);cursor:pointer;top:50%;left:50%;touch-action:none"></div>
+            </div>
+            <div style="display:flex;justify-content:center">
+              <canvas id="faceCanvas" width="200" height="200" style="border:1px solid var(--border);border-radius:var(--r);background:var(--white)"></canvas>
+            </div>
+          </div>
+        </div>
+
+        <p><em>"I believe that in the end, Gaussian processes will win through because this type of transformation is extremely complicated, but the GP interpolates smoothly between the different points and finds a configuration where that smooth interpolation is most likely."</em> — The Lecturer.</p>
+      </div>
+    </div>
+
+    <!-- ─ L3 Row 8 ─ -->
+    <div class="note-row" id="s3-8">
+      <div class="cue-column">
+        <h2>8. Deriving \(\min(t, t')\)</h2>
+        <ul>
+          <li>Lower Triangular Matrix (\(L_1\))</li>
+          <li>Inner Products of History</li>
+          <li>The Mechanics of Correlation</li>
+        </ul>
+      </div>
+      <div class="content-column">
+        <h3>The Linear Algebra of Time</h3>
+        <p>In Section 2, we established that the Brownian motion kernel is \(k(t, t') = \min(t, t')\). But <em>why</em> does the math perfectly work out to a minimum function? The lecturer provides a beautiful linear algebra intuition using a Lower Triangular Matrix of ones, denoted as \(L_1\).</p>
+        <p>Since \(x_i\) is the sum of all past noises up to time \(i\), we can write the entire state history vector \(\mathbf{x}\) as a matrix multiplication of \(L_1\) and the noise vector \(\mathbf{\epsilon}\):</p>
+        <div class="math-block math-block-sm">
+          $$ \begin{bmatrix} x_1 \\ x_2 \\ x_3 \\ x_4 \end{bmatrix} =
+          \begin{bmatrix}
+          1 &amp; 0 &amp; 0 &amp; 0 \\
+          1 &amp; 1 &amp; 0 &amp; 0 \\
+          1 &amp; 1 &amp; 1 &amp; 0 \\
+          1 &amp; 1 &amp; 1 &amp; 1
+          \end{bmatrix}
+          \begin{bmatrix} \epsilon_1 \\ \epsilon_2 \\ \epsilon_3 \\ \epsilon_4 \end{bmatrix} $$
+        </div>
+        <p>To find the covariance between time \(i\) (e.g., Row 2) and time \(j\) (e.g., Row 4), we take the dot product (inner product) of those two rows:</p>
+        <ul style="font-family:'JetBrains Mono',monospace;font-size:.82rem">
+          <li>Row 2: \([1, 1, 0, 0]\)</li>
+          <li>Row 4: \([1, 1, 1, 1]\)</li>
+          <li>Dot Product: \((1\times1) + (1\times1) + (0\times1) + (0\times1) = 2\)</li>
+        </ul>
+        <div class="callout callout-blue" style="margin-top:1rem">
+          <h4>The Intuition</h4>
+          <p>Because the matrix is lower triangular, Row \(i\) has exactly \(i\) ones, and Row \(j\) has exactly \(j\) ones. When you take their dot product, the ones only overlap up to the shorter of the two rows. Everything after that is multiplied by a zero. Thus, the dot product is always exactly \(\min(i, j)\). When we scale this by continuous time increments \(\Delta t\), it effortlessly becomes \(\min(t, t')\).</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- ─ L3 Row 9 ─ -->
+    <div class="note-row" id="s3-9">
+      <div class="cue-column">
+        <h2>9. Advanced Coregionalization</h2>
+        <ul>
+          <li>Rank of \(B\) Matrix</li>
+          <li>The LMC</li>
+          <li>Short vs. Long Term task correlations</li>
+        </ul>
+      </div>
+      <div class="content-column">
+        <h3>Rank and The LMC</h3>
+        <p>In Multi-Output GPs (Section 3), we introduced \(K_{multi} = K_{time} \otimes B_{tasks}\). The complexity of the multi-task relationship is entirely governed by the <strong>Rank</strong> of \(B\).</p>
+        <ul>
+          <li><strong>Rank-1 Coregionalization:</strong> If \(B\) is rank-1, it implies there is only <em>one</em> underlying latent Gaussian process driving every single output. The outputs might look different, but they are just scaled versions of the exact same hidden curve.</li>
+          <li><strong>Full-Rank Coregionalization:</strong> If \(B\) is full rank (e.g., a \(2 \times 2\) matrix for 2 outputs), it implies there are 2 independent latent processes driving the outputs. However, if they are multiplied by a single \(K_{time}\) kernel, both latent processes are forced to have the exact same length scale (smoothness).</li>
+        </ul>
+        <div class="callout callout-indigo">
+          <h4>The Linear Model of Coregionalization (LMC)</h4>
+          <p>What if Stock A and Stock B are highly correlated in their short-term daily jitter, but completely independent in their long-term monthly trends? A single Kronecker product cannot model this.</p>
+          <br>
+          <p>The solution developed in geostatistics (Kriging) in 1978 is the <strong>LMC</strong>. We simply sum multiple Kronecker products together!</p>
+          <div class="math-block" style="margin:.6rem 0">$$K_{multi} = (K_{fast} \otimes B_{short}) + (K_{slow} \otimes B_{long})$$</div>
+          <p>This creates an incredibly powerful prior that can separate fast-moving shared noise from slow-moving independent trends.</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- ─ L3 Row 10 ─ -->
+    <div class="note-row" id="s3-10">
+      <div class="cue-column">
+        <h2>10. Origin of Kernels</h2>
+        <ul>
+          <li>Bochner's Theorem</li>
+          <li>Fourier Space</li>
+          <li>The Matérn Family</li>
+        </ul>
+      </div>
+      <div class="content-column">
+        <h3>Bochner's Theorem &amp; The Matérn Family</h3>
+        <p>Where do valid, stationary covariance functions come from? We cannot just invent random math formulas and hope they create positive-definite matrices.</p>
+        <p><strong>Bochner's Theorem</strong> provides the theoretical framework: <em>The inverse Fourier transform of any positive measure (e.g., a probability distribution) in spectral (frequency) space is guaranteed to be a valid, stationary covariance function.</em></p>
+        <p>By applying different low-pass filters in frequency space, we generate kernels with strictly defined levels of smoothness (differentiability):</p>
+        <div class="callout callout-blue">
+          <h4>Squared Exponential (RBF) — \(\infty\)-differentiable</h4>
+          <p>Derived by applying a Gaussian filter in Fourier space. Infinitely differentiable. Mathematically beautiful but often "too smooth" for rugged real-world data.</p>
+        </div>
       </div>
     </div>
 
@@ -1464,6 +1761,12 @@
             drawConditioning();
             drawApproximation();
             drawTradeoff();
+
+            // Lecture 3 resize
+            if (document.getElementById('brownianCanvas')) {
+                bCanvas.width = bCanvas.parentElement.clientWidth - 48;
+                drawBrownian();
+            }
         });
 
         // Initial Draws
@@ -1473,6 +1776,164 @@
             drawApproximation();
             drawTradeoff();
         }, 100);
+</script>
+
+<!-- ── Lecture 3 JavaScript (original, unchanged) ── -->
+<script>
+        // --- Visualizer 1: Brownian Motion / Gauss-Markov ---
+        const bCanvas = document.getElementById('brownianCanvas');
+        const bCtx = bCanvas.getContext('2d');
+        bCanvas.width = bCanvas.parentElement.clientWidth - 48;
+
+        function randn_l3() {
+            let u = 0, v = 0;
+            while (u === 0) u = Math.random();
+            while (v === 0) v = Math.random();
+            return Math.sqrt(-2.0 * Math.log(u)) * Math.cos(2.0 * Math.PI * v);
+        }
+
+        function drawBrownian() {
+            bCtx.clearRect(0, 0, bCanvas.width, bCanvas.height);
+
+            const steps = bCanvas.width;
+            const cy = bCanvas.height / 2;
+            const dt = 1.0;
+            const scaleY = 5.0;
+
+            // Draw variance envelope (+/- 2 std deviations -> 2 * sqrt(t))
+            bCtx.fillStyle = 'rgba(59, 130, 246, 0.15)';
+            bCtx.beginPath();
+            bCtx.moveTo(0, cy);
+            for (let t = 0; t <= steps; t++) {
+                let std = Math.sqrt(t * dt);
+                bCtx.lineTo(t, cy - (2 * std * scaleY));
+            }
+            for (let t = steps; t >= 0; t--) {
+                let std = Math.sqrt(t * dt);
+                bCtx.lineTo(t, cy + (2 * std * scaleY));
+            }
+            bCtx.fill();
+
+            // Center line
+            bCtx.strokeStyle = '#94a3b8';
+            bCtx.setLineDash([5, 5]);
+            bCtx.beginPath();
+            bCtx.moveTo(0, cy); bCtx.lineTo(bCanvas.width, cy);
+            bCtx.stroke();
+            bCtx.setLineDash([]);
+
+            // Draw Random Walk
+            let y_bm = 0;
+            bCtx.strokeStyle = '#2563eb';
+            bCtx.lineWidth = 1.5;
+            bCtx.beginPath();
+            bCtx.moveTo(0, cy);
+            for (let t = 1; t <= steps; t++) {
+                y_bm += randn_l3() * Math.sqrt(dt);
+                bCtx.lineTo(t, cy - (y_bm * scaleY));
+            }
+            bCtx.stroke();
+        }
+
+        document.getElementById('resampleBrownianBtn').addEventListener('click', drawBrownian);
+
+        // --- Visualizer 2: GPLVM Face Interpolation ---
+        const latentBox = document.getElementById('latentBox');
+        const lCursor = document.getElementById('latentCursor');
+        const fCanvas = document.getElementById('faceCanvas');
+        const fCtx = fCanvas.getContext('2d');
+
+        const gpFaces = [
+            { x: 0, y: 1, params: [-12, 1, -5] },
+            { x: 1, y: 1, params: [12, 1, 5] },
+            { x: 0, y: 0, params: [-12, 12, -5] },
+            { x: 1, y: 0, params: [12, 12, 5] }
+        ];
+
+        function drawFace(params) {
+            fCtx.clearRect(0, 0, fCanvas.width, fCanvas.height);
+            const cx = fCanvas.width / 2;
+            const cy = fCanvas.height / 2;
+            const mouthSmile = params[0];
+            const eyeOpen    = params[1];
+            const eyebrowTilt = params[2];
+
+            fCtx.strokeStyle = '#1e293b';
+            fCtx.lineWidth = 4;
+            fCtx.lineCap = 'round';
+
+            fCtx.beginPath();
+            fCtx.arc(cx, cy, 80, 0, 2 * Math.PI);
+            fCtx.fillStyle = '#fef08a'; fCtx.fill(); fCtx.stroke();
+
+            fCtx.beginPath();
+            fCtx.ellipse(cx - 30, cy - 20, 10, Math.max(1, eyeOpen), 0, 0, 2 * Math.PI);
+            fCtx.fillStyle = '#1e293b'; fCtx.fill(); fCtx.stroke();
+
+            fCtx.beginPath();
+            fCtx.ellipse(cx + 30, cy - 20, 10, Math.max(1, eyeOpen), 0, 0, 2 * Math.PI);
+            fCtx.fillStyle = '#1e293b'; fCtx.fill(); fCtx.stroke();
+
+            fCtx.beginPath();
+            fCtx.moveTo(cx - 45, cy - 40 - eyebrowTilt);
+            fCtx.lineTo(cx - 15, cy - 40 + eyebrowTilt);
+            fCtx.stroke();
+
+            fCtx.beginPath();
+            fCtx.moveTo(cx + 15, cy - 40 + eyebrowTilt);
+            fCtx.lineTo(cx + 45, cy - 40 - eyebrowTilt);
+            fCtx.stroke();
+
+            fCtx.beginPath();
+            fCtx.moveTo(cx - 30, cy + 30);
+            fCtx.quadraticCurveTo(cx, cy + 30 + mouthSmile * 3, cx + 30, cy + 30);
+            fCtx.stroke();
+        }
+
+        function updateFaceFromLatent(normX, normY) {
+            const lengthScale = 0.8;
+            let weights = [];
+            let weightSum = 0;
+            for (let i = 0; i < gpFaces.length; i++) {
+                let distSq = Math.pow(normX - gpFaces[i].x, 2) + Math.pow(normY - gpFaces[i].y, 2);
+                let w = Math.exp(-distSq / (2 * lengthScale * lengthScale));
+                weights.push(w);
+                weightSum += w;
+            }
+            let ip = [0, 0, 0];
+            for (let i = 0; i < gpFaces.length; i++) {
+                let nw = weights[i] / weightSum;
+                ip[0] += nw * gpFaces[i].params[0];
+                ip[1] += nw * gpFaces[i].params[1];
+                ip[2] += nw * gpFaces[i].params[2];
+            }
+            drawFace(ip);
+        }
+
+        let isDragging_l3 = false;
+
+        function handlePointer(e) {
+            if (!isDragging_l3 && e.type !== 'pointerdown') return;
+            if (e.type !== 'pointerdown') e.preventDefault();
+            const rect = latentBox.getBoundingClientRect();
+            let x = Math.max(0, Math.min(e.clientX - rect.left, rect.width));
+            let y = Math.max(0, Math.min(e.clientY - rect.top,  rect.height));
+            // The latent box uses padding-bottom trick, so actual height = width
+            const size = rect.width;
+            lCursor.style.left = x + 'px';
+            lCursor.style.top  = y + 'px';
+            updateFaceFromLatent(x / size, y / size);
+        }
+
+        latentBox.addEventListener('pointerdown', (e) => { isDragging_l3 = true; lCursor.style.cursor = 'grabbing'; handlePointer(e); });
+        window.addEventListener('pointermove', handlePointer);
+        window.addEventListener('pointerup', () => { isDragging_l3 = false; lCursor.style.cursor = 'pointer'; });
+
+        // Lecture 3 init
+        setTimeout(() => {
+            drawBrownian();
+            updateFaceFromLatent(0.5, 0.5);
+        }, 150);
 </script>
 
 </body>
