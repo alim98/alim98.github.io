@@ -1017,7 +1017,7 @@
           <div class="viz-title">Interactive: The GPLVM Animation Concept</div>
           <div class="viz-hint">In the lecture's video example, Bill Baxter trained a GPLVM on just 4 hand-drawn frames. The model discovered a 2D latent space. Drag the blue dot around the Latent Space below to see how non-linear GP interpolation creates smooth, novel facial expressions!</div>
           <div style="display:grid;grid-template-columns:1fr 1fr;gap:1.5rem;align-items:center;margin-top:.5rem">
-            <div style="position:relative;width:100%;padding-bottom:100%;border:2px solid var(--border);background:var(--off);border-radius:var(--r);overflow:hidden" id="latentBox">
+            <div style="position:relative;width:100%;aspect-ratio:1/1;border:2px solid var(--border);background:var(--off);border-radius:var(--r);overflow:hidden" id="latentBox">
               <span style="position:absolute;top:6px;left:8px;font-size:.65rem;color:var(--ink-4);font-weight:600">Sad / Closed</span>
               <span style="position:absolute;top:6px;right:8px;font-size:.65rem;color:var(--ink-4);font-weight:600;text-align:right">Happy / Closed</span>
               <span style="position:absolute;bottom:6px;left:8px;font-size:.65rem;color:var(--ink-4);font-weight:600">Sad / Open</span>
@@ -1783,7 +1783,6 @@
         // --- Visualizer 1: Brownian Motion / Gauss-Markov ---
         const bCanvas = document.getElementById('brownianCanvas');
         const bCtx = bCanvas.getContext('2d');
-        bCanvas.width = bCanvas.parentElement.clientWidth - 48;
 
         function randn_l3() {
             let u = 0, v = 0;
@@ -1793,6 +1792,8 @@
         }
 
         function drawBrownian() {
+            // Always re-measure real rendered width before drawing
+            bCanvas.width = bCanvas.offsetWidth || 600;
             bCtx.clearRect(0, 0, bCanvas.width, bCanvas.height);
 
             const steps = bCanvas.width;
@@ -1918,11 +1919,10 @@
             const rect = latentBox.getBoundingClientRect();
             let x = Math.max(0, Math.min(e.clientX - rect.left, rect.width));
             let y = Math.max(0, Math.min(e.clientY - rect.top,  rect.height));
-            // The latent box uses padding-bottom trick, so actual height = width
-            const size = rect.width;
             lCursor.style.left = x + 'px';
             lCursor.style.top  = y + 'px';
-            updateFaceFromLatent(x / size, y / size);
+            // Normalise x by width and y by height (aspect-ratio:1/1 so they're equal)
+            updateFaceFromLatent(x / rect.width, y / rect.height);
         }
 
         latentBox.addEventListener('pointerdown', (e) => { isDragging_l3 = true; lCursor.style.cursor = 'grabbing'; handlePointer(e); });
