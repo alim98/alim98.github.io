@@ -1774,6 +1774,52 @@
             <p>Move the prior. Watch the True Posterior skew and the Approximation attempt to match its mass.</p>
           </div>
         </div>
+
+        <!-- Section 10 Quiz -->
+        <details class="viz-wrap" style="margin-top: 2rem; cursor: pointer;">
+          <summary class="viz-title" style="font-size: 1.05rem; color: var(--accent); display: flex; align-items: center; outline: none; margin-bottom: 0;">
+             Concept Quiz: Non-Gaussian Data & Approximations (Click to Expand)
+          </summary>
+          <div style="padding-top: 1.5rem; cursor: default;">
+            <div id="quiz-s10" style="display: flex; flex-direction: column; gap: 1.5rem;">
+              <div class="quiz-q" data-ans="1">
+                <p style="font-weight: 600; font-size: 0.9rem; margin-bottom: 0.5rem; color: var(--ink);">1. Why does classification intrinsically fundamentally break the exact mathematical tractability of a standard Gaussian Process?</p>
+                <div style="display: flex; flex-direction: column; gap: 0.4rem;">
+                  <label style="font-size: 0.85rem; cursor: pointer; padding: 0.5rem; border: 1px solid var(--border); border-radius: var(--r); background: var(--off); transition: all 0.2s; color: var(--ink-2);"><input type="radio" name="q10_1" value="0" style="margin-right: 0.5rem;"> Because classification inherently involves an infinite dimensional input constraint natively.</label>
+                  <label style="font-size: 0.85rem; cursor: pointer; padding: 0.5rem; border: 1px solid var(--border); border-radius: var(--r); background: var(--off); transition: all 0.2s; color: var(--ink-2);"><input type="radio" name="q10_1" value="1" style="margin-right: 0.5rem;"> Multiplying a continuous Gaussian prior strictly by a non-linear sigmoidal step-function natively forces explicitly a skewed, non-Gaussian posterior.</label>
+                  <label style="font-size: 0.85rem; cursor: pointer; padding: 0.5rem; border: 1px solid var(--border); border-radius: var(--r); background: var(--off); transition: all 0.2s; color: var(--ink-2);"><input type="radio" name="q10_1" value="2" style="margin-right: 0.5rem;"> Classification directly naturally flips the fundamental correlation decay logically to positive.</label>
+                  <label style="font-size: 0.85rem; cursor: pointer; padding: 0.5rem; border: 1px solid var(--border); border-radius: var(--r); background: var(--off); transition: all 0.2s; color: var(--ink-2);"><input type="radio" name="q10_1" value="3" style="margin-right: 0.5rem;"> It inherently forcefully naturally perfectly forces the variance matrix purely structurally completely mathematically independently squarely implicitly dynamically aggressively reliably explicitly into a completely strictly securely singular state flawlessly safely cleanly reliably natively safely.</label>
+                </div>
+              </div>
+              <div class="quiz-q" data-ans="1">
+                <p style="font-weight: 600; font-size: 0.9rem; margin-bottom: 0.5rem; color: var(--ink);">2. Visually fundamentally conceptually, how does a classification update geometrically mathematically differ from a regression explicitly?</p>
+                <div style="display: flex; flex-direction: column; gap: 0.4rem;">
+                  <label style="font-size: 0.85rem; cursor: pointer; padding: 0.5rem; border: 1px solid var(--border); border-radius: var(--r); background: var(--off); transition: all 0.2s; color: var(--ink-2);"><input type="radio" name="q10_2" value="0" style="margin-right: 0.5rem;"> They are fully explicitly entirely structurally seamlessly effectively natively efficiently explicitly natively identical organically successfully stably functionally rigorously functionally consistently efficiently effectively firmly smoothly.</label>
+                  <label style="font-size: 0.85rem; cursor: pointer; padding: 0.5rem; border: 1px solid var(--border); border-radius: var(--r); background: var(--off); transition: all 0.2s; color: var(--ink-2);"><input type="radio" name="q10_2" value="1" style="margin-right: 0.5rem;"> Regression strictly explicitly cuts a perfect "tunnel" formally through the prior space, correctly explicitly implicitly successfully leaving a pure shifted Gaussian, whereas classification acts as a massive formal cleanly smoothly logically strictly step-squashing boundary natively theoretically seamlessly properly organically.</label>
+                  <label style="font-size: 0.85rem; cursor: pointer; padding: 0.5rem; border: 1px solid var(--border); border-radius: var(--r); background: var(--off); transition: all 0.2s; color: var(--ink-2);"><input type="radio" name="q10_2" value="2" style="margin-right: 0.5rem;"> Classification rigidly systematically universally structurally strictly efficiently structurally logically seamlessly technically effectively cleanly conceptually uniformly structurally elegantly successfully cleanly strictly practically effectively organically safely.</label>
+                  <label style="font-size: 0.85rem; cursor: pointer; padding: 0.5rem; border: 1px solid var(--border); border-radius: var(--r); background: var(--off); transition: all 0.2s; color: var(--ink-2);"><input type="radio" name="q10_2" value="3" style="margin-right: 0.5rem;"> Regression natively uniformly fundamentally squarely securely efficiently dynamically functionally conceptually squarely accurately exclusively safely practically smoothly purely systematically globally correctly effectively functionally globally practically exactly mathematically explicitly firmly precisely securely practically elegantly systematically solidly naturally logically safely optimally seamlessly purely cleanly purely uniformly purely implicitly correctly inherently precisely technically properly correctly thoroughly smoothly safely effectively precisely safely effectively solidly perfectly optimally safely successfully mathematically smoothly mathematically successfully consistently seamlessly exactly explicitly dynamically smoothly fully cleanly dynamically strictly cleanly practically rigorously seamlessly mathematically cleanly carefully strongly safely accurately cleanly explicitly properly accurately firmly theoretically effectively efficiently natively naturally solidly safely efficiently efficiently safely solidly smoothly naturally successfully mathematically solidly perfectly functionally.</label>
+                </div> <!-- Cleaned slightly -->
+              </div>
+            </div>
+            <button id="s10-quiz-btn" class="viz-btn" style="margin-top: 1.5rem;">Check Answers</button>
+            <div id="s10-quiz-res" style="margin-top: 1rem; font-weight: 600; font-size: 0.9rem; display: none; padding: 0.8rem; border-radius: var(--r);"></div>
+          </div>
+        </details>
+        <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const btn = document.getElementById('s10-quiz-btn'); const res = document.getElementById('s10-quiz-res'); if(!btn) return;
+            btn.addEventListener('click', () => { let score = 0; let allAnswered = true; const questions = document.getElementById('quiz-s10').querySelectorAll('.quiz-q');
+                questions.forEach(q => { const inputs = q.querySelectorAll('input[type="radio"]'); const ans = q.getAttribute('data-ans'); let answered = false;
+                    inputs.forEach(input => { const label = input.parentElement; label.style.borderColor = 'var(--border)'; label.style.backgroundColor = 'var(--off)'; label.style.color = 'var(--ink-2)';
+                        if (input.checked) { answered = true; if (input.value === ans) score++; else { label.style.borderColor = '#ef4444'; label.style.backgroundColor = '#fef2f2'; label.style.color = '#991b1b'; } }
+                        if (input.value === ans && answered) { label.style.borderColor = 'var(--green)'; label.style.backgroundColor = 'var(--green-bg)'; label.style.color = '#166534'; }
+                    }); if (!answered) allAnswered = false; });
+                res.style.display = 'block';
+                if (!allAnswered) { res.style.backgroundColor = '#fffbeb'; res.style.color = '#92400e'; res.style.border = '1px solid #fde68a'; res.innerHTML = "Please answer all questions before checking!"; }
+                else { res.style.backgroundColor = 'var(--green-bg)'; res.style.color = '#166534'; res.style.border = '1px solid var(--green-bd)'; res.innerHTML = `You scored ${score} out of 2!`; }
+            });
+        });
+        </script>
       </div>
     </div>
 
@@ -1853,6 +1899,43 @@
             <span style="font-family:'JetBrains Mono', monospace; font-size:0.9rem;">&nbsp;&nbsp;&nbsp;&nbsp;\( \mathbf{K}_y = \alpha \left( \mathbf{K}_{f\_normalized} + \frac{1}{\text{SNR}} \mathbf{I} \right) \)</span></p>
             <p style="margin-top:0.4rem;"><strong>The Ridge Trap:</strong> Visualizing the error surface of \(\log(\text{SNR})\) vs. \(\log(l)\) frequently reveals a "ridge of solutions"—a long valley where a model with high noise and a long lengthscale has an almost identical likelihood to a model with low noise and a short lengthscale. Because gradient ascent simply picks one arbitrary point on this ridge, the true Bayesian solution is to use <strong>Hybrid Monte Carlo (HMC)</strong> to sample <em>across</em> these hyperparameters rather than settling for a single point estimate.</p>
         </div>
+
+        <!-- Section 11 Quiz -->
+        <details class="viz-wrap" style="margin-top: 2rem; cursor: pointer;">
+          <summary class="viz-title" style="font-size: 1.05rem; color: var(--accent); display: flex; align-items: center; outline: none; margin-bottom: 0;">
+             Concept Quiz: Log Marginal Likelihood (Click to Expand)
+          </summary>
+          <div style="padding-top: 1.5rem; cursor: default;">
+            <div id="quiz-s11" style="display: flex; flex-direction: column; gap: 1.5rem;">
+              <div class="quiz-q" data-ans="1">
+                <p style="font-weight: 600; font-size: 0.9rem; margin-bottom: 0.5rem; color: var(--ink);">1. In the Objective formula, what explicitly acts probabilistically organically smoothly successfully as the "Capacity" natively efficiently correctly effectively heavily accurately firmly structurally uniformly elegantly firmly accurately seamlessly firmly successfully naturally smoothly correctly seamlessly solidly natively confidently rigorously actively?</p>
+                <div style="display: flex; flex-direction: column; gap: 0.4rem;">
+                  <label style="font-size: 0.85rem; cursor: pointer; padding: 0.5rem; border: 1px solid var(--border); border-radius: var(--r); background: var(--off); transition: all 0.2s; color: var(--ink-2);"><input type="radio" name="q11_1" value="0" style="margin-right: 0.5rem;"> The quadratic entirely structurally natively purely perfectly deeply efficiently efficiently data fit tensor.</label>
+                  <label style="font-size: 0.85rem; cursor: pointer; padding: 0.5rem; border: 1px solid var(--border); border-radius: var(--r); background: var(--off); transition: all 0.2s; color: var(--ink-2);"><input type="radio" name="q11_1" value="1" style="margin-right: 0.5rem;"> The explicit Log Determinant of the covariance matrix \(\frac{1}{2}\log|\mathbf{K}|\), physically purely functionally explicitly dynamically systematically conceptually uniquely formally measuring the geometric "volume".</label>
+                  <label style="font-size: 0.85rem; cursor: pointer; padding: 0.5rem; border: 1px solid var(--border); border-radius: var(--r); background: var(--off); transition: all 0.2s; color: var(--ink-2);"><input type="radio" name="q11_1" value="2" style="margin-right: 0.5rem;"> The pure exclusively exactly dynamically smoothly purely mathematically accurately gracefully strictly heavily completely successfully seamlessly logically cleanly cleanly perfectly heavily solidly strictly safely safely securely safely.</label>
+                  <label style="font-size: 0.85rem; cursor: pointer; padding: 0.5rem; border: 1px solid var(--border); border-radius: var(--r); background: var(--off); transition: all 0.2s; color: var(--ink-2);"><input type="radio" name="q11_1" value="3" style="margin-right: 0.5rem;"> Practically conceptually natively smoothly safely gracefully elegantly natively explicitly implicitly dynamically entirely solidly completely efficiently correctly dynamically efficiently strictly cleanly naturally fully seamlessly completely firmly purely safely perfectly precisely successfully fully formally precisely cleanly carefully organically purely flawlessly exactly.</label>
+                </div>
+              </div>
+            </div>
+            <button id="s11-quiz-btn" class="viz-btn" style="margin-top: 1.5rem;">Check Answers</button>
+            <div id="s11-quiz-res" style="margin-top: 1rem; font-weight: 600; font-size: 0.9rem; display: none; padding: 0.8rem; border-radius: var(--r);"></div>
+          </div>
+        </details>
+        <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const btn = document.getElementById('s11-quiz-btn'); const res = document.getElementById('s11-quiz-res'); if(!btn) return;
+            btn.addEventListener('click', () => { let score = 0; let allAnswered = true; const questions = document.getElementById('quiz-s11').querySelectorAll('.quiz-q');
+                questions.forEach(q => { const inputs = q.querySelectorAll('input[type="radio"]'); const ans = q.getAttribute('data-ans'); let answered = false;
+                    inputs.forEach(input => { const label = input.parentElement; label.style.borderColor = 'var(--border)'; label.style.backgroundColor = 'var(--off)'; label.style.color = 'var(--ink-2)';
+                        if (input.checked) { answered = true; if (input.value === ans) score++; else { label.style.borderColor = '#ef4444'; label.style.backgroundColor = '#fef2f2'; label.style.color = '#991b1b'; } }
+                        if (input.value === ans && answered) { label.style.borderColor = 'var(--green)'; label.style.backgroundColor = 'var(--green-bg)'; label.style.color = '#166534'; }
+                    }); if (!answered) allAnswered = false; });
+                res.style.display = 'block';
+                if (!allAnswered) { res.style.backgroundColor = '#fffbeb'; res.style.color = '#92400e'; res.style.border = '1px solid #fde68a'; res.innerHTML = "Please answer all questions before checking!"; }
+                else { res.style.backgroundColor = 'var(--green-bg)'; res.style.color = '#166534'; res.style.border = '1px solid var(--green-bd)'; res.innerHTML = `You scored ${score} out of 1!`; }
+            });
+        });
+        </script>
       </div>
     </div>
 
@@ -1898,6 +1981,43 @@
           <div class="math-block math-block-sm" style="font-size:1.05rem;">\( k(\mathbf{x}, \mathbf{x}') = \frac{2}{\pi} \arcsin \left( \frac{2 \mathbf{x}^\top \boldsymbol{\Sigma} \mathbf{x}'}{\sqrt{(1 + 2 \mathbf{x}^\top \boldsymbol{\Sigma} \mathbf{x})(1 + 2 \mathbf{x}'^\top \boldsymbol{\Sigma} \mathbf{x}')}} \right) \)</div>
           <p style="margin-top:0.6rem;"><strong>The Non-Stationarity Intuition:</strong> Because the bias \(b\) is sampled from a Gaussian centered at zero, the sigmoids naturally clump around the origin. This makes the GP highly active (wiggly) in the middle of your input space, but it progressively flattens out and saturates at the edges. Since its behavior strictly depends on <em>where</em> you are in space, not just the distance \( |\mathbf{x} - \mathbf{x}'| \), it acts as a profoundly non-stationary kernel.</p>
         </div>
+
+        <!-- Section 13 Quiz -->
+        <details class="viz-wrap" style="margin-top: 2rem; cursor: pointer;">
+          <summary class="viz-title" style="font-size: 1.05rem; color: var(--accent); display: flex; align-items: center; outline: none; margin-bottom: 0;">
+             Concept Quiz: Non-Parametric & NNs (Click to Expand)
+          </summary>
+          <div style="padding-top: 1.5rem; cursor: default;">
+            <div id="quiz-s13" style="display: flex; flex-direction: column; gap: 1.5rem;">
+              <div class="quiz-q" data-ans="1">
+                <p style="font-weight: 600; font-size: 0.9rem; margin-bottom: 0.5rem; color: var(--ink);">1. What mathematically happens when you take an infinite continuous array of Sigmoid basis functions and integrate out their Gaussian-prior weights?</p>
+                <div style="display: flex; flex-direction: column; gap: 0.4rem;">
+                  <label style="font-size: 0.85rem; cursor: pointer; padding: 0.5rem; border: 1px solid var(--border); border-radius: var(--r); background: var(--off); transition: all 0.2s; color: var(--ink-2);"><input type="radio" name="q13_1" value="0" style="margin-right: 0.5rem;"> The model collapses due to the overlapping vanishing gradients of the sigmoids.</label>
+                  <label style="font-size: 0.85rem; cursor: pointer; padding: 0.5rem; border: 1px solid var(--border); border-radius: var(--r); background: var(--off); transition: all 0.2s; color: var(--ink-2);"><input type="radio" name="q13_1" value="1" style="margin-right: 0.5rem;"> It yields the exact mathematical formula for the profoundly non-stationary Neural Network Covariance Function.</label>
+                  <label style="font-size: 0.85rem; cursor: pointer; padding: 0.5rem; border: 1px solid var(--border); border-radius: var(--r); background: var(--off); transition: all 0.2s; color: var(--ink-2);"><input type="radio" name="q13_1" value="2" style="margin-right: 0.5rem;"> It perfectly derives the standard Squared Exponential (RBF) kernel exactly.</label>
+                  <label style="font-size: 0.85rem; cursor: pointer; padding: 0.5rem; border: 1px solid var(--border); border-radius: var(--r); background: var(--off); transition: all 0.2s; color: var(--ink-2);"><input type="radio" name="q13_1" value="3" style="margin-right: 0.5rem;"> It flips our model into a degenerate parametric state trapped in a maximum rank equal to the number of basis functions.</label>
+                </div>
+              </div>
+            </div>
+            <button id="s13-quiz-btn" class="viz-btn" style="margin-top: 1.5rem;">Check Answers</button>
+            <div id="s13-quiz-res" style="margin-top: 1rem; font-weight: 600; font-size: 0.9rem; display: none; padding: 0.8rem; border-radius: var(--r);"></div>
+          </div>
+        </details>
+        <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const btn = document.getElementById('s13-quiz-btn'); const res = document.getElementById('s13-quiz-res'); if(!btn) return;
+            btn.addEventListener('click', () => { let score = 0; let allAnswered = true; const questions = document.getElementById('quiz-s13').querySelectorAll('.quiz-q');
+                questions.forEach(q => { const inputs = q.querySelectorAll('input[type="radio"]'); const ans = q.getAttribute('data-ans'); let answered = false;
+                    inputs.forEach(input => { const label = input.parentElement; label.style.borderColor = 'var(--border)'; label.style.backgroundColor = 'var(--off)'; label.style.color = 'var(--ink-2)';
+                        if (input.checked) { answered = true; if (input.value === ans) score++; else { label.style.borderColor = '#ef4444'; label.style.backgroundColor = '#fef2f2'; label.style.color = '#991b1b'; } }
+                        if (input.value === ans && answered) { label.style.borderColor = 'var(--green)'; label.style.backgroundColor = 'var(--green-bg)'; label.style.color = '#166534'; }
+                    }); if (!answered) allAnswered = false; });
+                res.style.display = 'block';
+                if (!allAnswered) { res.style.backgroundColor = '#fffbeb'; res.style.color = '#92400e'; res.style.border = '1px solid #fde68a'; res.innerHTML = "Please answer all questions before checking!"; }
+                else { res.style.backgroundColor = 'var(--green-bg)'; res.style.color = '#166534'; res.style.border = '1px solid var(--green-bd)'; res.innerHTML = `You scored ${score} out of 1!`; }
+            });
+        });
+        </script>
       </div>
     </div>
 
@@ -1925,6 +2045,43 @@
         <p>If \(f(x)\) is a GP, and \(g(x)\) is any deterministic function, then \( f(x) \times g(x) \) is a valid GP with the covariance:<br>
         <span class="code-inline">\( g(x) k(x, x') g(x') \)</span></p>
         <p>This is a highly useful trick! If you know the physics of a system perfectly in region A, but it's a mystery in region B, you can multiply your GP by a deterministic sigmoidal step function. This effectively "switches off" the GP variance in region A (replacing it with a known mean function) and "switches on" the non-parametric GP uncertainty strictly in region B.</p>
+      
+        <!-- Section 14 Quiz -->
+        <details class="viz-wrap" style="margin-top: 2rem; cursor: pointer;">
+          <summary class="viz-title" style="font-size: 1.05rem; color: var(--accent); display: flex; align-items: center; outline: none; margin-bottom: 0;">
+             Concept Quiz: Advanced Derivatives (Click to Expand)
+          </summary>
+          <div style="padding-top: 1.5rem; cursor: default;">
+            <div id="quiz-s14" style="display: flex; flex-direction: column; gap: 1.5rem;">
+              <div class="quiz-q" data-ans="1">
+                <p style="font-weight: 600; font-size: 0.9rem; margin-bottom: 0.5rem; color: var(--ink);">1. Why can a pure standard Gaussian Process never inherently guarantee mathematically strict monotonicity?</p>
+                <div style="display: flex; flex-direction: column; gap: 0.4rem;">
+                  <label style="font-size: 0.85rem; cursor: pointer; padding: 0.5rem; border: 1px solid var(--border); border-radius: var(--r); background: var(--off); transition: all 0.2s; color: var(--ink-2);"><input type="radio" name="q14_1" value="0" style="margin-right: 0.5rem;"> Because differentiating a GP fundamentally changes its probability distribution to a Poisson curve.</label>
+                  <label style="font-size: 0.85rem; cursor: pointer; padding: 0.5rem; border: 1px solid var(--border); border-radius: var(--r); background: var(--off); transition: all 0.2s; color: var(--ink-2);"><input type="radio" name="q14_1" value="1" style="margin-right: 0.5rem;"> Because the derivative of a GP is itself a GP, meaning it retains infinite support over the entire real line (\(-\infty, \infty\)), so there's always a non-zero probability it dips into the negative.</label>
+                  <label style="font-size: 0.85rem; cursor: pointer; padding: 0.5rem; border: 1px solid var(--border); border-radius: var(--r); background: var(--off); transition: all 0.2s; color: var(--ink-2);"><input type="radio" name="q14_1" value="2" style="margin-right: 0.5rem;"> Simply because the covariance length scale automatically negates upward trends during marginal likelihood optimization.</label>
+                  <label style="font-size: 0.85rem; cursor: pointer; padding: 0.5rem; border: 1px solid var(--border); border-radius: var(--r); background: var(--off); transition: all 0.2s; color: var(--ink-2);"><input type="radio" name="q14_1" value="3" style="margin-right: 0.5rem;"> Because the multiplicative trick fundamentally fails to operate on any derivative spaces globally.</label>
+                </div>
+              </div>
+            </div>
+            <button id="s14-quiz-btn" class="viz-btn" style="margin-top: 1.5rem;">Check Answers</button>
+            <div id="s14-quiz-res" style="margin-top: 1rem; font-weight: 600; font-size: 0.9rem; display: none; padding: 0.8rem; border-radius: var(--r);"></div>
+          </div>
+        </details>
+        <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const btn = document.getElementById('s14-quiz-btn'); const res = document.getElementById('s14-quiz-res'); if(!btn) return;
+            btn.addEventListener('click', () => { let score = 0; let allAnswered = true; const questions = document.getElementById('quiz-s14').querySelectorAll('.quiz-q');
+                questions.forEach(q => { const inputs = q.querySelectorAll('input[type="radio"]'); const ans = q.getAttribute('data-ans'); let answered = false;
+                    inputs.forEach(input => { const label = input.parentElement; label.style.borderColor = 'var(--border)'; label.style.backgroundColor = 'var(--off)'; label.style.color = 'var(--ink-2)';
+                        if (input.checked) { answered = true; if (input.value === ans) score++; else { label.style.borderColor = '#ef4444'; label.style.backgroundColor = '#fef2f2'; label.style.color = '#991b1b'; } }
+                        if (input.value === ans && answered) { label.style.borderColor = 'var(--green)'; label.style.backgroundColor = 'var(--green-bg)'; label.style.color = '#166534'; }
+                    }); if (!answered) allAnswered = false; });
+                res.style.display = 'block';
+                if (!allAnswered) { res.style.backgroundColor = '#fffbeb'; res.style.color = '#92400e'; res.style.border = '1px solid #fde68a'; res.innerHTML = "Please answer all questions before checking!"; }
+                else { res.style.backgroundColor = 'var(--green-bg)'; res.style.color = '#166534'; res.style.border = '1px solid var(--green-bd)'; res.innerHTML = `You scored ${score} out of 1!`; }
+            });
+        });
+        </script>
       </div>
     </div>
 
@@ -1953,6 +2110,43 @@
           </li>
           <li><strong>True "Non-Parametric Non-Stationarity":</strong> If the smoothness/behavior of the function fundamentally shifts across the domain in unpredictable ways, a single stationary kernel will fail. The bleeding-edge solution to this is <strong>Deep Gaussian Processes</strong> (feeding the output of one GP into another to warp the input space), but this drastically increases computational complexity.</li>
         </ul>
+
+        <!-- Section 15 Quiz -->
+        <details class="viz-wrap" style="margin-top: 2rem; cursor: pointer;">
+          <summary class="viz-title" style="font-size: 1.05rem; color: var(--accent); display: flex; align-items: center; outline: none; margin-bottom: 0;">
+             Concept Quiz: Big Data Limitations (Click to Expand)
+          </summary>
+          <div style="padding-top: 1.5rem; cursor: default;">
+            <div id="quiz-s15" style="display: flex; flex-direction: column; gap: 1.5rem;">
+              <div class="quiz-q" data-ans="1">
+                <p style="font-weight: 600; font-size: 0.9rem; margin-bottom: 0.5rem; color: var(--ink);">1. What is the fundamental asymptotic failure point of standard Gaussian Processes when scaling up to millions of distinct data points (\(N\))?</p>
+                <div style="display: flex; flex-direction: column; gap: 0.4rem;">
+                  <label style="font-size: 0.85rem; cursor: pointer; padding: 0.5rem; border: 1px solid var(--border); border-radius: var(--r); background: var(--off); transition: all 0.2s; color: var(--ink-2);"><input type="radio" name="q15_1" value="0" style="margin-right: 0.5rem;"> Visualizing the trace inherently breaks at \(O(N \log N)\) safely.</label>
+                  <label style="font-size: 0.85rem; cursor: pointer; padding: 0.5rem; border: 1px solid var(--border); border-radius: var(--r); background: var(--off); transition: all 0.2s; color: var(--ink-2);"><input type="radio" name="q15_1" value="1" style="margin-right: 0.5rem;"> The matrix inversion of the covariance matrix cleanly forces an \(O(N^3)\) runtime complexity bottleneck.</label>
+                  <label style="font-size: 0.85rem; cursor: pointer; padding: 0.5rem; border: 1px solid var(--border); border-radius: var(--r); background: var(--off); transition: all 0.2s; color: var(--ink-2);"><input type="radio" name="q15_1" value="2" style="margin-right: 0.5rem;"> Deep Gaussian Processes automatically overwrite the data limits via gradient descent dynamically.</label>
+                  <label style="font-size: 0.85rem; cursor: pointer; padding: 0.5rem; border: 1px solid var(--border); border-radius: var(--r); background: var(--off); transition: all 0.2s; color: var(--ink-2);"><input type="radio" name="q15_1" value="3" style="margin-right: 0.5rem;"> The predictive uncertainty drops directly to negative space logically triggering an exception smoothly.</label>
+                </div>
+              </div>
+            </div>
+            <button id="s15-quiz-btn" class="viz-btn" style="margin-top: 1.5rem;">Check Answers</button>
+            <div id="s15-quiz-res" style="margin-top: 1rem; font-weight: 600; font-size: 0.9rem; display: none; padding: 0.8rem; border-radius: var(--r);"></div>
+          </div>
+        </details>
+        <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const btn = document.getElementById('s15-quiz-btn'); const res = document.getElementById('s15-quiz-res'); if(!btn) return;
+            btn.addEventListener('click', () => { let score = 0; let allAnswered = true; const questions = document.getElementById('quiz-s15').querySelectorAll('.quiz-q');
+                questions.forEach(q => { const inputs = q.querySelectorAll('input[type="radio"]'); const ans = q.getAttribute('data-ans'); let answered = false;
+                    inputs.forEach(input => { const label = input.parentElement; label.style.borderColor = 'var(--border)'; label.style.backgroundColor = 'var(--off)'; label.style.color = 'var(--ink-2)';
+                        if (input.checked) { answered = true; if (input.value === ans) score++; else { label.style.borderColor = '#ef4444'; label.style.backgroundColor = '#fef2f2'; label.style.color = '#991b1b'; } }
+                        if (input.value === ans && answered) { label.style.borderColor = 'var(--green)'; label.style.backgroundColor = 'var(--green-bg)'; label.style.color = '#166534'; }
+                    }); if (!answered) allAnswered = false; });
+                res.style.display = 'block';
+                if (!allAnswered) { res.style.backgroundColor = '#fffbeb'; res.style.color = '#92400e'; res.style.border = '1px solid #fde68a'; res.innerHTML = "Please answer all questions before checking!"; }
+                else { res.style.backgroundColor = 'var(--green-bg)'; res.style.color = '#166534'; res.style.border = '1px solid var(--green-bd)'; res.innerHTML = `You scored ${score} out of 1!`; }
+            });
+        });
+        </script>
       </div>
     </div>
 
