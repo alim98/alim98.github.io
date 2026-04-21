@@ -649,91 +649,126 @@
         <div class="math-block">\( K_y = K_f + \sigma^2 I \)</div>
 
         <!-- Section 8 Quiz -->
-        <div class="viz-wrap" style="margin-top: 2rem;">
-          <div class="viz-title" style="font-size: 1.05rem; margin-bottom: 1.2rem; color: var(--accent);">Concept Quiz: Additive Properties &amp; Noise</div>
+        <details class="viz-wrap" style="margin-top: 2rem; cursor: pointer;">
+          <summary class="viz-title" style="font-size: 1.05rem; color: var(--accent); display: flex; align-items: center; outline: none; margin-bottom: 0;">
+             Concept Quiz: Additive Properties &amp; Noise (Click to Expand)
+          </summary>
           
-          <div id="quiz-s8" style="display: flex; flex-direction: column; gap: 1.5rem;">
-            <!-- Q1 -->
-            <div class="quiz-q" data-ans="1">
-              <p style="font-weight: 600; font-size: 0.9rem; margin-bottom: 0.5rem; color: var(--ink);">1. When you add two independent Gaussian random variables together, what happens to the covariance of their sum?</p>
-              <div style="display: flex; flex-direction: column; gap: 0.4rem;">
-                <label style="font-size: 0.85rem; cursor: pointer; padding: 0.5rem; border: 1px solid var(--border); border-radius: var(--r); background: var(--off); transition: all 0.2s; color: var(--ink-2);">
-                  <input type="radio" name="q1" value="0" style="margin-right: 0.5rem;"> It is the product of their covariances.
-                </label>
-                <label style="font-size: 0.85rem; cursor: pointer; padding: 0.5rem; border: 1px solid var(--border); border-radius: var(--r); background: var(--off); transition: all 0.2s; color: var(--ink-2);">
-                  <input type="radio" name="q1" value="1" style="margin-right: 0.5rem;"> It is the sum of their individual covariances.
-                </label>
-                <label style="font-size: 0.85rem; cursor: pointer; padding: 0.5rem; border: 1px solid var(--border); border-radius: var(--r); background: var(--off); transition: all 0.2s; color: var(--ink-2);">
-                  <input type="radio" name="q1" value="2" style="margin-right: 0.5rem;"> It defaults to the identity matrix.
-                </label>
-                <label style="font-size: 0.85rem; cursor: pointer; padding: 0.5rem; border: 1px solid var(--border); border-radius: var(--r); background: var(--off); transition: all 0.2s; color: var(--ink-2);">
-                  <input type="radio" name="q1" value="3" style="margin-right: 0.5rem;"> The resulting distribution is non-Gaussian.
-                </label>
+          <div style="padding-top: 1.5rem; cursor: default;">
+            <div id="quiz-s8" style="display: flex; flex-direction: column; gap: 1.5rem;">
+              <!-- Q1 -->
+              <div class="quiz-q" data-ans="1">
+                <p style="font-weight: 600; font-size: 0.9rem; margin-bottom: 0.5rem; color: var(--ink);">1. When you add two independent Gaussian random variables together, what happens to the covariance of their sum?</p>
+                <div style="display: flex; flex-direction: column; gap: 0.4rem;">
+                  <label style="font-size: 0.85rem; cursor: pointer; padding: 0.5rem; border: 1px solid var(--border); border-radius: var(--r); background: var(--off); transition: all 0.2s; color: var(--ink-2);">
+                    <input type="radio" name="q8_1" value="0" style="margin-right: 0.5rem;"> It is the product of their covariances.
+                  </label>
+                  <label style="font-size: 0.85rem; cursor: pointer; padding: 0.5rem; border: 1px solid var(--border); border-radius: var(--r); background: var(--off); transition: all 0.2s; color: var(--ink-2);">
+                    <input type="radio" name="q8_1" value="1" style="margin-right: 0.5rem;"> It is the sum of their individual covariances.
+                  </label>
+                  <label style="font-size: 0.85rem; cursor: pointer; padding: 0.5rem; border: 1px solid var(--border); border-radius: var(--r); background: var(--off); transition: all 0.2s; color: var(--ink-2);">
+                    <input type="radio" name="q8_1" value="2" style="margin-right: 0.5rem;"> It defaults to the identity matrix.
+                  </label>
+                  <label style="font-size: 0.85rem; cursor: pointer; padding: 0.5rem; border: 1px solid var(--border); border-radius: var(--r); background: var(--off); transition: all 0.2s; color: var(--ink-2);">
+                    <input type="radio" name="q8_1" value="3" style="margin-right: 0.5rem;"> The resulting distribution is non-Gaussian.
+                  </label>
+                </div>
+              </div>
+
+              <!-- Q2 -->
+              <div class="quiz-q" data-ans="2">
+                <p style="font-weight: 600; font-size: 0.9rem; margin-bottom: 0.5rem; color: var(--ink);">2. How does independent, identically distributed (I.I.D.) Gaussian noise mathematically affect the covariance matrix of a GP?</p>
+                <div style="display: flex; flex-direction: column; gap: 0.4rem;">
+                  <label style="font-size: 0.85rem; cursor: pointer; padding: 0.5rem; border: 1px solid var(--border); border-radius: var(--r); background: var(--off); transition: all 0.2s; color: var(--ink-2);">
+                    <input type="radio" name="q8_2" value="0" style="margin-right: 0.5rem;"> It scales the entire matrix.
+                  </label>
+                  <label style="font-size: 0.85rem; cursor: pointer; padding: 0.5rem; border: 1px solid var(--border); border-radius: var(--r); background: var(--off); transition: all 0.2s; color: var(--ink-2);">
+                    <input type="radio" name="q8_2" value="1" style="margin-right: 0.5rem;"> It adds a constant to all off-diagonal elements.
+                  </label>
+                  <label style="font-size: 0.85rem; cursor: pointer; padding: 0.5rem; border: 1px solid var(--border); border-radius: var(--r); background: var(--off); transition: all 0.2s; color: var(--ink-2);">
+                    <input type="radio" name="q8_2" value="2" style="margin-right: 0.5rem;"> It adds variance \(\sigma^2\) exclusively to the diagonal elements.
+                  </label>
+                  <label style="font-size: 0.85rem; cursor: pointer; padding: 0.5rem; border: 1px solid var(--border); border-radius: var(--r); background: var(--off); transition: all 0.2s; color: var(--ink-2);">
+                    <input type="radio" name="q8_2" value="3" style="margin-right: 0.5rem;"> It subtracts variance from the diagonal elements.
+                  </label>
+                </div>
+              </div>
+
+              <!-- Q3 -->
+              <div class="quiz-q" data-ans="2">
+                <p style="font-weight: 600; font-size: 0.9rem; margin-bottom: 0.5rem; color: var(--ink);">3. In the observational equation \( y_i = f(x_i) + \epsilon_i \), what does \(\epsilon_i\) represent?</p>
+                <div style="display: flex; flex-direction: column; gap: 0.4rem;">
+                  <label style="font-size: 0.85rem; cursor: pointer; padding: 0.5rem; border: 1px solid var(--border); border-radius: var(--r); background: var(--off); transition: all 0.2s; color: var(--ink-2);">
+                    <input type="radio" name="q8_3" value="0" style="margin-right: 0.5rem;"> The predictive mean of the Gaussian Process.
+                  </label>
+                  <label style="font-size: 0.85rem; cursor: pointer; padding: 0.5rem; border: 1px solid var(--border); border-radius: var(--r); background: var(--off); transition: all 0.2s; color: var(--ink-2);">
+                    <input type="radio" name="q8_3" value="1" style="margin-right: 0.5rem;"> Correlated noise between \(x_i\) and \(x_j\).
+                  </label>
+                  <label style="font-size: 0.85rem; cursor: pointer; padding: 0.5rem; border: 1px solid var(--border); border-radius: var(--r); background: var(--off); transition: all 0.2s; color: var(--ink-2);">
+                    <input type="radio" name="q8_3" value="2" style="margin-right: 0.5rem;"> Independent observational noise at point \(x_i\).
+                  </label>
+                  <label style="font-size: 0.85rem; cursor: pointer; padding: 0.5rem; border: 1px solid var(--border); border-radius: var(--r); background: var(--off); transition: all 0.2s; color: var(--ink-2);">
+                    <input type="radio" name="q8_3" value="3" style="margin-right: 0.5rem;"> The true underlying function's amplitude.
+                  </label>
+                </div>
+              </div>
+
+              <!-- Q4 -->
+              <div class="quiz-q" data-ans="2">
+                <p style="font-weight: 600; font-size: 0.9rem; margin-bottom: 0.5rem; color: var(--ink);">4. If the latent function has covariance \(K_f\) and noise is \(\mathcal{N}(0, \sigma^2)\), what is the final covariance matrix \(K_y\)?</p>
+                <div style="display: flex; flex-direction: column; gap: 0.4rem;">
+                  <label style="font-size: 0.85rem; cursor: pointer; padding: 0.5rem; border: 1px solid var(--border); border-radius: var(--r); background: var(--off); transition: all 0.2s; color: var(--ink-2);">
+                    <input type="radio" name="q8_4" value="0" style="margin-right: 0.5rem;"> \( K_y = K_f \times \sigma^2 \)
+                  </label>
+                  <label style="font-size: 0.85rem; cursor: pointer; padding: 0.5rem; border: 1px solid var(--border); border-radius: var(--r); background: var(--off); transition: all 0.2s; color: var(--ink-2);">
+                    <input type="radio" name="q8_4" value="1" style="margin-right: 0.5rem;"> \( K_y = K_f + \sigma I \)
+                  </label>
+                  <label style="font-size: 0.85rem; cursor: pointer; padding: 0.5rem; border: 1px solid var(--border); border-radius: var(--r); background: var(--off); transition: all 0.2s; color: var(--ink-2);">
+                    <input type="radio" name="q8_4" value="2" style="margin-right: 0.5rem;"> \( K_y = K_f + \sigma^2 I \)
+                  </label>
+                  <label style="font-size: 0.85rem; cursor: pointer; padding: 0.5rem; border: 1px solid var(--border); border-radius: var(--r); background: var(--off); transition: all 0.2s; color: var(--ink-2);">
+                    <input type="radio" name="q8_4" value="3" style="margin-right: 0.5rem;"> \( K_y = K_f \times (\sigma^2 I) \)
+                  </label>
+                </div>
               </div>
             </div>
+            
+            <button id="s8-quiz-btn" class="viz-btn" style="margin-top: 1.5rem;">Check Answers</button>
+            <div id="s8-quiz-res" style="margin-top: 1rem; font-weight: 600; font-size: 0.9rem; display: none; padding: 0.8rem; border-radius: var(--r);"></div>
 
-            <!-- Q2 -->
-            <div class="quiz-q" data-ans="2">
-              <p style="font-weight: 600; font-size: 0.9rem; margin-bottom: 0.5rem; color: var(--ink);">2. How does independent, identically distributed (I.I.D.) Gaussian noise mathematically affect the covariance matrix of a GP?</p>
-              <div style="display: flex; flex-direction: column; gap: 0.4rem;">
-                <label style="font-size: 0.85rem; cursor: pointer; padding: 0.5rem; border: 1px solid var(--border); border-radius: var(--r); background: var(--off); transition: all 0.2s; color: var(--ink-2);">
-                  <input type="radio" name="q2" value="0" style="margin-right: 0.5rem;"> It scales the entire matrix.
-                </label>
-                <label style="font-size: 0.85rem; cursor: pointer; padding: 0.5rem; border: 1px solid var(--border); border-radius: var(--r); background: var(--off); transition: all 0.2s; color: var(--ink-2);">
-                  <input type="radio" name="q2" value="1" style="margin-right: 0.5rem;"> It adds a constant to all off-diagonal elements.
-                </label>
-                <label style="font-size: 0.85rem; cursor: pointer; padding: 0.5rem; border: 1px solid var(--border); border-radius: var(--r); background: var(--off); transition: all 0.2s; color: var(--ink-2);">
-                  <input type="radio" name="q2" value="2" style="margin-right: 0.5rem;"> It adds variance \(\sigma^2\) exclusively to the diagonal elements.
-                </label>
-                <label style="font-size: 0.85rem; cursor: pointer; padding: 0.5rem; border: 1px solid var(--border); border-radius: var(--r); background: var(--off); transition: all 0.2s; color: var(--ink-2);">
-                  <input type="radio" name="q2" value="3" style="margin-right: 0.5rem;"> It subtracts variance from the diagonal elements.
-                </label>
-              </div>
-            </div>
+            <!-- Conceptual Explanations -->
+            <h4 style="margin-top: 2.5rem; font-weight: 600; color: var(--ink); border-bottom: 1px solid var(--border); padding-bottom: 0.5rem;">Deep Dive Explanations</h4>
+            <div style="display: flex; flex-direction: column; gap: 0.85rem; margin-top: 1.2rem;">
+              <details style="background: var(--off); padding: 0.8rem 1rem; border-radius: var(--r); border: 1px solid var(--border);">
+                <summary style="cursor: pointer; font-weight: 500; font-size: 0.9rem; color: var(--ink-2); outline: none;">What is the geometric intuition behind adding \(\sigma^2\) exclusively to the diagonal?</summary>
+                <div style="margin-top: 0.8rem; font-size: 0.85rem; color: var(--ink-3); line-height: 1.6; border-top: 1px dashed var(--border-h); padding-top: 0.6rem;">
+                  Adding variance only to the diagonal asserts that the noise at point \(x_i\) is perfectly independent of the noise at any other point \(x_j\). We inflate the uncertainty locally at every data point without implying any structural correlation or geometric pull between them.
+                </div>
+              </details>
 
-            <!-- Q3 -->
-            <div class="quiz-q" data-ans="2">
-              <p style="font-weight: 600; font-size: 0.9rem; margin-bottom: 0.5rem; color: var(--ink);">3. In the observational equation \( y_i = f(x_i) + \epsilon_i \), what does \(\epsilon_i\) represent?</p>
-              <div style="display: flex; flex-direction: column; gap: 0.4rem;">
-                <label style="font-size: 0.85rem; cursor: pointer; padding: 0.5rem; border: 1px solid var(--border); border-radius: var(--r); background: var(--off); transition: all 0.2s; color: var(--ink-2);">
-                  <input type="radio" name="q3" value="0" style="margin-right: 0.5rem;"> The predictive mean of the Gaussian Process.
-                </label>
-                <label style="font-size: 0.85rem; cursor: pointer; padding: 0.5rem; border: 1px solid var(--border); border-radius: var(--r); background: var(--off); transition: all 0.2s; color: var(--ink-2);">
-                  <input type="radio" name="q3" value="1" style="margin-right: 0.5rem;"> Correlated noise between \(x_i\) and \(x_j\).
-                </label>
-                <label style="font-size: 0.85rem; cursor: pointer; padding: 0.5rem; border: 1px solid var(--border); border-radius: var(--r); background: var(--off); transition: all 0.2s; color: var(--ink-2);">
-                  <input type="radio" name="q3" value="2" style="margin-right: 0.5rem;"> Independent observational noise at point \(x_i\).
-                </label>
-                <label style="font-size: 0.85rem; cursor: pointer; padding: 0.5rem; border: 1px solid var(--border); border-radius: var(--r); background: var(--off); transition: all 0.2s; color: var(--ink-2);">
-                  <input type="radio" name="q3" value="3" style="margin-right: 0.5rem;"> The true underlying function's amplitude.
-                </label>
-              </div>
-            </div>
+              <details style="background: var(--off); padding: 0.8rem 1rem; border-radius: var(--r); border: 1px solid var(--border);">
+                <summary style="cursor: pointer; font-weight: 500; font-size: 0.9rem; color: var(--ink-2); outline: none;">Why can we simply sum the covariance matrices \(K_1\) and \(K_2\) when combining processes?</summary>
+                <div style="margin-top: 0.8rem; font-size: 0.85rem; color: var(--ink-3); line-height: 1.6; border-top: 1px dashed var(--border-h); padding-top: 0.6rem;">
+                  A fundamental property of Gaussian distributions is that the sum of two independent Gaussian random variables is also definitively Gaussian. The resulting distribution has a mean equal to the sum of the means, and a covariance perfectly equal to the sum of the individual covariances.
+                </div>
+              </details>
 
-            <!-- Q4 -->
-            <div class="quiz-q" data-ans="2">
-              <p style="font-weight: 600; font-size: 0.9rem; margin-bottom: 0.5rem; color: var(--ink);">4. If the latent function has covariance \(K_f\) and noise is \(\mathcal{N}(0, \sigma^2)\), what is the final covariance matrix \(K_y\)?</p>
-              <div style="display: flex; flex-direction: column; gap: 0.4rem;">
-                <label style="font-size: 0.85rem; cursor: pointer; padding: 0.5rem; border: 1px solid var(--border); border-radius: var(--r); background: var(--off); transition: all 0.2s; color: var(--ink-2);">
-                  <input type="radio" name="q4" value="0" style="margin-right: 0.5rem;"> \( K_y = K_f \times \sigma^2 \)
-                </label>
-                <label style="font-size: 0.85rem; cursor: pointer; padding: 0.5rem; border: 1px solid var(--border); border-radius: var(--r); background: var(--off); transition: all 0.2s; color: var(--ink-2);">
-                  <input type="radio" name="q4" value="1" style="margin-right: 0.5rem;"> \( K_y = K_f + \sigma I \)
-                </label>
-                <label style="font-size: 0.85rem; cursor: pointer; padding: 0.5rem; border: 1px solid var(--border); border-radius: var(--r); background: var(--off); transition: all 0.2s; color: var(--ink-2);">
-                  <input type="radio" name="q4" value="2" style="margin-right: 0.5rem;"> \( K_y = K_f + \sigma^2 I \)
-                </label>
-                <label style="font-size: 0.85rem; cursor: pointer; padding: 0.5rem; border: 1px solid var(--border); border-radius: var(--r); background: var(--off); transition: all 0.2s; color: var(--ink-2);">
-                  <input type="radio" name="q4" value="3" style="margin-right: 0.5rem;"> \( K_y = K_f \times (\sigma^2 I) \)
-                </label>
-              </div>
+              <details style="background: var(--off); padding: 0.8rem 1rem; border-radius: var(--r); border: 1px solid var(--border);">
+                <summary style="cursor: pointer; font-weight: 500; font-size: 0.9rem; color: var(--ink-2); outline: none;">How do you model internal physical noise vs. sensor measurement noise?</summary>
+                <div style="margin-top: 0.8rem; font-size: 0.85rem; color: var(--ink-3); line-height: 1.6; border-top: 1px dashed var(--border-h); padding-top: 0.6rem;">
+                  Since internal systemic noise and external sensor noise are physically independent, you model them as separate additive components. The final covariance matrix simply sums the base process kernel, the internal noise kernel, and finally the sensor noise diagonal \(\sigma^2 I\).
+                </div>
+              </details>
+
+              <details style="background: var(--off); padding: 0.8rem 1rem; border-radius: var(--r); border: 1px solid var(--border);">
+                <summary style="cursor: pointer; font-weight: 500; font-size: 0.9rem; color: var(--ink-2); outline: none;">What happens to your predictive posteriors if you underestimate \(\sigma^2\)?</summary>
+                <div style="margin-top: 0.8rem; font-size: 0.85rem; color: var(--ink-3); line-height: 1.6; border-top: 1px dashed var(--border-h); padding-top: 0.6rem;">
+                  The model will overly trust the observed data points. The GP will attempt to fit every slight deviation as true underlying signal rather than rejecting it as noise, leading to a highly erratic, "wiggly" predictive mean (severe overfitting) and irresponsibly confident error bars.
+                </div>
+              </details>
             </div>
           </div>
-          
-          <button id="s8-quiz-btn" class="viz-btn" style="margin-top: 1.5rem;">Check Answers</button>
-          
-          <div id="s8-quiz-res" style="margin-top: 1rem; font-weight: 600; font-size: 0.9rem; display: none; padding: 0.8rem; border-radius: var(--r);"></div>
-        </div>
+        </details>
         
         <script>
         document.addEventListener('DOMContentLoaded', () => {
@@ -743,7 +778,7 @@
             
             btn.addEventListener('click', () => {
                 let score = 0;
-                const questions = document.querySelectorAll('.quiz-q');
+                const questions = document.getElementById('quiz-s8').querySelectorAll('.quiz-q');
                 let allAnswered = true;
                 
                 questions.forEach(q => {
@@ -768,7 +803,6 @@
                             }
                         }
                         
-                        // Always highlight the correct answer if the user attempted the question array
                         if (input.value === ans && answered) {
                             label.style.borderColor = 'var(--green)';
                             label.style.backgroundColor = 'var(--green-bg)';
@@ -825,6 +859,187 @@
           <p>A separable kernel simply multiplies them: \( K((t_1, i_1), (t_2, i_2)) = K_{time}(t_1, t_2) \times K_{stock}(i_1, i_2) \). <br><br>
           In matrix algebra, constructing a full covariance matrix this way utilizes the <strong>Kronecker Product (\(\otimes\))</strong>. This assumes that the temporal correlation (how prices change over time) is strictly independent of the inter-stock correlation (how Stock A and B relate generally). It is highly computationally efficient but fails to capture complex delayed correlations (e.g., Stock A going down today directly causing Stock B to go down tomorrow).</p>
         </div>
+
+        <!-- Section 9 Quiz -->
+        <details class="viz-wrap" style="margin-top: 2rem; cursor: pointer;">
+          <summary class="viz-title" style="font-size: 1.05rem; color: var(--accent); display: flex; align-items: center; outline: none; margin-bottom: 0;">
+             Concept Quiz: Core Challenges of GPs (Click to Expand)
+          </summary>
+          
+          <div style="padding-top: 1.5rem; cursor: default;">
+            <div id="quiz-s9" style="display: flex; flex-direction: column; gap: 1.5rem;">
+              <!-- Q1 -->
+              <div class="quiz-q" data-ans="3">
+                <p style="font-weight: 600; font-size: 0.9rem; margin-bottom: 0.5rem; color: var(--ink);">1. What is the fundamental computational complexity of making predictions with a standard Gaussian Process?</p>
+                <div style="display: flex; flex-direction: column; gap: 0.4rem;">
+                  <label style="font-size: 0.85rem; cursor: pointer; padding: 0.5rem; border: 1px solid var(--border); border-radius: var(--r); background: var(--off); transition: all 0.2s; color: var(--ink-2);">
+                    <input type="radio" name="q9_1" value="0" style="margin-right: 0.5rem;"> \(O(N)\)
+                  </label>
+                  <label style="font-size: 0.85rem; cursor: pointer; padding: 0.5rem; border: 1px solid var(--border); border-radius: var(--r); background: var(--off); transition: all 0.2s; color: var(--ink-2);">
+                    <input type="radio" name="q9_1" value="1" style="margin-right: 0.5rem;"> \(O(N \log N)\)
+                  </label>
+                  <label style="font-size: 0.85rem; cursor: pointer; padding: 0.5rem; border: 1px solid var(--border); border-radius: var(--r); background: var(--off); transition: all 0.2s; color: var(--ink-2);">
+                    <input type="radio" name="q9_1" value="2" style="margin-right: 0.5rem;"> \(O(N^2)\)
+                  </label>
+                  <label style="font-size: 0.85rem; cursor: pointer; padding: 0.5rem; border: 1px solid var(--border); border-radius: var(--r); background: var(--off); transition: all 0.2s; color: var(--ink-2);">
+                    <input type="radio" name="q9_1" value="3" style="margin-right: 0.5rem;"> \(O(N^3)\)
+                  </label>
+                </div>
+              </div>
+
+              <!-- Q2 -->
+              <div class="quiz-q" data-ans="0">
+                <p style="font-weight: 600; font-size: 0.9rem; margin-bottom: 0.5rem; color: var(--ink);">2. Which specific linear algebra operation is entirely responsible for this massive computational bottleneck?</p>
+                <div style="display: flex; flex-direction: column; gap: 0.4rem;">
+                  <label style="font-size: 0.85rem; cursor: pointer; padding: 0.5rem; border: 1px solid var(--border); border-radius: var(--r); background: var(--off); transition: all 0.2s; color: var(--ink-2);">
+                    <input type="radio" name="q9_2" value="0" style="margin-right: 0.5rem;"> Inverting the \(N \times N\) covariance matrix \(K\).
+                  </label>
+                  <label style="font-size: 0.85rem; cursor: pointer; padding: 0.5rem; border: 1px solid var(--border); border-radius: var(--r); background: var(--off); transition: all 0.2s; color: var(--ink-2);">
+                    <input type="radio" name="q9_2" value="1" style="margin-right: 0.5rem;"> Computing the log-marginal likelihood.
+                  </label>
+                  <label style="font-size: 0.85rem; cursor: pointer; padding: 0.5rem; border: 1px solid var(--border); border-radius: var(--r); background: var(--off); transition: all 0.2s; color: var(--ink-2);">
+                    <input type="radio" name="q9_2" value="2" style="margin-right: 0.5rem;"> Generating the kernel matrix from the data.
+                  </label>
+                  <label style="font-size: 0.85rem; cursor: pointer; padding: 0.5rem; border: 1px solid var(--border); border-radius: var(--r); background: var(--off); transition: all 0.2s; color: var(--ink-2);">
+                    <input type="radio" name="q9_2" value="3" style="margin-right: 0.5rem;"> Gradient descent optimization on hyperparameters.
+                  </label>
+                </div>
+              </div>
+
+              <!-- Q3 -->
+              <div class="quiz-q" data-ans="1">
+                <p style="font-weight: 600; font-size: 0.9rem; margin-bottom: 0.5rem; color: var(--ink);">3. How do 'separable' covariance functions construct a combined multi-output kernel for distinct input types?</p>
+                <div style="display: flex; flex-direction: column; gap: 0.4rem;">
+                  <label style="font-size: 0.85rem; cursor: pointer; padding: 0.5rem; border: 1px solid var(--border); border-radius: var(--r); background: var(--off); transition: all 0.2s; color: var(--ink-2);">
+                    <input type="radio" name="q9_3" value="0" style="margin-right: 0.5rem;"> By adding the matrices.
+                  </label>
+                  <label style="font-size: 0.85rem; cursor: pointer; padding: 0.5rem; border: 1px solid var(--border); border-radius: var(--r); background: var(--off); transition: all 0.2s; color: var(--ink-2);">
+                    <input type="radio" name="q9_3" value="1" style="margin-right: 0.5rem;"> By using the Kronecker Product (\(\otimes\)).
+                  </label>
+                  <label style="font-size: 0.85rem; cursor: pointer; padding: 0.5rem; border: 1px solid var(--border); border-radius: var(--r); background: var(--off); transition: all 0.2s; color: var(--ink-2);">
+                    <input type="radio" name="q9_3" value="2" style="margin-right: 0.5rem;"> By averaging their eigenvalues.
+                  </label>
+                  <label style="font-size: 0.85rem; cursor: pointer; padding: 0.5rem; border: 1px solid var(--border); border-radius: var(--r); background: var(--off); transition: all 0.2s; color: var(--ink-2);">
+                    <input type="radio" name="q9_3" value="3" style="margin-right: 0.5rem;"> By dividing the kernel outputs.
+                  </label>
+                </div>
+              </div>
+
+              <!-- Q4 -->
+              <div class="quiz-q" data-ans="2">
+                <p style="font-weight: 600; font-size: 0.9rem; margin-bottom: 0.5rem; color: var(--ink);">4. Why does non-Gaussian data (like binary classification) break the standard elegance of GPs?</p>
+                <div style="display: flex; flex-direction: column; gap: 0.4rem;">
+                  <label style="font-size: 0.85rem; cursor: pointer; padding: 0.5rem; border: 1px solid var(--border); border-radius: var(--r); background: var(--off); transition: all 0.2s; color: var(--ink-2);">
+                    <input type="radio" name="q9_4" value="0" style="margin-right: 0.5rem;"> The matrix inversion complexity jumps to \(O(N^4)\).
+                  </label>
+                  <label style="font-size: 0.85rem; cursor: pointer; padding: 0.5rem; border: 1px solid var(--border); border-radius: var(--r); background: var(--off); transition: all 0.2s; color: var(--ink-2);">
+                    <input type="radio" name="q9_4" value="1" style="margin-right: 0.5rem;"> The kernel completely loses its positive definiteness.
+                  </label>
+                  <label style="font-size: 0.85rem; cursor: pointer; padding: 0.5rem; border: 1px solid var(--border); border-radius: var(--r); background: var(--off); transition: all 0.2s; color: var(--ink-2);">
+                    <input type="radio" name="q9_4" value="2" style="margin-right: 0.5rem;"> The true posterior becomes skewed and non-Gaussian, losing exact mathematical tractability.
+                  </label>
+                  <label style="font-size: 0.85rem; cursor: pointer; padding: 0.5rem; border: 1px solid var(--border); border-radius: var(--r); background: var(--off); transition: all 0.2s; color: var(--ink-2);">
+                    <input type="radio" name="q9_4" value="3" style="margin-right: 0.5rem;"> Overfitting becomes mathematically unavoidable.
+                  </label>
+                </div>
+              </div>
+            </div>
+            
+            <button id="s9-quiz-btn" class="viz-btn" style="margin-top: 1.5rem;">Check Answers</button>
+            <div id="s9-quiz-res" style="margin-top: 1rem; font-weight: 600; font-size: 0.9rem; display: none; padding: 0.8rem; border-radius: var(--r);"></div>
+
+            <!-- Conceptual Explanations -->
+            <h4 style="margin-top: 2.5rem; font-weight: 600; color: var(--ink); border-bottom: 1px solid var(--border); padding-bottom: 0.5rem;">Deep Dive Explanations</h4>
+            <div style="display: flex; flex-direction: column; gap: 0.85rem; margin-top: 1.2rem;">
+              <details style="background: var(--off); padding: 0.8rem 1rem; border-radius: var(--r); border: 1px solid var(--border);">
+                <summary style="cursor: pointer; font-weight: 500; font-size: 0.9rem; color: var(--ink-2); outline: none;">Why are GPs fundamentally slow for very large datasets?</summary>
+                <div style="margin-top: 0.8rem; font-size: 0.85rem; color: var(--ink-3); line-height: 1.6; border-top: 1px dashed var(--border-h); padding-top: 0.6rem;">
+                  To calculate the exact predictive distribution or the marginal likelihood, we mathematically must invert the \(N \times N\) covariance matrix \(K\). Standard matrix inversion requires \(O(N^3)\) floating-point operations. For large datasets, this compute time grows excessively fast, and memory storage grows at \(O(N^2)\). 
+                </div>
+              </details>
+
+              <details style="background: var(--off); padding: 0.8rem 1rem; border-radius: var(--r); border: 1px solid var(--border);">
+                <summary style="cursor: pointer; font-weight: 500; font-size: 0.9rem; color: var(--ink-2); outline: none;">What is the hidden restriction of the Kronecker Product trick?</summary>
+                <div style="margin-top: 0.8rem; font-size: 0.85rem; color: var(--ink-3); line-height: 1.6; border-top: 1px dashed var(--border-h); padding-top: 0.6rem;">
+                  It rigidly assumes that the correlations across the distinct input spaces are perfectly independent. For instance, it assumes that how Stocks A and B correlate temporally across the month is independent of their general baseline relationship. It absolutely cannot capture direct, delayed cross-domain interactions.
+                </div>
+              </details>
+
+              <details style="background: var(--off); padding: 0.8rem 1rem; border-radius: var(--r); border: 1px solid var(--border);">
+                <summary style="cursor: pointer; font-weight: 500; font-size: 0.9rem; color: var(--ink-2); outline: none;">Why is choosing the exact covariance function often considered an "art"?</summary>
+                <div style="margin-top: 0.8rem; font-size: 0.85rem; color: var(--ink-3); line-height: 1.6; border-top: 1px dashed var(--border-h); padding-top: 0.6rem;">
+                  The covariance function physically enforces your prior assumptions—the strict bounds of what you believe the hidden functional rules look like (smoothness, periodicity, jagged bumps). If your kernel fundamentally assumes smooth waves, it will utterly fail to model discontinuous jumps, regardless of how much data you feed it.
+                </div>
+              </details>
+
+              <details style="background: var(--off); padding: 0.8rem 1rem; border-radius: var(--r); border: 1px solid var(--border);">
+                <summary style="cursor: pointer; font-weight: 500; font-size: 0.9rem; color: var(--ink-2); outline: none;">How do practitioners mathematically resolve skewed non-Gaussian posteriors?</summary>
+                <div style="margin-top: 0.8rem; font-size: 0.85rem; color: var(--ink-3); line-height: 1.6; border-top: 1px dashed var(--border-h); padding-top: 0.6rem;">
+                  They use tools like Expectation Propagation (EP) or Variational Inference. These tools force a pure Gaussian distribution tightly around the skewed true posterior mass, giving us a "surrogate" that roughly mimics the exact shape to successfully restore mathematical tractability.
+                </div>
+              </details>
+            </div>
+          </div>
+        </details>
+        
+        <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const btn = document.getElementById('s9-quiz-btn');
+            const res = document.getElementById('s9-quiz-res');
+            if(!btn) return;
+            
+            btn.addEventListener('click', () => {
+                let score = 0;
+                const questions = document.getElementById('quiz-s9').querySelectorAll('.quiz-q');
+                let allAnswered = true;
+                
+                questions.forEach(q => {
+                    const inputs = q.querySelectorAll('input[type="radio"]');
+                    const ans = q.getAttribute('data-ans');
+                    let answered = false;
+                    
+                    inputs.forEach(input => {
+                        const label = input.parentElement;
+                        label.style.borderColor = 'var(--border)';
+                        label.style.backgroundColor = 'var(--off)';
+                        label.style.color = 'var(--ink-2)';
+                        
+                        if (input.checked) {
+                            answered = true;
+                            if (input.value === ans) {
+                                score++;
+                            } else {
+                                label.style.borderColor = '#ef4444';
+                                label.style.backgroundColor = '#fef2f2';
+                                label.style.color = '#991b1b';
+                            }
+                        }
+                        
+                        if (input.value === ans && answered) {
+                            label.style.borderColor = 'var(--green)';
+                            label.style.backgroundColor = 'var(--green-bg)';
+                            label.style.color = '#166534';
+                        }
+                    });
+                    
+                    if (!answered) allAnswered = false;
+                });
+                
+                res.style.display = 'block';
+                if (!allAnswered) {
+                     res.style.backgroundColor = '#fffbeb';
+                     res.style.color = '#92400e';
+                     res.style.border = '1px solid #fde68a';
+                     res.innerHTML = "Please answer all 4 questions before checking!";
+                } else {
+                     res.style.backgroundColor = 'var(--green-bg)';
+                     res.style.color = '#166534';
+                     res.style.border = '1px solid var(--green-bd)';
+                     res.innerHTML = `You scored ${score} out of 4! ${score === 4 ? 'Masterful understanding!' : 'Review the highlighted answers above.'}`;
+                }
+            });
+        });
+        </script>
       </div>
     </div>
 
