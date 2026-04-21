@@ -363,11 +363,10 @@
       <li><a href="#s8">8. Additive Properties &amp; Noise</a></li>
       <li><a href="#s9">9. Core Challenges of GPs</a></li>
       <li><a href="#s10">10. Non-Gaussian Data</a></li>
-      <li><a href="#s11">11. Parameter Optimization</a></li>
-      <li><a href="#s12">12. Geometry of the Objective</a></li>
-      <li><a href="#s13">13. Parametric to Non-Parametric</a></li>
-      <li><a href="#s14">14. Advanced Math &amp; Constraints</a></li>
-      <li><a href="#s15">15. Final Limitations</a></li>
+      <li><a href="#s11">11. Learning Covariance Parameters</a></li>
+      <li><a href="#s13">12. Parametric to Non-Parametric</a></li>
+      <li><a href="#s14">13. Advanced Math &amp; Constraints</a></li>
+      <li><a href="#s15">14. Final Limitations</a></li>
       <li style="margin-top:.8rem"><div class="toc-label" style="margin-bottom:.4rem">Lecture 3</div></li>
       <li><a href="#s3-1">1. Gauss-Markov Processes</a></li>
       <li><a href="#s3-2">2. Brownian Motion Kernel</a></li>
@@ -743,84 +742,71 @@
     <!-- ─ Row 11 ─ -->
     <div class="note-row" id="s11">
       <div class="cue-column">
-        <h2>11. Parameter Optimization</h2>
+        <h2>11. Learning Covariance Parameters</h2>
         <ul>
+          <li>Two Big Advantages of GPs</li>
           <li>Type II Maximum Likelihood</li>
-          <li>Non-Convexity</li>
-          <li>Data Fit vs. Model Capacity</li>
+          <li>Eigendecomposition of \(\mathbf{K}\)</li>
+          <li>Capacity vs. Data Fit</li>
         </ul>
       </div>
       <div class="content-column">
-        <h3>Fitting the Covariance Parameters</h3>
-        <p>Unlike standard kernel methods where you might find kernel parameters via cross-validation, in Gaussian Processes, we optimize them directly using the marginal likelihood (often called <strong>Type II Maximum Likelihood</strong>). The goal is to find the parameters (like length scale \(l\), variance \(\alpha^2\), and noise \(\sigma^2\)) that maximize the probability of the data we observed, given the model.</p>
-        <p>The log marginal likelihood we optimize looks like this:</p>
-        <div class="math-block">\( \log P(\mathbf{y} | X) = -\frac{1}{2} \mathbf{y}^T K^{-1} \mathbf{y} - \frac{1}{2} \log |K| - \frac{N}{2} \log 2\pi \)</div>
-        <ul>
-          <li><strong>\(-\frac{1}{2} \mathbf{y}^T K^{-1} \mathbf{y}\) (Data Fit):</strong> This term penalizes the model if it doesn't fit the data well.</li>
-          <li><strong>\(-\frac{1}{2} \log |K|\) (Model Capacity):</strong> This is a complexity penalty. It penalizes the model for being too flexible or complex. It acts as an automatic Occam's Razor, preventing overfitting.</li>
-        </ul>
-
-        <div class="callout callout-red">
-          <h4>The Non-Convex Optimization Problem</h4>
-          <p>A crucial point discussed in the lecture: while the optimization problem is convex with respect to the full covariance matrix \(K\) (if constrained to be positive definite), it is <strong>highly non-convex</strong> with respect to the hyperparameters (like \(l\) and \(\alpha\)) buried <em>inside</em> the kernel function. Because of this, standard convex optimization theories often don't apply, and practitioners must use techniques like gradient descent with multiple restarts to find a good set of hyperparameters, as there may be many local optima.</p>
+        <h3>Optimizing the Kernel (Marginal Likelihood)</h3>
+        
+        <div class="callout callout-emerald mb-6">
+            <h4 style="color:#065f46">The Two Big Advantages of GPs</h4>
+            <p>While GPs are computationally more complex (\(O(N^3)\)) and often less efficient than standard kernel methods (like SVMs), the lecturer explicitly outlines two massive advantages:</p>
+            <ol>
+                <li><strong>Sustaining Uncertainty:</strong> Standard kernel methods throw away error bars. GPs retain a full probabilistic measure of uncertainty, which is vital for decision-making.</li>
+                <li><strong>Optimization of Kernel Parameters:</strong> Standard kernel methods require expensive cross-validation to find hyperparameters. GPs allow us to optimize them directly from the training data via the marginal likelihood.</li>
+            </ol>
         </div>
 
-        <div class="callout callout-yellow">
-          <h4>📌 Additional Foundation: What is the Determinant \(|K|\)?</h4>
-          <p>The lecture hints at a way of thinking about the determinant of \(K\) as a measure of model capacity. Here's the intuition:</p>
-          <br>
-          <p>In a covariance matrix, the determinant roughly measures the "volume" of uncertainty. If data points are highly uncorrelated (like white noise), the matrix is mostly diagonal, the volume is large, and the model is highly flexible—it can fit anything, but explains nothing. If data points are highly correlated, the matrix columns are nearly linearly dependent, the determinant shrinks towards zero, and the model is very rigid (low capacity). The \(-\frac{1}{2} \log |K|\) term balances this, stopping the model from becoming needlessly rigid or needlessly noisy.</p>
+        <p>The parameters \(\boldsymbol{\theta}\) are <em>inside</em> the covariance matrix \( \mathbf{K} \) (i.e., \(k_{i,j} = k(\mathbf{x}_i, \mathbf{x}_j; \boldsymbol{\theta})\)). The objective function to minimize (negative log marginal likelihood) is:</p>
+        <div class="math-block" style="font-size:1.1rem; padding:1.2rem; text-align:center;">
+            \(E(\boldsymbol{\theta}) = \color{#3b82f6}{\frac{1}{2} \log |\mathbf{K}|} + \color{#ef4444}{\frac{\mathbf{y}^\top \mathbf{K}^{-1} \mathbf{y}}{2}}\)
         </div>
-      </div>
-    </div>
+        
+        <h4 class="section-sub">Eigendecomposition of Covariance</h4>
+        <p>To intuitively understand this objective, we can decompose the covariance matrix: \(\mathbf{K} = \mathbf{R} \boldsymbol{\Lambda}^2 \mathbf{R}^\top\). Here, the diagonal of \(\boldsymbol{\Lambda}\) represents distances along the principal axes (eigenvalues), and \(\mathbf{R}\) gives the rotation of these axes.</p>
 
-    <!-- ─ Row 12 ─ -->
-    <div class="note-row" id="s12">
-      <div class="cue-column">
-        <h2>12. Geometry of the Objective</h2>
         <ul>
-          <li>Eigendecomposition of K</li>
-          <li>Data Fit as a Quadratic Form</li>
-          <li>The Trade-off Curve</li>
-        </ul>
-      </div>
-      <div class="content-column">
-        <h3>Volume vs. Rotation (The Occam's Razor)</h3>
-        <p>Let's look closer at the marginal likelihood terms. If we break down the covariance matrix \(K\) using an eigendecomposition, we get \(K = R \Lambda R^T\), where \(R\) represents a rotation and \(\Lambda\) is a diagonal matrix of eigenvalues (representing length/scale in each direction).</p>
-        <ul>
-          <li><strong>The Capacity Term (\(-\frac{1}{2} \log |K|\)):</strong> The determinant \(|K|\) is exactly the product of its eigenvalues. Geometrically, this is the <em>volume</em> of the multidimensional Gaussian contour. A model with high volume (e.g., very short length scale, acting like white noise) can explain any dataset, but it is penalized heavily here.</li>
-          <li><strong>The Data Fit Term (\(-\frac{1}{2} \mathbf{y}^T K^{-1} \mathbf{y}\)):</strong> Think of this as the actual data vector \(\mathbf{y}\) sitting in space. The model tries to "rotate" its covariance ellipse (using \(R\)) and stretch its axes to encompass that data point efficiently. To get a good fit <em>without</em> inflating the volume penalty, the model must adjust parameters like the length scale (\(l\)) so that correlated points align neatly along a narrow principal axis.</li>
+            <li>
+                <strong style="color:#3b82f6">Model Capacity (\(\frac{1}{2} \log |\mathbf{K}|\)):</strong> This acts as our regularizer. The determinant \(|\mathbf{K}|\) is the product of its eigenvalues, which geometrically represents the "volume" the Gaussian distribution covers. Minimizing this penalizes overly complex, high-volume models (acting as an automatic Occam's razor).
+            </li>
+            <li style="margin-top:0.4rem">
+                <strong style="color:#ef4444">Data Fit (\(\frac{1}{2} \mathbf{y}^\top \mathbf{K}^{-1} \mathbf{y}\)):</strong> Notice that the latent function \(\mathbf{f}\) has been completely integrated out! There is no function parameter to fit. This quadratic form measures how well our actual data vector \(\mathbf{y}\) aligns with the rotated and scaled covariance ellipse we just defined. 
+            </li>
         </ul>
 
-        <!-- Visualizer 4 -->
-        <div class="viz-wrap">
+        <!-- Visualizer: Marginal Likelihood Trade-off -->
+        <div class="viz-wrap mt-6">
           <div class="viz-title">Interactive: The Marginal Likelihood Trade-off</div>
           <div class="viz-hint">Adjust the length scale (\(l\)). Watch how a short length scale fits the data perfectly but suffers a massive complexity penalty, while a long length scale is simple but misses the data. The optimal model sits in the "Goldilocks" zone.</div>
           <div class="canvas-pair">
             <div>
-              <p class="clabel">GP Fit to Data</p>
+              <p class="clabel text-center font-bold">GP Fit to Data</p>
               <canvas id="fitCanvas" height="180" class="interactive-canvas"></canvas>
             </div>
             <div>
-              <p class="clabel">Log Marginal Likelihood Components</p>
+              <p class="clabel text-center font-bold">Log Marginal Likelihood Components</p>
               <canvas id="mlCanvas" height="180" class="interactive-canvas"></canvas>
               <div class="legend-row" style="margin-top:.5rem;margin-bottom:0">
                 <div class="legend-item"><div class="legend-color" style="background-color:#ef4444"></div> Data Fit</div>
-                <div class="legend-item"><div class="legend-color" style="background-color:#3b82f6"></div> Complexity Penalty</div>
-                <div class="legend-item"><div class="legend-color" style="background-color:#000"></div> Total LML</div>
+                <div class="legend-item"><div class="legend-color" style="background-color:#3b82f6"></div> Capacity</div>
+                <div class="legend-item"><div class="legend-color" style="background-color:#000"></div> Total Error</div>
               </div>
             </div>
           </div>
           <div class="slider-group" style="margin-top:.85rem">
-            <label>Length Scale (\(l\)): <span id="tradeoffLVal">0.5</span></label>
+            <label>Length Scale (\(l\)): <span id="tradeoffLVal">0.50</span></label>
             <input type="range" id="tradeoffSlider" min="0.1" max="2.5" step="0.05" value="0.5">
           </div>
         </div>
 
-        <div class="callout callout-red">
-          <h4>Local Optima are a Trap</h4>
-          <p>Because this objective function is highly non-convex with respect to hyper-parameters, optimizing it (usually via L-BFGS or Conjugate Gradients) can easily get stuck. <br>
-          <strong>Example:</strong> Given a noisy time series, one local minimum might explain it as a smooth, slow wave with lots of noise (high length scale, high noise variance). Another local minimum might explain the exact same data as a jagged, erratic signal with almost zero noise (low length scale, low noise). Sometimes, their likelihood scores are virtually identical! A true Bayesian would use Hybrid Monte Carlo (HMC) to sample over these parameters instead of picking just one.</p>
+        <div class="callout callout-red mt-6">
+            <h4>The Non-Convex Trap</h4>
+            <p>While the objective is technically convex with respect to the matrix \(\mathbf{K}\) itself, it is <strong>highly non-convex</strong> with respect to the hyperparameters \(\boldsymbol{\theta}\) (like the lengthscale \(l\)). Because of this, optimizing \(E(\boldsymbol{\theta})\) can easily get stuck in local optima (e.g., finding a solution with pure noise vs. one with a clear signal), making parameter optimization one of the trickier parts of GPs.</p>
         </div>
       </div>
     </div>
@@ -828,7 +814,7 @@
     <!-- ─ Row 13 ─ -->
     <div class="note-row" id="s13">
       <div class="cue-column">
-        <h2>13. From Parametric to Non-Parametric</h2>
+        <h2>12. From Parametric to Non-Parametric</h2>
         <ul>
           <li>Basis Function Expansion</li>
           <li>Integrating out Weights</li>
@@ -866,7 +852,7 @@
     <!-- ─ Row 14 ─ -->
     <div class="note-row" id="s14">
       <div class="cue-column">
-        <h2>14. Advanced Math &amp; Constraints</h2>
+        <h2>13. Advanced Math &amp; Constraints</h2>
         <ul>
           <li>Derivatives of GPs</li>
           <li>The Monotonicity Problem</li>
@@ -893,7 +879,7 @@
     <!-- ─ Row 15 ─ -->
     <div class="note-row" id="s15">
       <div class="cue-column">
-        <h2>15. Final Limitations</h2>
+        <h2>14. Final Limitations</h2>
         <ul>
           <li>$O(N^3)$ Runtime</li>
           <li>Discontinuities</li>
