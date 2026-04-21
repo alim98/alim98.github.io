@@ -639,8 +639,8 @@
       </div>
       <div class="content-column">
         <h3>Adding Noise to the Process</h3>
-        <p>In the real world, we rarely observe the true underlying function \(f(x)\). We observe a corrupted version:<br><br>
-        <span class="code-inline">y_i = f(x_i) + \epsilon_i</span></p>
+        <p>In the real world, we rarely observe the true underlying function \(f(x)\). We observe a corrupted version:</p>
+        <div class="math-block math-block-sm">\( y_i = f(x_i) + \epsilon_i \)</div>
         <p>If we assume \(\epsilon_i\) is independent Gaussian noise with variance \(\sigma^2\), incorporating this into our GP is trivial due to a beautiful property of Gaussian distributions:</p>
 
         <blockquote>"If you have two Gaussian random variables and you add them together, the sum is also distributed as a Gaussian, and its covariance is the sum of their individual covariances: \(K_{sum} = K_1 + K_2\)."</blockquote>
