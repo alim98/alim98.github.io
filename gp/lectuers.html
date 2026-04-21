@@ -251,6 +251,55 @@
       .slider-grid { grid-template-columns: 1fr; }
       .canvas-pair { grid-template-columns: 1fr; }
     }
+    /* ── Per-section personal notes ── */
+    .cue-column { position: relative; }
+    .note-add-btn {
+      display: inline-flex; align-items: center; justify-content: center;
+      margin-top: .8rem;
+      width: 24px; height: 24px; border-radius: 50%;
+      border: 1.5px solid var(--border);
+      background: var(--white); color: var(--ink-3);
+      font-size: .95rem; font-weight: 700; line-height: 1;
+      cursor: pointer; transition: border-color .18s, color .18s, background .18s;
+    }
+    .note-add-btn:hover { border-color: var(--accent); color: var(--accent); background: #f0f4ff; }
+    .note-add-btn.has-note { border-color: #c0a800; color: #7a6500; background: #fffce0; font-size: .8rem; }
+    .note-panel {
+      grid-column: 1 / -1;
+      border-top: 1px dashed var(--border);
+      padding-top: 1rem; margin-top: .2rem;
+      animation: noteFadeIn .18s ease;
+    }
+    @keyframes noteFadeIn { from { opacity:0; transform:translateY(-5px); } to { opacity:1; transform:translateY(0); } }
+    .note-panel-inner {
+      background: #fffef0;
+      border: 1.5px solid #e0d060;
+      border-radius: var(--r);
+      padding: .8rem 1rem;
+    }
+    .note-panel-header {
+      display: flex; justify-content: space-between; align-items: center;
+      margin-bottom: .5rem;
+      font-size: .75rem; font-weight: 600; color: #7a6500;
+    }
+    .note-header-actions { display: flex; align-items: center; gap: .5rem; }
+    .note-saved-msg { font-size: .72rem; color: #4a8a4a; font-weight: 400; min-width: 3rem; }
+    .note-close-btn {
+      background: none; border: none; cursor: pointer;
+      font-size: 1rem; color: #bbb; line-height: 1; padding: 0 2px; transition: color .15s;
+    }
+    .note-close-btn:hover { color: #555; }
+    .note-textarea {
+      width: 100%; min-height: 76px; max-height: 320px;
+      border: 1px solid #ddd07a; border-radius: 5px;
+      padding: .5rem .7rem;
+      font-family: inherit; font-size: .87rem; line-height: 1.65;
+      resize: vertical; background: #fff; color: var(--ink);
+      box-sizing: border-box; outline: none;
+      transition: border-color .15s, box-shadow .15s;
+    }
+    .note-textarea:focus { border-color: #b09a00; box-shadow: 0 0 0 3px rgba(176,154,0,.1); }
+    .note-textarea::placeholder { color: #bbb; }
   </style>
 </head>
 
@@ -1939,6 +1988,94 @@
             }
         }, 150);
 })(); // end IIFE
+</script>
+
+<!-- ── Personal Notes System ── -->
+<script>
+(function() {
+  // Finds every note-row that has an id and injects a + button + collapsible panel
+  const KEY = 'gp_note_'; // localStorage prefix
+
+  document.querySelectorAll('.note-row[id]').forEach(row => {
+    const id = row.id;
+    const cue = row.querySelector('.cue-column');
+    if (!cue) return;
+
+    const saved = localStorage.getItem(KEY + id) || '';
+
+    // ── + / pencil toggle button ──
+    const btn = document.createElement('button');
+    btn.className = 'note-add-btn' + (saved ? ' has-note' : '');
+    btn.innerHTML  = saved ? '&#9998;' : '+';
+    btn.title = saved ? 'Edit your note' : 'Add a note for this section';
+    btn.setAttribute('aria-expanded', 'false');
+    btn.setAttribute('aria-label', 'Toggle note for section ' + id);
+    cue.appendChild(btn);
+
+    // ── note panel (hidden by default) ──
+    const panel = document.createElement('div');
+    panel.className = 'note-panel';
+    panel.style.display = 'none';
+    panel.innerHTML = [
+      '<div class="note-panel-inner">',
+        '<div class="note-panel-header">',
+          '<span>&#9998;&nbsp;My Notes</span>',
+          '<div class="note-header-actions">',
+            '<span class="note-saved-msg"></span>',
+            '<button class="note-close-btn" aria-label="Close note">&times;</button>',
+          '</div>',
+        '</div>',
+        '<textarea class="note-textarea" placeholder="Add your own notes, questions or insights for this section…"></textarea>',
+      '</div>'
+    ].join('');
+    row.appendChild(panel);
+
+    const ta   = panel.querySelector('.note-textarea');
+    const msg  = panel.querySelector('.note-saved-msg');
+    ta.value = saved;
+
+    // auto-resize helper
+    function resize() { ta.style.height = 'auto'; ta.style.height = Math.max(76, ta.scrollHeight) + 'px'; }
+
+    // open / close the panel
+    function open() {
+      panel.style.display = 'block';
+      btn.setAttribute('aria-expanded', 'true');
+      resize();  ta.focus();
+    }
+    function close() {
+      panel.style.display = 'none';
+      btn.setAttribute('aria-expanded', 'false');
+    }
+
+    btn.addEventListener('click', () =>
+      panel.style.display === 'none' ? open() : close()
+    );
+    panel.querySelector('.note-close-btn').addEventListener('click', close);
+
+    // debounced auto-save
+    let timer;
+    ta.addEventListener('input', () => {
+      resize();
+      clearTimeout(timer);
+      msg.textContent = '';
+      timer = setTimeout(() => {
+        const v = ta.value.trim();
+        if (v) {
+          localStorage.setItem(KEY + id, ta.value);
+          btn.innerHTML = '&#9998;'; btn.classList.add('has-note');
+          btn.title = 'Edit your note';
+        } else {
+          localStorage.removeItem(KEY + id);
+          btn.innerHTML = '+'; btn.classList.remove('has-note');
+          btn.title = 'Add a note for this section';
+        }
+        msg.textContent = '\u2713 saved';
+        setTimeout(() => { msg.textContent = ''; }, 1800);
+      }, 500);
+    });
+  });
+})();
 </script>
 
 </body>
