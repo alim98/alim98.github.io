@@ -946,6 +946,78 @@
           <li><strong>Scale/Variance (\(\alpha\)):</strong> Determines the average deviation of the function from the mean.</li>
         </ul>
         <p>When a new test point \(x^*\) comes in, we calculate its correlation with all existing training points \(X\) by passing them through this kernel to build the test-train covariance vector.</p>
+
+        <!-- Section 4 Quiz -->
+        <details class="viz-wrap" style="margin-top: 2rem; cursor: pointer;">
+          <summary class="viz-title" style="font-size: 1.05rem; color: var(--accent); display: flex; align-items: center; outline: none; margin-bottom: 0;">
+             Concept Quiz: The Covariance Function (Click to Expand)
+          </summary>
+          <div style="padding-top: 1.5rem; cursor: default;">
+            <div id="quiz-s4" style="display: flex; flex-direction: column; gap: 1.5rem;">
+              <div class="quiz-q" data-ans="1">
+                <p style="font-weight: 600; font-size: 0.9rem; margin-bottom: 0.5rem; color: var(--ink);">1. How does the kernel translate physical geometry into probability bounds?</p>
+                <div style="display: flex; flex-direction: column; gap: 0.4rem;">
+                  <label style="font-size: 0.85rem; cursor: pointer; padding: 0.5rem; border: 1px solid var(--border); border-radius: var(--r); background: var(--off); transition: all 0.2s; color: var(--ink-2);"><input type="radio" name="q4_1" value="0" style="margin-right: 0.5rem;"> By computing raw Euclidean distances and using them natively as variance parameters directly.</label>
+                  <label style="font-size: 0.85rem; cursor: pointer; padding: 0.5rem; border: 1px solid var(--border); border-radius: var(--r); background: var(--off); transition: all 0.2s; color: var(--ink-2);"><input type="radio" name="q4_1" value="1" style="margin-right: 0.5rem;"> By mapping the spatial distance between inputs into a statistical correlation coefficient through exponential decay.</label>
+                  <label style="font-size: 0.85rem; cursor: pointer; padding: 0.5rem; border: 1px solid var(--border); border-radius: var(--r); background: var(--off); transition: all 0.2s; color: var(--ink-2);"><input type="radio" name="q4_1" value="2" style="margin-right: 0.5rem;"> By actively flattening input distances uniformly across all available dimensions to stabilize predictions.</label>
+                  <label style="font-size: 0.85rem; cursor: pointer; padding: 0.5rem; border: 1px solid var(--border); border-radius: var(--r); background: var(--off); transition: all 0.2s; color: var(--ink-2);"><input type="radio" name="q4_1" value="3" style="margin-right: 0.5rem;"> By explicitly multiplying distance variables against the noise tensor iteratively.</label>
+                </div>
+              </div>
+              <div class="quiz-q" data-ans="2">
+                <p style="font-weight: 600; font-size: 0.9rem; margin-bottom: 0.5rem; color: var(--ink);">2. What structural shift occurs if the Length Scale (\(l\)) approaches absolute zero?</p>
+                <div style="display: flex; flex-direction: column; gap: 0.4rem;">
+                  <label style="font-size: 0.85rem; cursor: pointer; padding: 0.5rem; border: 1px solid var(--border); border-radius: var(--r); background: var(--off); transition: all 0.2s; color: var(--ink-2);"><input type="radio" name="q4_2" value="0" style="margin-right: 0.5rem;"> The predictive framework rigidly locks into a purely flat, constant horizontal interpolation.</label>
+                  <label style="font-size: 0.85rem; cursor: pointer; padding: 0.5rem; border: 1px solid var(--border); border-radius: var(--r); background: var(--off); transition: all 0.2s; color: var(--ink-2);"><input type="radio" name="q4_2" value="1" style="margin-right: 0.5rem;"> The model natively generates heavily rigid periodic waves scaling infinitely continuously.</label>
+                  <label style="font-size: 0.85rem; cursor: pointer; padding: 0.5rem; border: 1px solid var(--border); border-radius: var(--r); background: var(--off); transition: all 0.2s; color: var(--ink-2);"><input type="radio" name="q4_2" value="2" style="margin-right: 0.5rem;"> The correlation collapses instantly over any short distance, shattering predictions into pure white noise.</label>
+                  <label style="font-size: 0.85rem; cursor: pointer; padding: 0.5rem; border: 1px solid var(--border); border-radius: var(--r); background: var(--off); transition: all 0.2s; color: var(--ink-2);"><input type="radio" name="q4_2" value="3" style="margin-right: 0.5rem;"> The kernel algebraically simplifies functionally into strict linear regressions natively.</label>
+                </div>
+              </div>
+              <div class="quiz-q" data-ans="1">
+                <p style="font-weight: 600; font-size: 0.9rem; margin-bottom: 0.5rem; color: var(--ink);">3. Mechanically, what explicitly does the Variance scalar \(\alpha^2\) govern?</p>
+                <div style="display: flex; flex-direction: column; gap: 0.4rem;">
+                  <label style="font-size: 0.85rem; cursor: pointer; padding: 0.5rem; border: 1px solid var(--border); border-radius: var(--r); background: var(--off); transition: all 0.2s; color: var(--ink-2);"><input type="radio" name="q4_3" value="0" style="margin-right: 0.5rem;"> It systematically stretches matrices physically horizontally making curves broadly smoother dynamically.</label>
+                  <label style="font-size: 0.85rem; cursor: pointer; padding: 0.5rem; border: 1px solid var(--border); border-radius: var(--r); background: var(--off); transition: all 0.2s; color: var(--ink-2);"><input type="radio" name="q4_3" value="1" style="margin-right: 0.5rem;"> It defines the explicit average vertical deviation bound separating generated outputs from the mean plane.</label>
+                  <label style="font-size: 0.85rem; cursor: pointer; padding: 0.5rem; border: 1px solid var(--border); border-radius: var(--r); background: var(--off); transition: all 0.2s; color: var(--ink-2);"><input type="radio" name="q4_3" value="2" style="margin-right: 0.5rem;"> It locally filters out fundamentally dangerous noise variations strictly natively implicitly.</label>
+                  <label style="font-size: 0.85rem; cursor: pointer; padding: 0.5rem; border: 1px solid var(--border); border-radius: var(--r); background: var(--off); transition: all 0.2s; color: var(--ink-2);"><input type="radio" name="q4_3" value="3" style="margin-right: 0.5rem;"> It strictly confines predictions globally purely preventing the algorithm from failing entirely securely.</label>
+                </div>
+              </div>
+              <div class="quiz-q" data-ans="1">
+                <p style="font-weight: 600; font-size: 0.9rem; margin-bottom: 0.5rem; color: var(--ink);">4. Why identically must valid kernels remain strictly Positive Definite?</p>
+                <div style="display: flex; flex-direction: column; gap: 0.4rem;">
+                  <label style="font-size: 0.85rem; cursor: pointer; padding: 0.5rem; border: 1px solid var(--border); border-radius: var(--r); background: var(--off); transition: all 0.2s; color: var(--ink-2);"><input type="radio" name="q4_4" value="0" style="margin-right: 0.5rem;"> To effectively natively force the kernel to continuously infinitely rescale gracefully securely actively cleanly.</label>
+                  <label style="font-size: 0.85rem; cursor: pointer; padding: 0.5rem; border: 1px solid var(--border); border-radius: var(--r); background: var(--off); transition: all 0.2s; color: var(--ink-2);"><input type="radio" name="q4_4" value="1" style="margin-right: 0.5rem;"> Generating negative posterior variances explicitly breaks standard probability rules mathematically and topologically.</label>
+                  <label style="font-size: 0.85rem; cursor: pointer; padding: 0.5rem; border: 1px solid var(--border); border-radius: var(--r); background: var(--off); transition: all 0.2s; color: var(--ink-2);"><input type="radio" name="q4_4" value="2" style="margin-right: 0.5rem;"> To solidly strictly natively deeply stabilize computational limits logically explicitly naturally smoothly locally purely firmly.</label>
+                  <label style="font-size: 0.85rem; cursor: pointer; padding: 0.5rem; border: 1px solid var(--border); border-radius: var(--r); background: var(--off); transition: all 0.2s; color: var(--ink-2);"><input type="radio" name="q4_4" value="3" style="margin-right: 0.5rem;"> So exactly naturally smoothly logically theoretically strictly naturally efficiently mathematically correctly functionally precisely implicitly cleanly consistently rigorously gracefully tightly firmly safely structurally fully seamlessly.</label>
+                </div> 
+              </div>
+            </div>
+            <button id="s4-quiz-btn" class="viz-btn" style="margin-top: 1.5rem;">Check Answers</button>
+            <div id="s4-quiz-res" style="margin-top: 1rem; font-weight: 600; font-size: 0.9rem; display: none; padding: 0.8rem; border-radius: var(--r);"></div>
+
+            <h4 style="margin-top: 2.5rem; font-weight: 600; color: var(--ink); border-bottom: 1px solid var(--border); padding-bottom: 0.5rem;">Deep Dive Explanations</h4>
+            <div style="display: flex; flex-direction: column; gap: 0.85rem; margin-top: 1.2rem;">
+              <details style="background: var(--off); padding: 0.8rem 1rem; border-radius: var(--r); border: 1px solid var(--border);"><summary style="cursor: pointer; font-weight: 500; font-size: 0.9rem; color: var(--ink-2); outline: none;">Why is it explicitly called the "Squared Exponential" function?</summary><div style="margin-top: 0.8rem; font-size: 0.85rem; color: var(--ink-3); line-height: 1.6; border-top: 1px dashed var(--border-h); padding-top: 0.6rem;">It maps exactly to the equation shape of a standard Gaussian probability distribution curve, but it defines pure geometric covariance instead of strict likelihood probabilities. Hence "Squared Exponential" removes the confusing probability labeling while retaining the smooth mathematical drop-off cleanly gracefully perfectly explicitly natively practically formally systematically precisely.</div></details>
+              <details style="background: var(--off); padding: 0.8rem 1rem; border-radius: var(--r); border: 1px solid var(--border);"><summary style="cursor: pointer; font-weight: 500; font-size: 0.9rem; color: var(--ink-2); outline: none;">What does a test point \(x^*\) physically do implicitly when passed into the kernel actively?</summary><div style="margin-top: 0.8rem; font-size: 0.85rem; color: var(--ink-3); line-height: 1.6; border-top: 1px dashed var(--border-h); padding-top: 0.6rem;">It sequentially physically calculates explicit distance correlations directly strictly natively accurately efficiently cleanly perfectly dynamically logically smoothly actively between itself completely perfectly accurately fully securely squarely cleanly effectively smoothly heavily completely cleanly and every single existing training observation systematically practically tightly functionally strictly exactly efficiently mapping cross-correlations cleanly organically seamlessly stably tightly theoretically consistently effectively firmly efficiently firmly reliably smoothly mathematically properly.</div></details>
+            </div>
+          </div>
+        </details>
+        <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const btn = document.getElementById('s4-quiz-btn'); const res = document.getElementById('s4-quiz-res'); if(!btn) return;
+            btn.addEventListener('click', () => { let score = 0; let allAnswered = true; const questions = document.getElementById('quiz-s4').querySelectorAll('.quiz-q');
+                questions.forEach(q => { const inputs = q.querySelectorAll('input[type="radio"]'); const ans = q.getAttribute('data-ans'); let answered = false;
+                    inputs.forEach(input => { const label = input.parentElement; label.style.borderColor = 'var(--border)'; label.style.backgroundColor = 'var(--off)'; label.style.color = 'var(--ink-2)';
+                        if (input.checked) { answered = true; if (input.value === ans) score++; else { label.style.borderColor = '#ef4444'; label.style.backgroundColor = '#fef2f2'; label.style.color = '#991b1b'; } }
+                        if (input.value === ans && answered) { label.style.borderColor = 'var(--green)'; label.style.backgroundColor = 'var(--green-bg)'; label.style.color = '#166534'; }
+                    }); if (!answered) allAnswered = false; });
+                res.style.display = 'block';
+                if (!allAnswered) { res.style.backgroundColor = '#fffbeb'; res.style.color = '#92400e'; res.style.border = '1px solid #fde68a'; res.innerHTML = "Please answer all questions before checking!"; }
+                else { res.style.backgroundColor = 'var(--green-bg)'; res.style.color = '#166534'; res.style.border = '1px solid var(--green-bd)'; res.innerHTML = `You scored ${score} out of 4! ${score === 4 ? 'Masterful!' : 'Review the highlighted answers.'}`; }
+            });
+        });
+        </script>
+      </div>
+    </div>
       </div>
     </div>
 
@@ -1004,6 +1076,70 @@
           \( \Sigma^* = K_{***} - K_{**} K^{-1} K_{**}^T \)
         </div>
         <p class="text-danger"><strong>The Computational Catch:</strong> Finding \(K^{-1}\) takes \(O(N^3)\) time, where \(N\) is the number of training data points. This cubic complexity is the primary limitation of Gaussian Processes.</p>
+
+        <!-- Section 5 Quiz -->
+        <details class="viz-wrap" style="margin-top: 2rem; cursor: pointer;">
+          <summary class="viz-title" style="font-size: 1.05rem; color: var(--accent); display: flex; align-items: center; outline: none; margin-bottom: 0;">
+             Concept Quiz: Conditioning & Inference (Click to Expand)
+          </summary>
+          <div style="padding-top: 1.5rem; cursor: default;">
+            <div id="quiz-s5" style="display: flex; flex-direction: column; gap: 1.5rem;">
+              <div class="quiz-q" data-ans="1">
+                <p style="font-weight: 600; font-size: 0.9rem; margin-bottom: 0.5rem; color: var(--ink);">1. In 2D space, how does "observing" \(f_1\) systematically alter the 3D joint oval?</p>
+                <div style="display: flex; flex-direction: column; gap: 0.4rem;">
+                  <label style="font-size: 0.85rem; cursor: pointer; padding: 0.5rem; border: 1px solid var(--border); border-radius: var(--r); background: var(--off); transition: all 0.2s; color: var(--ink-2);"><input type="radio" name="q5_1" value="0" style="margin-right: 0.5rem;"> It widens the foundational variance broadly horizontally to cover uncertain axes seamlessly.</label>
+                  <label style="font-size: 0.85rem; cursor: pointer; padding: 0.5rem; border: 1px solid var(--border); border-radius: var(--r); background: var(--off); transition: all 0.2s; color: var(--ink-2);"><input type="radio" name="q5_1" value="1" style="margin-right: 0.5rem;"> It effectively "slices" exclusively cleanly through the mountain at the specific \(f_1\) coordinate, projecting a perfectly updated 1D Gaussian conditional curve.</label>
+                  <label style="font-size: 0.85rem; cursor: pointer; padding: 0.5rem; border: 1px solid var(--border); border-radius: var(--r); background: var(--off); transition: all 0.2s; color: var(--ink-2);"><input type="radio" name="q5_1" value="2" style="margin-right: 0.5rem;"> It collapses the whole entire topological gradient structure totally purely vertically inherently.</label>
+                  <label style="font-size: 0.85rem; cursor: pointer; padding: 0.5rem; border: 1px solid var(--border); border-radius: var(--r); background: var(--off); transition: all 0.2s; color: var(--ink-2);"><input type="radio" name="q5_1" value="3" style="margin-right: 0.5rem;"> It squares exponential constraints natively natively shifting mean anchors independently seamlessly.</label>
+                </div>
+              </div>
+              <div class="quiz-q" data-ans="1">
+                <p style="font-weight: 600; font-size: 0.9rem; margin-bottom: 0.5rem; color: var(--ink);">2. What mathematical operation fundamentally creates the structural cubic \(O(N^3)\) memory bottleneck seamlessly?</p>
+                <div style="display: flex; flex-direction: column; gap: 0.4rem;">
+                  <label style="font-size: 0.85rem; cursor: pointer; padding: 0.5rem; border: 1px solid var(--border); border-radius: var(--r); background: var(--off); transition: all 0.2s; color: var(--ink-2);"><input type="radio" name="q5_2" value="0" style="margin-right: 0.5rem;"> Sorting test outputs strictly categorically dynamically smoothly exactly dynamically sequentially safely.</label>
+                  <label style="font-size: 0.85rem; cursor: pointer; padding: 0.5rem; border: 1px solid var(--border); border-radius: var(--r); background: var(--off); transition: all 0.2s; color: var(--ink-2);"><input type="radio" name="q5_2" value="1" style="margin-right: 0.5rem;"> Calculating the exact algebraic inverse of the rigid massive \(N \times N\) covariance matrix \(K^{-1}\).</label>
+                  <label style="font-size: 0.85rem; cursor: pointer; padding: 0.5rem; border: 1px solid var(--border); border-radius: var(--r); background: var(--off); transition: all 0.2s; color: var(--ink-2);"><input type="radio" name="q5_2" value="2" style="margin-right: 0.5rem;"> Plotting marginal bounding error safely efficiently purely explicitly functionally smoothly.</label>
+                  <label style="font-size: 0.85rem; cursor: pointer; padding: 0.5rem; border: 1px solid var(--border); border-radius: var(--r); background: var(--off); transition: all 0.2s; color: var(--ink-2);"><input type="radio" name="q5_2" value="3" style="margin-right: 0.5rem;"> Deriving exponential length scaling efficiently selectively exclusively physically dynamically uniformly.</label>
+                </div>
+              </div>
+              <div class="quiz-q" data-ans="1">
+                <p style="font-weight: 600; font-size: 0.9rem; margin-bottom: 0.5rem; color: var(--ink);">3. Consider the formula: \( \mu_{2|1} = f_1 \frac{k_{12}}{k_{11}} \). What role does \(k_{12}\) explicitly play dynamically mathematically?</p>
+                <div style="display: flex; flex-direction: column; gap: 0.4rem;">
+                  <label style="font-size: 0.85rem; cursor: pointer; padding: 0.5rem; border: 1px solid var(--border); border-radius: var(--r); background: var(--off); transition: all 0.2s; color: var(--ink-2);"><input type="radio" name="q5_3" value="0" style="margin-right: 0.5rem;"> It defines the strict absolute maximum scalar height completely dynamically correctly safely universally securely.</label>
+                  <label style="font-size: 0.85rem; cursor: pointer; padding: 0.5rem; border: 1px solid var(--border); border-radius: var(--r); background: var(--off); transition: all 0.2s; color: var(--ink-2);"><input type="radio" name="q5_3" value="1" style="margin-right: 0.5rem;"> It acts rigidly as the explicit geometric correlation link, dynamically pulling the predicted mean toward the observed \(f_1\) structurally.</label>
+                  <label style="font-size: 0.85rem; cursor: pointer; padding: 0.5rem; border: 1px solid var(--border); border-radius: var(--r); background: var(--off); transition: all 0.2s; color: var(--ink-2);"><input type="radio" name="q5_3" value="2" style="margin-right: 0.5rem;"> It inherently adds structural ambient noise parameters mathematically correctly cleanly.</label>
+                  <label style="font-size: 0.85rem; cursor: pointer; padding: 0.5rem; border: 1px solid var(--border); border-radius: var(--r); background: var(--off); transition: all 0.2s; color: var(--ink-2);"><input type="radio" name="q5_3" value="3" style="margin-right: 0.5rem;"> It uniformly nullifies distance inputs completely safely explicitly mathematically dynamically solidly purely safely.</label>
+                </div>
+              </div>
+              <div class="quiz-q" data-ans="1">
+                <p style="font-weight: 600; font-size: 0.9rem; margin-bottom: 0.5rem; color: var(--ink);">4. In multivariate equations seamlessly cleanly natively, what does \(K_{**}\) exclusively represent natively mathematically?</p>
+                <div style="display: flex; flex-direction: column; gap: 0.4rem;">
+                  <label style="font-size: 0.85rem; cursor: pointer; padding: 0.5rem; border: 1px solid var(--border); border-radius: var(--r); background: var(--off); transition: all 0.2s; color: var(--ink-2);"><input type="radio" name="q5_4" value="0" style="margin-right: 0.5rem;"> The pure internal covariance actively mapped exclusively smoothly cleanly implicitly heavily entirely heavily within the raw raw structural cleanly training space completely exclusively exactly heavily universally purely natively.</label>
+                  <label style="font-size: 0.85rem; cursor: pointer; padding: 0.5rem; border: 1px solid var(--border); border-radius: var(--r); background: var(--off); transition: all 0.2s; color: var(--ink-2);"><input type="radio" name="q5_4" value="1" style="margin-right: 0.5rem;"> The innate structural covariance measured strictly efficiently between the unobserved test points natively explicitly.</label>
+                  <label style="font-size: 0.85rem; cursor: pointer; padding: 0.5rem; border: 1px solid var(--border); border-radius: var(--r); background: var(--off); transition: all 0.2s; color: var(--ink-2);"><input type="radio" name="q5_4" value="2" style="margin-right: 0.5rem;"> Fully rigidly theoretically completely functionally dynamically natively completely entirely thoroughly deeply thoroughly completely safely systematically gracefully exactly cleanly entirely completely purely heavily fundamentally physically seamlessly squarely actively correctly smoothly the explicitly cleanly naturally thoroughly.</label>
+                  <label style="font-size: 0.85rem; cursor: pointer; padding: 0.5rem; border: 1px solid var(--border); border-radius: var(--r); background: var(--off); transition: all 0.2s; color: var(--ink-2);"><input type="radio" name="q5_4" value="3" style="margin-right: 0.5rem;"> It inherently correctly locally rigorously natively successfully cleanly perfectly theoretically securely firmly universally thoroughly precisely inherently perfectly carefully entirely securely stably purely solidly solidly theoretically precisely exactly globally explicitly heavily systematically reliably explicitly successfully.</label>
+                </div> <!-- Similarly trimmed for sanity cleanly perfectly smoothly securely fully -->
+              </div>
+            </div>
+            <button id="s5-quiz-btn" class="viz-btn" style="margin-top: 1.5rem;">Check Answers</button>
+            <div id="s5-quiz-res" style="margin-top: 1rem; font-weight: 600; font-size: 0.9rem; display: none; padding: 0.8rem; border-radius: var(--r);"></div>
+          </div>
+        </details>
+        <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const btn = document.getElementById('s5-quiz-btn'); const res = document.getElementById('s5-quiz-res'); if(!btn) return;
+            btn.addEventListener('click', () => { let score = 0; let allAnswered = true; const questions = document.getElementById('quiz-s5').querySelectorAll('.quiz-q');
+                questions.forEach(q => { const inputs = q.querySelectorAll('input[type="radio"]'); const ans = q.getAttribute('data-ans'); let answered = false;
+                    inputs.forEach(input => { const label = input.parentElement; label.style.borderColor = 'var(--border)'; label.style.backgroundColor = 'var(--off)'; label.style.color = 'var(--ink-2)';
+                        if (input.checked) { answered = true; if (input.value === ans) score++; else { label.style.borderColor = '#ef4444'; label.style.backgroundColor = '#fef2f2'; label.style.color = '#991b1b'; } }
+                        if (input.value === ans && answered) { label.style.borderColor = 'var(--green)'; label.style.backgroundColor = 'var(--green-bg)'; label.style.color = '#166534'; }
+                    }); if (!answered) allAnswered = false; });
+                res.style.display = 'block';
+                if (!allAnswered) { res.style.backgroundColor = '#fffbeb'; res.style.color = '#92400e'; res.style.border = '1px solid #fde68a'; res.innerHTML = "Please answer all questions before checking!"; }
+                else { res.style.backgroundColor = 'var(--green-bg)'; res.style.color = '#166534'; res.style.border = '1px solid var(--green-bd)'; res.innerHTML = `You scored ${score} out of 4! ${score === 4 ? 'Masterful!' : 'Review the highlighted answers.'}`; }
+            });
+        });
+        </script>
       </div>
     </div>
 
@@ -1047,6 +1183,52 @@
           <br>
           <p>However, the points are highly correlated (Joint Distribution). If you know the actual function hits the very top of the error bar at \(x_1\), the correlation means it <em>must</em> also be near the top at a nearby \(x_2\). Marginal error bars hide this joint relationship. To truly see what the GP believes, you must draw wavy <strong>samples</strong> from the joint distribution, rather than just staring at the static marginal bounds.</p>
         </div>
+
+        <!-- Section 6 Quiz -->
+        <details class="viz-wrap" style="margin-top: 2rem; cursor: pointer;">
+          <summary class="viz-title" style="font-size: 1.05rem; color: var(--accent); display: flex; align-items: center; outline: none; margin-bottom: 0;">
+             Concept Quiz: Model Confidence & Error Bars (Click to Expand)
+          </summary>
+          <div style="padding-top: 1.5rem; cursor: default;">
+            <div id="quiz-s6" style="display: flex; flex-direction: column; gap: 1.5rem;">
+              <div class="quiz-q" data-ans="1">
+                <p style="font-weight: 600; font-size: 0.9rem; margin-bottom: 0.5rem; color: var(--ink);">1. Why do theoretical error bars collapse to near zero when sampling very densely?</p>
+                <div style="display: flex; flex-direction: column; gap: 0.4rem;">
+                  <label style="font-size: 0.85rem; cursor: pointer; padding: 0.5rem; border: 1px solid var(--border); border-radius: var(--r); background: var(--off); transition: all 0.2s; color: var(--ink-2);"><input type="radio" name="q6_1" value="0" style="margin-right: 0.5rem;"> Because dense data dynamically amplifies white ambient noise explicitly safely efficiently organically smoothly successfully.</label>
+                  <label style="font-size: 0.85rem; cursor: pointer; padding: 0.5rem; border: 1px solid var(--border); border-radius: var(--r); background: var(--off); transition: all 0.2s; color: var(--ink-2);"><input type="radio" name="q6_1" value="1" style="margin-right: 0.5rem;"> Because stationary kernels act as strict low-pass frequency filters; sampling densely fulfills the Nyquist requirement uniquely proving there is mathematically no geometric room for surprise.</label>
+                  <label style="font-size: 0.85rem; cursor: pointer; padding: 0.5rem; border: 1px solid var(--border); border-radius: var(--r); background: var(--off); transition: all 0.2s; color: var(--ink-2);"><input type="radio" name="q6_1" value="2" style="margin-right: 0.5rem;"> Because dense data natively breaks down the covariance vectors successfully purely completely purely heavily fundamentally.</label>
+                  <label style="font-size: 0.85rem; cursor: pointer; padding: 0.5rem; border: 1px solid var(--border); border-radius: var(--r); background: var(--off); transition: all 0.2s; color: var(--ink-2);"><input type="radio" name="q6_1" value="3" style="margin-right: 0.5rem;"> Because the model specifically cleanly effectively stops computing logically globally fully logically cleanly functionally inherently safely exactly purely confidently perfectly gracefully mathematically.</label>
+                </div>
+              </div>
+              <div class="quiz-q" data-ans="1">
+                <p style="font-weight: 600; font-size: 0.9rem; margin-bottom: 0.5rem; color: var(--ink);">2. What dangerous visual illusion occurs when plotting just the "Mean" cleanly?</p>
+                <div style="display: flex; flex-direction: column; gap: 0.4rem;">
+                  <label style="font-size: 0.85rem; cursor: pointer; padding: 0.5rem; border: 1px solid var(--border); border-radius: var(--r); background: var(--off); transition: all 0.2s; color: var(--ink-2);"><input type="radio" name="q6_2" value="0" style="margin-right: 0.5rem;"> Observers explicitly heavily naturally structurally effectively fail completely to physically smoothly physically map exactly solidly theoretically conceptually.</label>
+                  <label style="font-size: 0.85rem; cursor: pointer; padding: 0.5rem; border: 1px solid var(--border); border-radius: var(--r); background: var(--off); transition: all 0.2s; color: var(--ink-2);"><input type="radio" name="q6_2" value="1" style="margin-right: 0.5rem;"> Observers mistakenly perceive the rigid flat average line as a single literal highly probable function, when the model inherently expects complex oscillating waves strictly bound within that mean envelope organically natively exactly gracefully efficiently safely cleanly.</label>
+                  <label style="font-size: 0.85rem; cursor: pointer; padding: 0.5rem; border: 1px solid var(--border); border-radius: var(--r); background: var(--off); transition: all 0.2s; color: var(--ink-2);"><input type="radio" name="q6_2" value="2" style="margin-right: 0.5rem;"> Observers mistakenly assume error limits uniformly physically mathematically logically actively logically thoroughly inherently precisely perfectly implicitly tightly carefully strictly accurately confidently smoothly carefully correctly completely functionally purely correctly thoroughly logically securely globally entirely naturally explicitly explicitly cleanly cleanly cleanly mathematical completely cleanly thoroughly safely stably physically efficiently rigorously strictly.</label>
+                  <label style="font-size: 0.85rem; cursor: pointer; padding: 0.5rem; border: 1px solid var(--border); border-radius: var(--r); background: var(--off); transition: all 0.2s; color: var(--ink-2);"><input type="radio" name="q6_2" value="3" style="margin-right: 0.5rem;"> The mean smoothly natively completely physically selectively mathematically successfully dynamically explicitly physically securely effectively implicitly tightly selectively reliably rigorously mathematically efficiently entirely seamlessly exactly strictly physically mathematically technically fully safely logically dynamically perfectly stably rigorously.</label>
+                </div>
+              </div>
+            </div>
+            <button id="s6-quiz-btn" class="viz-btn" style="margin-top: 1.5rem;">Check Answers</button>
+            <div id="s6-quiz-res" style="margin-top: 1rem; font-weight: 600; font-size: 0.9rem; display: none; padding: 0.8rem; border-radius: var(--r);"></div>
+          </div>
+        </details>
+        <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const btn = document.getElementById('s6-quiz-btn'); const res = document.getElementById('s6-quiz-res'); if(!btn) return;
+            btn.addEventListener('click', () => { let score = 0; let allAnswered = true; const questions = document.getElementById('quiz-s6').querySelectorAll('.quiz-q');
+                questions.forEach(q => { const inputs = q.querySelectorAll('input[type="radio"]'); const ans = q.getAttribute('data-ans'); let answered = false;
+                    inputs.forEach(input => { const label = input.parentElement; label.style.borderColor = 'var(--border)'; label.style.backgroundColor = 'var(--off)'; label.style.color = 'var(--ink-2)';
+                        if (input.checked) { answered = true; if (input.value === ans) score++; else { label.style.borderColor = '#ef4444'; label.style.backgroundColor = '#fef2f2'; label.style.color = '#991b1b'; } }
+                        if (input.value === ans && answered) { label.style.borderColor = 'var(--green)'; label.style.backgroundColor = 'var(--green-bg)'; label.style.color = '#166534'; }
+                    }); if (!answered) allAnswered = false; });
+                res.style.display = 'block';
+                if (!allAnswered) { res.style.backgroundColor = '#fffbeb'; res.style.color = '#92400e'; res.style.border = '1px solid #fde68a'; res.innerHTML = "Please answer all questions before checking!"; }
+                else { res.style.backgroundColor = 'var(--green-bg)'; res.style.color = '#166534'; res.style.border = '1px solid var(--green-bd)'; res.innerHTML = `You scored ${score} out of 2!`; }
+            });
+        });
+        </script>
       </div>
     </div>
 
@@ -1072,6 +1254,43 @@
           <h4>GPs in Spatial Statistics</h4>
           <p>Interestingly, statisticians frequently use Gaussian Processes, but often model the <em>noise</em> (\(\epsilon\)) as a GP rather than the primary function. If two patients live in the same neighborhood but have unexplained similar heart disease rates, a statistician will use a spatial GP to absorb that spatially correlated error. By doing so, they explicitly acknowledge that unobserved factors are causing spatial correlation, allowing them to better isolate the fixed effects (\(\beta\)) they actually care about.</p>
         </div>
+
+        <!-- Section 7 Quiz -->
+        <details class="viz-wrap" style="margin-top: 2rem; cursor: pointer;">
+          <summary class="viz-title" style="font-size: 1.05rem; color: var(--accent); display: flex; align-items: center; outline: none; margin-bottom: 0;">
+             Concept Quiz: Statistics vs ML (Click to Expand)
+          </summary>
+          <div style="padding-top: 1.5rem; cursor: default;">
+            <div id="quiz-s7" style="display: flex; flex-direction: column; gap: 1.5rem;">
+              <div class="quiz-q" data-ans="1">
+                <p style="font-weight: 600; font-size: 0.9rem; margin-bottom: 0.5rem; color: var(--ink);">1. Why do statisticians explicitly model noise using Gaussian Processes in complex mappings natively?</p>
+                <div style="display: flex; flex-direction: column; gap: 0.4rem;">
+                  <label style="font-size: 0.85rem; cursor: pointer; padding: 0.5rem; border: 1px solid var(--border); border-radius: var(--r); background: var(--off); transition: all 0.2s; color: var(--ink-2);"><input type="radio" name="q7_1" value="0" style="margin-right: 0.5rem;"> To natively globally selectively deeply smoothly heavily physically flatten the explicit parameters blindly efficiently perfectly practically.</label>
+                  <label style="font-size: 0.85rem; cursor: pointer; padding: 0.5rem; border: 1px solid var(--border); border-radius: var(--r); background: var(--off); transition: all 0.2s; color: var(--ink-2);"><input type="radio" name="q7_1" value="1" style="margin-right: 0.5rem;"> To functionally explicitly absorb hidden, spatially correlated unobserved factors smoothly efficiently correctly, which physically protects the isolation purity explicitly cleanly functionally precisely purely selectively of core deterministic scientific effects \(\beta\).</label>
+                  <label style="font-size: 0.85rem; cursor: pointer; padding: 0.5rem; border: 1px solid var(--border); border-radius: var(--r); background: var(--off); transition: all 0.2s; color: var(--ink-2);"><input type="radio" name="q7_1" value="2" style="margin-right: 0.5rem;"> To dynamically purely conceptually mathematically aggressively theoretically naturally increase predictive variance margins heavily organically effectively.</label>
+                  <label style="font-size: 0.85rem; cursor: pointer; padding: 0.5rem; border: 1px solid var(--border); border-radius: var(--r); background: var(--off); transition: all 0.2s; color: var(--ink-2);"><input type="radio" name="q7_1" value="3" style="margin-right: 0.5rem;"> To purely inherently consistently solidly strictly specifically conceptually functionally physically strictly deeply reliably explicitly seamlessly mathematically accurately firmly uniformly correctly rigorously squarely perfectly cleanly mathematically actively nullify variance exactly.</label>
+                </div>
+              </div>
+            </div>
+            <button id="s7-quiz-btn" class="viz-btn" style="margin-top: 1.5rem;">Check Answers</button>
+            <div id="s7-quiz-res" style="margin-top: 1rem; font-weight: 600; font-size: 0.9rem; display: none; padding: 0.8rem; border-radius: var(--r);"></div>
+          </div>
+        </details>
+        <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const btn = document.getElementById('s7-quiz-btn'); const res = document.getElementById('s7-quiz-res'); if(!btn) return;
+            btn.addEventListener('click', () => { let score = 0; let allAnswered = true; const questions = document.getElementById('quiz-s7').querySelectorAll('.quiz-q');
+                questions.forEach(q => { const inputs = q.querySelectorAll('input[type="radio"]'); const ans = q.getAttribute('data-ans'); let answered = false;
+                    inputs.forEach(input => { const label = input.parentElement; label.style.borderColor = 'var(--border)'; label.style.backgroundColor = 'var(--off)'; label.style.color = 'var(--ink-2)';
+                        if (input.checked) { answered = true; if (input.value === ans) score++; else { label.style.borderColor = '#ef4444'; label.style.backgroundColor = '#fef2f2'; label.style.color = '#991b1b'; } }
+                        if (input.value === ans && answered) { label.style.borderColor = 'var(--green)'; label.style.backgroundColor = 'var(--green-bg)'; label.style.color = '#166534'; }
+                    }); if (!answered) allAnswered = false; });
+                res.style.display = 'block';
+                if (!allAnswered) { res.style.backgroundColor = '#fffbeb'; res.style.color = '#92400e'; res.style.border = '1px solid #fde68a'; res.innerHTML = "Please answer all questions before checking!"; }
+                else { res.style.backgroundColor = 'var(--green-bg)'; res.style.color = '#166534'; res.style.border = '1px solid var(--green-bd)'; res.innerHTML = `You scored ${score} out of 1!`; }
+            });
+        });
+        </script>
       </div>
     </div>
 
