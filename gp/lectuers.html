@@ -1,1667 +1,1270 @@
 <!DOCTYPE html>
 <html lang="en">
-
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Gaussian Processes: Intuition & Mathematics</title>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Gaussian Processes — Ali Mikaeili</title>
+  <meta name="description" content="Lecture notes synthesis of Neil Lawrence's Gaussian Processes lecture at MLSS 2015 Tübingen." />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.8/dist/katex.min.css" />
+  <script src="https://cdn.jsdelivr.net/npm/katex@0.16.8/dist/katex.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/katex@0.16.8/dist/contrib/auto-render.min.js"></script>
 
-    <!-- Tailwind CSS -->
-    <script src="https://cdn.tailwindcss.com"></script>
+  <style>
+    /* ── Design tokens (mirror main site) ── */
+    :root {
+      --white:    #ffffff;
+      --off:      #f8f8f6;
+      --border:   #e8e8e4;
+      --border-h: #cecec8;
+      --ink:      #0f0f0e;
+      --ink-2:    #3a3a36;
+      --ink-3:    #7a7a74;
+      --ink-4:    #b8b8b0;
+      --accent:   #2563eb;
+      --accent-bg:#eff6ff;
+      --accent-bd:#bfdbfe;
+      --green:    #16a34a;
+      --green-bg: #f0fdf4;
+      --r:        8px;
+      --r-lg:     12px;
+      --content:  720px;
+    }
 
-    <!-- KaTeX for Math -->
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.8/dist/katex.min.css">
-    <script src="https://cdn.jsdelivr.net/npm/katex@0.16.8/dist/katex.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/katex@0.16.8/dist/contrib/auto-render.min.js"></script>
-    <script>
-        document.addEventListener("DOMContentLoaded", function () {
-            renderMathInElement(document.body, {
-                delimiters: [
-                    { left: '$$', right: '$$', display: true },
-                    { left: '\\(', right: '\\)', display: false },
-                    { left: '\\[', right: '\\]', display: true }
-                ]
-            });
-        });
-    </script>
+    /* ── Reset ── */
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    html { font-size: 15px; -webkit-font-smoothing: antialiased; scroll-behavior: smooth; }
+    body {
+      font-family: 'Inter', system-ui, sans-serif;
+      background: var(--white);
+      color: var(--ink);
+      line-height: 1.7;
+    }
+    a { color: var(--accent); text-decoration: none; }
+    a:hover { text-decoration: underline; }
 
-    <style>
-        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&family=JetBrains+Mono:wght@400;700&display=swap');
+    /* ── Topbar ── */
+    .topbar {
+      position: sticky;
+      top: 0;
+      z-index: 50;
+      background: rgba(255,255,255,.92);
+      backdrop-filter: blur(12px);
+      border-bottom: 1px solid var(--border);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: .65rem 1.5rem;
+      gap: 1rem;
+    }
 
-        body {
-            font-family: 'Inter', sans-serif;
-            background-color: #f8fafc;
-            color: #0f172a;
-        }
+    .topbar-left {
+      display: flex;
+      align-items: center;
+      gap: .85rem;
+    }
 
-        .math-font {
-            font-family: 'JetBrains Mono', monospace;
-        }
+    .back-link {
+      display: inline-flex;
+      align-items: center;
+      gap: .4rem;
+      font-size: .78rem;
+      color: var(--ink-3);
+      padding: .3rem .6rem;
+      border-radius: var(--r);
+      border: 1px solid var(--border);
+      transition: background .15s, color .15s, border-color .15s;
+      text-decoration: none;
+    }
+    .back-link:hover {
+      background: var(--off);
+      color: var(--ink);
+      border-color: var(--border-h);
+      text-decoration: none;
+    }
+    .back-link svg { flex-shrink: 0; }
 
-        /* Note Layout Styles */
-        .note-row {
-            display: grid;
-            grid-template-columns: 1fr;
-            gap: 2rem;
-            border-bottom: 1px solid #e2e8f0;
-            padding: 3rem 0;
-        }
+    .topbar-divider {
+      width: 1px;
+      height: 16px;
+      background: var(--border);
+    }
 
-        @media (min-width: 768px) {
-            .note-row {
-                grid-template-columns: 1fr 2.5fr;
-            }
-        }
+    .topbar-title {
+      font-size: .82rem;
+      font-weight: 500;
+      color: var(--ink-2);
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
 
-        .cue-column {
-            font-weight: 600;
-            color: #334155;
-            position: relative;
-        }
+    .topbar-meta {
+      font-size: .73rem;
+      color: var(--ink-4);
+      white-space: nowrap;
+    }
 
-        .content-column {
-            font-weight: 400;
-            color: #1e293b;
-            line-height: 1.7;
-        }
+    /* ── Progress bar ── */
+    .progress-bar {
+      position: fixed;
+      top: 0; left: 0;
+      height: 2px;
+      background: var(--accent);
+      width: 0%;
+      transition: width .1s linear;
+      z-index: 100;
+    }
 
-        .interactive-canvas {
-            width: 100%;
-            border-radius: 0.5rem;
-            background: #ffffff;
-            border: 1px solid #cbd5e1;
-            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
-        }
+    /* ── Main layout ── */
+    .page {
+      display: grid;
+      grid-template-columns: 200px 1fr;
+      max-width: 1100px;
+      margin: 0 auto;
+      padding: 2.5rem 1.5rem;
+      gap: 3rem;
+      align-items: start;
+    }
 
-        input[type=range] {
-            accent-color: #3b82f6;
-        }
+    /* ── Table of Contents (sticky sidebar) ── */
+    .toc {
+      position: sticky;
+      top: 70px;
+      max-height: calc(100vh - 90px);
+      overflow-y: auto;
+    }
+    .toc::-webkit-scrollbar { width: 3px; }
+    .toc::-webkit-scrollbar-thumb { background: var(--border); }
 
-        .legend-item {
-            display: flex;
-            align-items: center;
-            font-size: 0.75rem;
-            color: #475569;
-        }
+    .toc-label {
+      font-size: .63rem;
+      font-weight: 600;
+      letter-spacing: .1em;
+      text-transform: uppercase;
+      color: var(--ink-4);
+      margin-bottom: .65rem;
+    }
 
-        .legend-color {
-            width: 12px;
-            height: 12px;
-            border-radius: 2px;
-            margin-right: 6px;
-        }
-    </style>
+    .toc-list {
+      list-style: none;
+      display: flex;
+      flex-direction: column;
+      gap: .05rem;
+    }
+
+    .toc-list a {
+      display: block;
+      font-size: .76rem;
+      color: var(--ink-3);
+      padding: .3rem .55rem;
+      border-radius: 6px;
+      border-left: 2px solid transparent;
+      transition: color .15s, background .15s, border-color .15s;
+      text-decoration: none;
+      line-height: 1.35;
+    }
+    .toc-list a:hover { color: var(--ink); background: var(--off); text-decoration: none; }
+    .toc-list a.active {
+      color: var(--accent);
+      border-left-color: var(--accent);
+      background: var(--accent-bg);
+      font-weight: 500;
+    }
+
+    /* ── Article ── */
+    .article { min-width: 0; }
+
+    /* Section header */
+    .sec-header {
+      display: flex;
+      align-items: baseline;
+      gap: .6rem;
+      margin-bottom: 1.1rem;
+      padding-bottom: .6rem;
+      border-bottom: 1px solid var(--border);
+    }
+    .sec-num {
+      font-size: .65rem;
+      font-weight: 700;
+      color: var(--ink-4);
+      letter-spacing: .08em;
+      font-variant-numeric: tabular-nums;
+    }
+    .sec-header h2 {
+      font-size: 1.05rem;
+      font-weight: 600;
+      letter-spacing: -.02em;
+    }
+
+    /* Section block */
+    .note-section {
+      padding: 2.25rem 0;
+      border-bottom: 1px solid var(--border);
+      scroll-margin-top: 70px;
+    }
+    .note-section:last-child { border-bottom: none; }
+
+    /* Body text */
+    .article p {
+      font-size: .9rem;
+      color: var(--ink-2);
+      line-height: 1.8;
+      margin-bottom: 1rem;
+    }
+    .article p:last-child { margin-bottom: 0; }
+
+    strong { color: var(--ink); font-weight: 600; }
+    em     { font-style: italic; }
+
+    /* Lists */
+    .article ul, .article ol {
+      padding-left: 1.4rem;
+      margin-bottom: 1rem;
+    }
+    .article li {
+      font-size: .9rem;
+      color: var(--ink-2);
+      line-height: 1.75;
+      margin-bottom: .4rem;
+    }
+
+    /* Callout boxes */
+    .callout {
+      border-radius: var(--r-lg);
+      padding: 1rem 1.2rem;
+      margin: 1.25rem 0;
+      border: 1px solid;
+    }
+    .callout h4 {
+      font-size: .82rem;
+      font-weight: 600;
+      margin-bottom: .5rem;
+    }
+    .callout p, .callout li { font-size: .84rem; }
+
+    .callout-blue   { background: var(--accent-bg); border-color: var(--accent-bd); }
+    .callout-blue h4 { color: #1d4ed8; }
+
+    .callout-yellow { background: #fffbeb; border-color: #fde68a; }
+    .callout-yellow h4 { color: #92400e; }
+
+    .callout-red    { background: #fef2f2; border-color: #fecaca; }
+    .callout-red h4 { color: #991b1b; }
+
+    .callout-indigo { background: #eef2ff; border-color: #c7d2fe; }
+    .callout-indigo h4 { color: #3730a3; }
+
+    /* Math display blocks */
+    .math-block {
+      background: var(--off);
+      border: 1px solid var(--border);
+      border-radius: var(--r);
+      padding: .9rem 1.1rem;
+      margin: 1rem 0;
+      overflow-x: auto;
+      text-align: center;
+      font-size: .95rem;
+    }
+
+    /* Inline code */
+    code {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: .82em;
+      background: var(--off);
+      border: 1px solid var(--border);
+      border-radius: 4px;
+      padding: .08em .35em;
+      color: var(--ink-2);
+    }
+
+    /* Blockquote */
+    blockquote {
+      border-left: 3px solid var(--border-h);
+      padding-left: 1rem;
+      margin: 1rem 0;
+      color: var(--ink-3);
+      font-style: italic;
+      font-size: .9rem;
+    }
+
+    /* Tag pills */
+    .tag-row {
+      display: flex;
+      flex-wrap: wrap;
+      gap: .3rem;
+      margin-top: 1rem;
+    }
+    .tag-pill {
+      font-size: .68rem;
+      padding: .18rem .52rem;
+      border-radius: 4px;
+      background: var(--off);
+      border: 1px solid var(--border);
+      color: var(--ink-3);
+    }
+
+    /* ── Interactive visualizer wrappers ── */
+    .viz-wrap {
+      background: var(--off);
+      border: 1px solid var(--border);
+      border-radius: var(--r-lg);
+      padding: 1.25rem;
+      margin: 1.25rem 0;
+    }
+    .viz-wrap h4 {
+      font-size: .82rem;
+      font-weight: 600;
+      margin-bottom: .4rem;
+      text-align: center;
+    }
+    .viz-wrap p.hint {
+      font-size: .76rem;
+      color: var(--ink-3);
+      text-align: center;
+      margin-bottom: .9rem;
+    }
+
+    canvas {
+      width: 100%;
+      border-radius: var(--r);
+      background: var(--white);
+      border: 1px solid var(--border);
+      display: block;
+    }
+
+    .slider-row {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 1rem;
+      margin-top: .9rem;
+    }
+    .slider-group label {
+      display: block;
+      font-size: .77rem;
+      font-weight: 500;
+      color: var(--ink-2);
+      margin-bottom: .25rem;
+    }
+    .slider-group p {
+      font-size: .72rem !important;
+      color: var(--ink-4) !important;
+      margin-top: .2rem;
+      margin-bottom: 0 !important;
+    }
+    input[type=range] {
+      width: 100%;
+      accent-color: var(--accent);
+    }
+
+    .viz-btn {
+      display: block;
+      width: 100%;
+      margin-top: .85rem;
+      padding: .5rem 1rem;
+      background: var(--accent);
+      color: #fff;
+      border: none;
+      border-radius: var(--r);
+      font-size: .82rem;
+      font-weight: 500;
+      font-family: 'Inter', sans-serif;
+      cursor: pointer;
+      transition: background .15s, transform .1s;
+    }
+    .viz-btn:hover { background: #1d4ed8; }
+    .viz-btn:active { transform: scale(.99); }
+
+    .canvas-pair {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: .75rem;
+    }
+    .canvas-pair p.clabel {
+      font-size: .72rem;
+      font-weight: 600;
+      text-align: center;
+      margin-bottom: .4rem;
+      color: var(--ink-3);
+    }
+
+    .legend-row {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: center;
+      gap: .65rem;
+      margin-bottom: .9rem;
+    }
+    .legend-item {
+      display: flex;
+      align-items: center;
+      gap: .35rem;
+      font-size: .72rem;
+      color: var(--ink-3);
+    }
+    .legend-swatch {
+      width: 12px; height: 12px;
+      border-radius: 2px;
+      flex-shrink: 0;
+    }
+
+    /* ── Responsive ── */
+    @media (max-width: 780px) {
+      .page { grid-template-columns: 1fr; padding: 1.5rem 1rem; }
+      .toc { display: none; }
+      .slider-row { grid-template-columns: 1fr; }
+      .canvas-pair { grid-template-columns: 1fr; }
+    }
+  </style>
 </head>
+<body>
 
-<body class="antialiased">
+<div class="progress-bar" id="progress"></div>
 
-    <div class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
+<!-- ── Topbar ── -->
+<header class="topbar">
+  <div class="topbar-left">
+    <a href="../index.html" class="back-link">
+      <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"/></svg>
+      Ali Mikaeili
+    </a>
+    <div class="topbar-divider"></div>
+    <span class="topbar-title">Gaussian Processes: Intuition &amp; Mathematics</span>
+  </div>
+  <span class="topbar-meta">Neil Lawrence · MLSS 2015 · Tübingen</span>
+</header>
 
-        <header class="mb-12 border-b-4 border-blue-600 pb-6">
-            <h1 class="text-4xl font-bold text-gray-900 mb-2">Gaussian Processes: Intuition & Framework</h1>
-            <p class="text-lg text-gray-600">Lecture Notes Synthesis & Interactive Visualizations</p>
-        </header>
+<div class="page">
 
-        <!-- Row 1: History and Philosophy -->
-        <div class="note-row">
-            <div class="cue-column">
-                <h2 class="text-xl text-blue-700">1. Philosophy & History</h2>
-                <ul class="mt-4 space-y-2 text-sm text-gray-500 font-normal">
-                    <li>Laplace's Demon</li>
-                    <li>Determinism vs. Ignorance</li>
-                    <li>Gauss & Ceres Orbit</li>
-                    <li>Least Squares & Latent Variables</li>
-                </ul>
-            </div>
-            <div class="content-column">
-                <h3 class="text-2xl font-bold mb-4">Probability as a Measure of Ignorance</h3>
-                <p class="mb-4">
-                    In 1800, Pierre-Simon Laplace described what is known as <strong>Laplace's Demon</strong>: an
-                    intellect that knows the precise location and momentum of every atom in the universe right now, and
-                    therefore could compute the entire past and future (a deterministic universe).
-                </p>
-                <p class="mb-4">
-                    Laplace's actual point, however, was that we <em>never</em> have this circumstance. Because we
-                    cannot track every "simple molecule of air," we must use probability. <strong>Probability is
-                        relative in part to our ignorance, and in part to our knowledge.</strong> We don't need things
-                    to be fundamentally stochastic to use probability; we use it to model the unknown.
-                </p>
+  <!-- ── Table of Contents ── -->
+  <nav class="toc" aria-label="Table of contents">
+    <div class="toc-label">Contents</div>
+    <ul class="toc-list">
+      <li><a href="#s1">1. Philosophy &amp; History</a></li>
+      <li><a href="#s2">2. The I.I.D. Assumption</a></li>
+      <li><a href="#s3">3. What is a GP?</a></li>
+      <li><a href="#s4">4. Covariance Function</a></li>
+      <li><a href="#s5">5. Conditioning &amp; Inference</a></li>
+      <li><a href="#s6">6. Model Confidence</a></li>
+      <li><a href="#s65">6.5 Error Bars</a></li>
+      <li><a href="#s7">7. Stats vs. ML</a></li>
+      <li><a href="#s8">8. Additive Properties</a></li>
+      <li><a href="#s9">9. Core Challenges</a></li>
+      <li><a href="#s10">10. Non-Gaussian Data</a></li>
+      <li><a href="#s11">11. Parameter Optimization</a></li>
+      <li><a href="#s12">12. Geometry of Objective</a></li>
+    </ul>
+  </nav>
 
-                <div class="bg-blue-50 p-6 rounded-lg border border-blue-100 my-6">
-                    <h4 class="font-bold text-blue-800 mb-2">Latent Variables in Early Modeling</h4>
-                    <p class="text-sm">
-                        When Gauss predicted the orbit of the dwarf planet Ceres using Least Squares, he was building on
-                        Laplace's framework. Laplace suggested adding an additional unknown (a latent variable,
-                        \(\epsilon\)) to represent the difference between the model's prediction and the observed data:
-                    </p>
-                    <div class="text-center my-4">
-                        \( y_i = mx_i + c + \epsilon_i \)
-                    </div>
-                    <p class="text-sm">
-                        He placed a probability distribution over this ignorance. Gauss later solidified this by using
-                        what we now call the Gaussian density for these variables.
-                    </p>
-                </div>
+  <!-- ── Article ── -->
+  <article class="article">
 
-                <p>
-                    <strong>The Underdetermined System:</strong> When fitting a line (2 parameters: \(m, c\)) to 1
-                    point, it's an underdetermined system. Bayesian thinking allows us to solve this by placing
-                    probability distributions over the parameters (\(m\) and \(c\)) themselves, handling our uncertainty
-                    probabilistically.
-                </p>
-            </div>
+    <!-- §1 -->
+    <section class="note-section" id="s1">
+      <div class="sec-header">
+        <span class="sec-num">01</span>
+        <h2>Philosophy &amp; History</h2>
+      </div>
+
+      <p>In 1800, Pierre-Simon Laplace described what is known as <strong>Laplace's Demon</strong>: an intellect that knows the precise location and momentum of every atom in the universe right now, and therefore could compute the entire past and future — a deterministic universe.</p>
+      <p>Laplace's actual point, however, was that we <em>never</em> have this circumstance. Because we cannot track every "simple molecule of air," we must use probability. <strong>Probability is relative in part to our ignorance, and in part to our knowledge.</strong> We don't need things to be fundamentally stochastic to use probability; we use it to model the unknown.</p>
+
+      <div class="callout callout-blue">
+        <h4>Latent Variables in Early Modeling</h4>
+        <p>When Gauss predicted the orbit of Ceres using Least Squares, he built on Laplace's framework. Laplace suggested adding an additional unknown (a latent variable \(\epsilon\)) to represent the difference between prediction and observation:</p>
+        <div class="math-block">\( y_i = mx_i + c + \epsilon_i \)</div>
+        <p>He placed a probability distribution over this ignorance. Gauss later solidified this by using what we now call the Gaussian density for these variables.</p>
+      </div>
+
+      <p><strong>The Underdetermined System:</strong> When fitting a line (2 parameters: \(m, c\)) to 1 point, it's underdetermined. Bayesian thinking allows us to solve this by placing probability distributions over the parameters \(m\) and \(c\) themselves, handling uncertainty probabilistically.</p>
+
+      <div class="tag-row">
+        <span class="tag-pill">Laplace's Demon</span>
+        <span class="tag-pill">Determinism vs. Ignorance</span>
+        <span class="tag-pill">Least Squares</span>
+        <span class="tag-pill">Latent Variables</span>
+      </div>
+    </section>
+
+    <!-- §2 -->
+    <section class="note-section" id="s2">
+      <div class="sec-header">
+        <span class="sec-num">02</span>
+        <h2>The I.I.D. Assumption</h2>
+      </div>
+
+      <p>The standard approach in machine learning is to assume data is <strong>I.I.D.</strong> (Independent and Identically Distributed). Under this assumption, the joint probability of training data \(Y\) and test data \(Y^*\) factors into independent products:</p>
+
+      <div class="math-block">\( P(\mathbf{Y}, \mathbf{Y}^*) = \prod_{i} P(y_i) \prod_{j} P(y^*_j) \)</div>
+
+      <p><strong>The Problem:</strong> This is a model of <em>noise</em>, not a model of data. It fails to explicitly model the relationship between \(y\) and \(y^*\). All the dependency must be artificially crammed into deterministic parameters (like weights in a neural network, \(w\)).</p>
+      <p><strong>Why do we use IID?</strong> For <em>algorithms</em>. Making an IID assumption makes the math easier (e.g., stochastic gradient descent, convex optimization).</p>
+      <p>Gaussian Processes reject this. They specify the full joint distribution directly: \(P(Y^* | Y)\). We define how correlated our training and test data are, allowing for extremely powerful, data-efficient models in low-data regimes.</p>
+
+      <div class="tag-row">
+        <span class="tag-pill">Independent &amp; Identically Distributed</span>
+        <span class="tag-pill">Joint Distributions</span>
+        <span class="tag-pill">Model vs. Algorithm</span>
+      </div>
+    </section>
+
+    <!-- §3 -->
+    <section class="note-section" id="s3">
+      <div class="sec-header">
+        <span class="sec-num">03</span>
+        <h2>What is a Gaussian Process?</h2>
+      </div>
+
+      <p>Instead of putting a probability distribution over parameters (like \(m\) and \(c\)), a Gaussian Process puts a probability distribution over the <strong>entire class of functions</strong>. A GP is formally defined as a collection of random variables, any finite number of which have a joint Gaussian distribution.</p>
+
+      <div class="callout callout-blue">
+        <h4>Marginalization Property</h4>
+        <p>GPs work mathematically because of marginalization. If you have a joint distribution of 25 points, finding the marginal distribution of just 2 points is trivial in Gaussians: you just take the relevant sub-matrix of the covariance matrix. This allows us to scale to infinite dimensions.</p>
+      </div>
+
+      <p><strong>The Magic of Correlation:</strong> If you sample 25 independent points from a standard Gaussian, you get noise. But if you sample 25 points from a Gaussian where <em>neighboring points are highly correlated</em>, you begin to hallucinate a smooth shape. This is the essence of a GP.</p>
+
+      <!-- Visualizer 1 -->
+      <div class="viz-wrap">
+        <h4>Interactive GP Sampler — Hallucinating Shape from Correlation</h4>
+        <p class="hint">Adjust length scale and variance, then sample new functions.</p>
+        <canvas id="gpCanvas" height="220"></canvas>
+        <div class="slider-row">
+          <div class="slider-group">
+            <label>Length Scale \(l\): <strong id="lVal">1.0</strong></label>
+            <input type="range" id="lSlider" min="0.1" max="5.0" step="0.1" value="1.0">
+            <p>Controls how far correlation stretches on the X-axis.</p>
+          </div>
+          <div class="slider-group">
+            <label>Variance \(\alpha^2\): <strong id="aVal">1.0</strong></label>
+            <input type="range" id="aSlider" min="0.1" max="5.0" step="0.1" value="1.0">
+            <p>Controls the amplitude/scale on the Y-axis.</p>
+          </div>
         </div>
+        <button class="viz-btn" id="resampleBtn">Sample New Function</button>
+      </div>
 
-        <!-- Row 2: Modeling and IID -->
-        <div class="note-row">
-            <div class="cue-column">
-                <h2 class="text-xl text-blue-700">2. The I.I.D. Assumption</h2>
-                <ul class="mt-4 space-y-2 text-sm text-gray-500 font-normal">
-                    <li>Independent and Identically Distributed</li>
-                    <li>Model vs. Algorithm</li>
-                    <li>Modeling Joint Distributions</li>
-                </ul>
-            </div>
-            <div class="content-column">
-                <h3 class="text-2xl font-bold mb-4">Why I.I.D. is Philosophically Flawed</h3>
-                <p class="mb-4">
-                    The standard approach in machine learning is to assume data is <strong>I.I.D.</strong> (Independent
-                    and Identically Distributed). Under this assumption, the joint probability of training data \(Y\)
-                    and test data \(Y^*\) factors into independent products:
-                </p>
-                <div class="bg-gray-100 p-4 rounded-md overflow-x-auto text-center mb-4">
-                    \( P(\mathbf{Y}, \mathbf{Y}^*) = \prod_{i} P(y_i) \prod_{j} P(y^*_j) \)
-                </div>
-                <p class="mb-4">
-                    <strong>The Problem:</strong> This is a model of <em>noise</em>, not a model of data. It fails to
-                    explicitly model the relationship between \(y\) and \(y^*\). All the dependency must be artificially
-                    crammed into deterministic parameters (like weights in a neural network, \(w\)).
-                </p>
-                <p class="mb-4">
-                    <strong>Why do we use IID?</strong> For <em>algorithms</em>. Making an IID assumption makes the math
-                    easier (e.g., stochastic gradient descent, convex optimization).
-                </p>
-                <p>
-                    Gaussian Processes reject this. They specify the full joint distribution directly: \(P(Y^* | Y)\).
-                    We define how correlated our training and test data are, allowing for extremely powerful,
-                    data-efficient models in low-data regimes.
-                </p>
-            </div>
+      <div class="tag-row">
+        <span class="tag-pill">Distribution over Functions</span>
+        <span class="tag-pill">High-dimensional Gaussians</span>
+        <span class="tag-pill">Marginalization</span>
+      </div>
+    </section>
+
+    <!-- §4 -->
+    <section class="note-section" id="s4">
+      <div class="sec-header">
+        <span class="sec-num">04</span>
+        <h2>The Covariance Function</h2>
+      </div>
+
+      <p>Where does the correlation matrix come from? We build it using a <strong>Covariance Function</strong> (or Kernel). Given any two inputs \(x_1\) and \(x_2\), this function outputs their covariance — how correlated their \(y\) values should be.</p>
+
+      <div class="math-block">\( k(x_i, x_j) = \alpha^2 \exp\left( - \frac{(x_i - x_j)^2}{2l^2} \right) \)</div>
+
+      <ul>
+        <li><strong>Distance-based:</strong> If \(x_i\) and \(x_j\) are identical, distance is 0, \(e^0 = 1\), correlation is max (\(\alpha^2\)). As distance increases, correlation drops toward 0.</li>
+        <li><strong>Length Scale \(l\):</strong> Defines "how close is close". Large \(l\) means distant points are still highly correlated (stretches the function horizontally). If \(l \to 0\), we get white noise. If \(l \to \infty\), we get flat constant functions.</li>
+        <li><strong>Scale/Variance \(\alpha\):</strong> Determines the average deviation of the function from the mean.</li>
+      </ul>
+
+      <p>When a new test point \(x^*\) comes in, we calculate its correlation with all existing training points \(X\) by passing them through this kernel to build the test-train covariance vector.</p>
+
+      <div class="tag-row">
+        <span class="tag-pill">Kernel Matrix</span>
+        <span class="tag-pill">Squared Exponential</span>
+        <span class="tag-pill">Positive Definite</span>
+      </div>
+    </section>
+
+    <!-- §5 -->
+    <section class="note-section" id="s5">
+      <div class="sec-header">
+        <span class="sec-num">05</span>
+        <h2>Conditioning &amp; Inference</h2>
+      </div>
+
+      <p>Imagine the joint distribution of two highly correlated points \(f_1\) and \(f_2\) as a 3D hill. If viewed from the top, it looks like an elongated diagonal ridge (contour oval).</p>
+      <p><strong>Inference:</strong> If we <em>observe</em> \(f_1\), we are specifying a coordinate. We "slice" through the mountain at that coordinate. The resulting 1D slice (renormalized) gives us our updated (conditional) Gaussian distribution for \(f_2\).</p>
+
+      <!-- Visualizer 2 -->
+      <div class="viz-wrap">
+        <h4>Interactive 2D Conditioning</h4>
+        <p class="hint">Move the slider to set \(f_1\). Watch the distribution of \(f_2\) update based on correlation.</p>
+        <div class="canvas-pair">
+          <div>
+            <p class="clabel">Joint 2D Distribution</p>
+            <canvas id="contourCanvas" height="200"></canvas>
+          </div>
+          <div>
+            <p class="clabel">Conditional \( P(f_2 | f_1) \)</p>
+            <canvas id="sliceCanvas" height="200"></canvas>
+          </div>
         </div>
-
-        <!-- Row 3: Gaussian Processes Concept -->
-        <div class="note-row">
-            <div class="cue-column">
-                <h2 class="text-xl text-blue-700">3. What is a GP?</h2>
-                <ul class="mt-4 space-y-2 text-sm text-gray-500 font-normal">
-                    <li>Distribution over functions</li>
-                    <li>High-dimensional Gaussians</li>
-                    <li>Hallucinating shape from correlation</li>
-                    <li>Marginalization Property</li>
-                </ul>
-            </div>
-            <div class="content-column">
-                <h3 class="text-2xl font-bold mb-4">A Distribution Over Functions</h3>
-                <p class="mb-4">
-                    Instead of putting a probability distribution over parameters (like \(m\) and \(c\)), a Gaussian
-                    Process puts a probability distribution over the <strong>entire class of functions</strong>. A GP is
-                    formally defined as a collection of random variables, any finite number of which have a joint
-                    Gaussian distribution.
-                </p>
-
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
-                    <div>
-                        <h4 class="font-bold mb-2">The Magic of Correlation</h4>
-                        <p class="text-sm">
-                            If you sample 25 independent points from a standard Gaussian, you get noise. But if you
-                            sample 25 points from a Gaussian where <em>neighboring points are highly correlated</em>,
-                            you begin to hallucinate a smooth shape. This is the essence of a GP.
-                        </p>
-                    </div>
-                    <div class="bg-blue-50 p-4 rounded-md">
-                        <h4 class="font-bold text-blue-800 text-sm mb-2">Marginalization Property</h4>
-                        <p class="text-xs">
-                            GPs work mathematically because of marginalization. If you have a joint distribution of 25
-                            points, finding the marginal distribution of just 2 points is trivial in Gaussians: you just
-                            take the relevant sub-matrix of the covariance matrix. This allows us to scale to infinite
-                            dimensions.
-                        </p>
-                    </div>
-                </div>
-
-                <!-- Visualizer 1 -->
-                <div class="bg-white p-6 rounded-lg shadow-sm border border-gray-200">
-                    <h4 class="font-bold mb-4 text-center">Interactive GP Sampler (Hallucinating Shape)</h4>
-                    <p class="text-sm text-gray-600 mb-4 text-center">Adjusting the correlation between points creates
-                        smooth functions from random Gaussian noise.</p>
-
-                    <canvas id="gpCanvas" height="250" class="interactive-canvas mb-4"></canvas>
-
-                    <div class="grid grid-cols-2 gap-4">
-                        <div>
-                            <label class="block text-sm font-bold text-gray-700">Length Scale (\(l\)): <span
-                                    id="lVal">1.0</span></label>
-                            <input type="range" id="lSlider" min="0.1" max="5.0" step="0.1" value="1.0" class="w-full">
-                            <p class="text-xs text-gray-500">Controls how far correlation stretches on the X-axis.</p>
-                        </div>
-                        <div>
-                            <label class="block text-sm font-bold text-gray-700">Variance (\(\alpha^2\)): <span
-                                    id="aVal">1.0</span></label>
-                            <input type="range" id="aSlider" min="0.1" max="5.0" step="0.1" value="1.0" class="w-full">
-                            <p class="text-xs text-gray-500">Controls the amplitude/scale on the Y-axis.</p>
-                        </div>
-                    </div>
-                    <button id="resampleBtn"
-                        class="mt-4 w-full bg-blue-600 text-white font-semibold py-2 px-4 rounded hover:bg-blue-700 transition">Sample
-                        New Function</button>
-                </div>
-            </div>
+        <div class="slider-row">
+          <div class="slider-group">
+            <label>Observe \(f_1\): <strong id="f1Val">0.0</strong></label>
+            <input type="range" id="f1Slider" min="-3.0" max="3.0" step="0.1" value="0.0">
+          </div>
+          <div class="slider-group">
+            <label>Correlation \(k_{12}\): <strong id="corVal">0.80</strong></label>
+            <input type="range" id="corSlider" min="-0.99" max="0.99" step="0.01" value="0.80">
+          </div>
         </div>
+      </div>
 
-        <!-- Row 4: Covariance Matrices -->
-        <div class="note-row">
-            <div class="cue-column">
-                <h2 class="text-xl text-blue-700">4. The Covariance Function</h2>
-                <ul class="mt-4 space-y-2 text-sm text-gray-500 font-normal">
-                    <li>Kernel Matrix</li>
-                    <li>Squared Exponential Kernel</li>
-                    <li>Positive Definite requirement</li>
-                </ul>
-            </div>
-            <div class="content-column">
-                <h3 class="text-2xl font-bold mb-4">Building the Structure</h3>
-                <p class="mb-4">
-                    Where does the correlation matrix come from? We build it using a <strong>Covariance
-                        Function</strong> (or Kernel). Given any two inputs \(x_1\) and \(x_2\), this function outputs
-                    their covariance (how correlated their \(y\) values should be).
-                </p>
+      <h3 style="font-size:.92rem;font-weight:600;margin:1.2rem 0 .6rem">The Mathematics of Inference</h3>
+      <p>For predicting a single test point \(f_2\) from training point \(f_1\):</p>
+      <div class="math-block">
+        \( \mu_{2|1} = f_1 \frac{k_{12}}{k_{11}} \)
+        <br/><br/>
+        \( \sigma^2_{2|1} = k_{22} - \frac{k_{12}^2}{k_{11}} \)
+      </div>
+      <p>For the general multivariate case (predicting \(\mathbf{f}^*\) given \(\mathbf{f}\)):</p>
+      <div class="math-block">
+        \( \mu^* = K_{**} K^{-1} \mathbf{f} \)
+        <br/><br/>
+        \( \Sigma^* = K_{***} - K_{**} K^{-1} K_{**}^T \)
+      </div>
 
-                <div class="bg-gray-100 p-4 rounded-md overflow-x-auto text-center mb-6">
-                    \( k(x_i, x_j) = \alpha^2 \exp\left( - \frac{(x_i - x_j)^2}{2l^2} \right) \)
-                </div>
+      <div class="callout callout-red">
+        <h4>The Computational Catch</h4>
+        <p>Finding \(K^{-1}\) takes \(O(N^3)\) time, where \(N\) is the number of training data points. This cubic complexity is the primary limitation of Gaussian Processes.</p>
+      </div>
 
-                <ul class="list-disc pl-6 mb-6 space-y-2">
-                    <li><strong>Distance-based:</strong> If \(x_i\) and \(x_j\) are identical, distance is 0, \(e^0 =
-                        1\), correlation is max (\(\alpha^2\)). As distance increases, correlation drops toward 0.</li>
-                    <li><strong>Length Scale (\(l\)):</strong> Defines "how close is close". Large \(l\) means distant
-                        points are still highly correlated (stretches the function horizontally). If \(l \to 0\), we get
-                        white noise. If \(l \to \infty\), we get flat constant functions.</li>
-                    <li><strong>Scale/Variance (\(\alpha\)):</strong> Determines the average deviation of the function
-                        from the mean.</li>
-                </ul>
+      <div class="tag-row">
+        <span class="tag-pill">Posterior Mean &amp; Variance</span>
+        <span class="tag-pill">Matrix Inversion</span>
+        <span class="tag-pill">O(N³) Complexity</span>
+      </div>
+    </section>
 
-                <p>
-                    When a new test point \(x^*\) comes in, we calculate its correlation with all existing training
-                    points \(X\) by passing them through this kernel to build the test-train covariance vector.
-                </p>
-            </div>
+    <!-- §6 -->
+    <section class="note-section" id="s6">
+      <div class="sec-header">
+        <span class="sec-num">06</span>
+        <h2>Model Confidence</h2>
+      </div>
+
+      <p>As you get more data points that are very close together relative to the length scale (\(l\)), the model's uncertainty variance collapses to near zero. It becomes incredibly confident about what the function does between those points.</p>
+      <p><strong>Why does this happen?</strong> Because a stationary kernel (like the Squared Exponential) acts like a low-pass filter in Fourier space. It essentially says, "I assume there are no high frequencies in this function." Similar to the <em>Nyquist sampling theorem</em>, if the model assumes a strict band-limit, and you sample densely enough, the model "knows" it can perfectly reconstruct the function.</p>
+
+      <div class="callout callout-red">
+        <h4>All Models Are Wrong</h4>
+        <p>In reality, predicting with 100% confidence is dangerous. If your error bars collapse entirely, it usually means your data is rich enough to expose the flaws in your original model assumptions. A good probabilistic modeler knows that the GP's extreme confidence is an artifact of the chosen kernel, not necessarily a reflection of reality.</p>
+      </div>
+
+      <div class="tag-row">
+        <span class="tag-pill">Collapsing Error Bars</span>
+        <span class="tag-pill">Nyquist Theorem</span>
+        <span class="tag-pill">Model Misspecification</span>
+      </div>
+    </section>
+
+    <!-- §6.5 -->
+    <section class="note-section" id="s65">
+      <div class="sec-header">
+        <span class="sec-num">6.5</span>
+        <h2>Interpreting Error Bars</h2>
+      </div>
+
+      <p>A critical point from the lecture: <strong>The mean function of a GP is an average, but no single generated sample will ever look like the mean.</strong> When visualizing a GP, we typically draw a solid line for the mean and shaded regions for the variance. If the mean line is perfectly flat between data points, people mistakenly think the model predicts a flat function. It doesn't!</p>
+
+      <div class="callout callout-yellow">
+        <h4>📌 Marginal vs. Joint Error Bars</h4>
+        <p>The shaded variance regions we plot are <strong>Marginal Error Bars</strong>. This means they only tell you the vertical uncertainty at one specific point \(x\), ignoring the rest of the function.</p>
+        <br/>
+        <p>However, the points are highly correlated (Joint Distribution). If you know the actual function hits the very top of the error bar at \(x_1\), the correlation means it <em>must</em> also be near the top at a nearby \(x_2\). Marginal error bars hide this joint relationship. To truly see what the GP believes, you must draw wavy <strong>samples</strong> from the joint distribution.</p>
+      </div>
+
+      <div class="tag-row">
+        <span class="tag-pill">Marginal vs. Joint</span>
+        <span class="tag-pill">Sampling from GP</span>
+      </div>
+    </section>
+
+    <!-- §7 -->
+    <section class="note-section" id="s7">
+      <div class="sec-header">
+        <span class="sec-num">07</span>
+        <h2>Statistics vs. Machine Learning</h2>
+      </div>
+
+      <ul>
+        <li><strong>Statistics (Interpretation First):</strong> Statisticians care deeply about the parameters (often denoted as \(\beta\)). For example, in an epidemiological model, they want to isolate the exact effect size of "smoking" on heart disease rates. They want the noise term (\(\epsilon\)) to be as close to white noise as possible.</li>
+        <li><strong>Machine Learning (Prediction First):</strong> ML practitioners treat parameters (often \(w\)) as a means to an end. We care less about isolating the exact "smoking coefficient" and more about accurately predicting the final output \(y\) for a new user.</li>
+      </ul>
+
+      <div class="callout callout-indigo">
+        <h4>GPs in Spatial Statistics</h4>
+        <p>Statisticians frequently use GPs, but often model the <em>noise</em> (\(\epsilon\)) as a GP rather than the primary function. If two patients live in the same neighborhood and have unexplained similar heart disease rates, a statistician will use a spatial GP to absorb that spatially correlated error — allowing them to better isolate the fixed effects (\(\beta\)) they actually care about.</p>
+      </div>
+
+      <div class="tag-row">
+        <span class="tag-pill">Parameters vs. Predictions</span>
+        <span class="tag-pill">Spatially Correlated Noise</span>
+      </div>
+    </section>
+
+    <!-- §8 -->
+    <section class="note-section" id="s8">
+      <div class="sec-header">
+        <span class="sec-num">08</span>
+        <h2>Additive Properties &amp; Noise</h2>
+      </div>
+
+      <p>In the real world, we rarely observe the true underlying function \(f(x)\). We observe a corrupted version: <code>y_i = f(x_i) + ε_i</code></p>
+      <p>If we assume \(\epsilon_i\) is independent Gaussian noise with variance \(\sigma^2\), incorporating this into our GP is trivial due to a beautiful property of Gaussian distributions:</p>
+
+      <blockquote>"If you have two Gaussian random variables and you add them together, the sum is also distributed as a Gaussian, and its covariance is the sum of their individual covariances: \(K_{sum} = K_1 + K_2\)."</blockquote>
+
+      <p>Because I.I.D. noise only correlates a point with itself, its covariance matrix is simply \(\sigma^2 I\). Therefore, to add noise to our GP model, we simply add \(\sigma^2\) to the diagonal of our kernel matrix:</p>
+
+      <div class="math-block">\( K_y = K_f + \sigma^2 I \)</div>
+
+      <div class="tag-row">
+        <span class="tag-pill">Summing Gaussians</span>
+        <span class="tag-pill">Observational Noise</span>
+        <span class="tag-pill">Diagonal Regularization</span>
+      </div>
+    </section>
+
+    <!-- §9 -->
+    <section class="note-section" id="s9">
+      <div class="sec-header">
+        <span class="sec-num">09</span>
+        <h2>The Core Challenges of GPs</h2>
+      </div>
+
+      <ol>
+        <li><strong>Computational Issues \(O(N^3)\):</strong> To make predictions, we must invert the training covariance matrix \(K\). Matrix inversion scales cubically with the number of data points. For large datasets, this becomes computationally intractable.</li>
+        <li><strong>Designing the Covariance Function:</strong> The kernel is where all the modeling happens. Choosing the wrong kernel means making the wrong assumptions about your data. For complex scenarios, designing the kernel is an art.</li>
+        <li><strong>Handling Multiple Outputs:</strong> If you are predicting the stock prices of two interacting companies, you need a kernel that takes both time and the stock index as inputs. You can use <em>separable covariance functions</em> (multiplying a time kernel by a stock-relationship kernel), or build richer cross-correlating functions.</li>
+        <li><strong>Non-Gaussian Data:</strong> What if your data is binary (classification) or counts (Poisson)? The elegant linear algebra of GPs breaks down when the likelihood function is no longer Gaussian.</li>
+      </ol>
+
+      <div class="callout callout-yellow">
+        <h4>📌 Separable Kernels for Multi-Output</h4>
+        <p>A separable kernel simply multiplies kernels for different input types:</p>
+        <div class="math-block">\( K((t_1, i_1), (t_2, i_2)) = K_{time}(t_1, t_2) \times K_{stock}(i_1, i_2) \)</div>
+        <p>In matrix algebra, this uses the <strong>Kronecker Product \(\otimes\)</strong>. It is highly computationally efficient but fails to capture complex delayed correlations (e.g., Stock A going down today causing Stock B to go down tomorrow).</p>
+      </div>
+
+      <div class="tag-row">
+        <span class="tag-pill">Non-Gaussian Data</span>
+        <span class="tag-pill">O(N³) Complexity</span>
+        <span class="tag-pill">Kernel Design</span>
+        <span class="tag-pill">Multiple Outputs</span>
+      </div>
+    </section>
+
+    <!-- §10 -->
+    <section class="note-section" id="s10">
+      <div class="sec-header">
+        <span class="sec-num">10</span>
+        <h2>Non-Gaussian Data &amp; Link Functions</h2>
+      </div>
+
+      <p>To model non-Gaussian data (like counts or binary classes), we borrow concepts from <strong>Generalized Linear Models (GLMs)</strong>. We use a GP to model a latent (hidden) function, and then pass that function through a non-linear <em>transformation function</em> to map it to our desired output space.</p>
+
+      <ul>
+        <li><strong>Poisson (Count Data):</strong> We model \(\log(\lambda) = f(x)\). The transformation is \(\lambda = \exp(f(x))\). Note: This makes the model multiplicative in its effects!</li>
+        <li><strong>Logistic/Sigmoid (Classification):</strong> We model the log-odds. The transformation is \( P(y=1) = \frac{1}{1 + \exp(-f(x))} \).</li>
+        <li><strong>Probit (Classification):</strong> We use the cumulative Gaussian function instead of a sigmoid. It looks similar but falls off quadratically rather than linearly in the tails, making the math slightly easier for GPs.</li>
+      </ul>
+
+      <div class="callout callout-red">
+        <h4>The Clash: Prior vs. Likelihood</h4>
+        <p>Bayesian inference is conceptually simple: <strong>Prior × Likelihood = Posterior</strong>. However, if your prior is Gaussian, but your likelihood is a Probit or Sigmoid step-function, their product is a <strong>skewed, non-Gaussian shape</strong>. Because it is no longer Gaussian, we lose our exact mathematical tractability.</p>
+        <br/>
+        <p><strong>The Solution? Approximation.</strong> Methods like Expectation Propagation (EP), Laplace Approximation, and Variational Inference attempt to fit a new "false" Gaussian that closely matches this skewed true posterior.</p>
+      </div>
+
+      <div class="callout callout-yellow">
+        <h4>📌 EP vs. Variational vs. Laplace</h4>
+        <ul>
+          <li><strong>Expectation Propagation (EP):</strong> Minimizes \(KL(\text{True} || \text{Approx})\) — "Moment Matching". The Gaussian will stretch to cover the entire mass/tails of the true distribution. Preferred for GP classification.</li>
+          <li><strong>Variational Inference (VI):</strong> Minimizes \(KL(\text{Approx} || \text{True})\) — "Zero-Forcing". The Gaussian approximation squeezes itself inside the tallest peak, often leading to severely underestimated variance.</li>
+          <li><strong>Laplace Approximation:</strong> Finds the peak (mode) of the skewed posterior using gradient ascent, then uses a Taylor Expansion (Hessian at the peak) to fit a Gaussian curve. Fast but can be inaccurate for heavily skewed distributions.</li>
+        </ul>
+      </div>
+
+      <!-- Visualizer 3 -->
+      <div class="viz-wrap">
+        <h4>Interactive: Approximating a Skewed Posterior</h4>
+        <p class="hint">Observe \(y=1\) → Likelihood pushes probability right. The Gaussian Prior × Likelihood creates a skewed True Posterior. Move the prior to see the effect.</p>
+        <div class="legend-row">
+          <span class="legend-item"><span class="legend-swatch" style="background:#3b82f6"></span>Prior \(\mathcal{N}\)</span>
+          <span class="legend-item"><span class="legend-swatch" style="background:#22c55e"></span>Likelihood (Sigmoid)</span>
+          <span class="legend-item"><span class="legend-swatch" style="background:rgba(239,68,68,.35)"></span>True Posterior</span>
+          <span class="legend-item"><span class="legend-swatch" style="border:2px dashed #000;background:transparent"></span>Gaussian Approx</span>
         </div>
-
-        <!-- Row 5: Inference / Slicing the Mountain -->
-        <div class="note-row">
-            <div class="cue-column">
-                <h2 class="text-xl text-blue-700">5. Conditioning & Inference</h2>
-                <ul class="mt-4 space-y-2 text-sm text-gray-500 font-normal">
-                    <li>Slicing the "Mountain"</li>
-                    <li>Posterior Mean & Variance</li>
-                    <li>Linear Algebra Complexity</li>
-                </ul>
-            </div>
-            <div class="content-column">
-                <h3 class="text-2xl font-bold mb-4">Slicing the Mountain (Conditioning)</h3>
-                <p class="mb-4">
-                    Imagine the joint distribution of two highly correlated points \(f_1\) and \(f_2\) as a 3D hill. If
-                    viewed from the top, it looks like an elongated diagonal ridge (contour oval).
-                </p>
-                <p class="mb-4">
-                    <strong>Inference:</strong> If we <em>observe</em> \(f_1\), we are specifying a coordinate. We
-                    "slice" through the mountain at that coordinate. The resulting 1D slice (renormalized) gives us our
-                    updated (conditional) Gaussian distribution for \(f_2\).
-                </p>
-
-                <div class="bg-white p-6 rounded-lg shadow-sm border border-gray-200 mb-6">
-                    <h4 class="font-bold mb-4 text-center">Interactive 2D Conditioning</h4>
-                    <p class="text-sm text-gray-600 mb-4 text-center">Move the slider to set \(f_1\). Watch how the
-                        distribution of \(f_2\) changes based on the correlation.</p>
-
-                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                        <!-- 2D Contour Canvas -->
-                        <div>
-                            <p class="text-xs text-center font-bold mb-1">Joint 2D Distribution</p>
-                            <canvas id="contourCanvas" height="200" class="interactive-canvas"></canvas>
-                        </div>
-                        <!-- 1D Slice Canvas -->
-                        <div>
-                            <p class="text-xs text-center font-bold mb-1">Conditional 1D Dist: \( P(f_2 | f_1) \)</p>
-                            <canvas id="sliceCanvas" height="200" class="interactive-canvas"></canvas>
-                        </div>
-                    </div>
-
-                    <div class="mt-4 space-y-4">
-                        <div>
-                            <label class="block text-sm font-bold text-gray-700">Observe \(f_1\): <span
-                                    id="f1Val">0.0</span></label>
-                            <input type="range" id="f1Slider" min="-3.0" max="3.0" step="0.1" value="0.0"
-                                class="w-full">
-                        </div>
-                        <div>
-                            <label class="block text-sm font-bold text-gray-700">Correlation (\(k_{12}\)): <span
-                                    id="corVal">0.80</span></label>
-                            <input type="range" id="corSlider" min="-0.99" max="0.99" step="0.01" value="0.80"
-                                class="w-full">
-                        </div>
-                    </div>
-                </div>
-
-                <h4 class="font-bold mb-2">The Mathematics of Inference</h4>
-                <p class="mb-4 text-sm">For predicting a single test point \(f_2\) from training point \(f_1\):</p>
-                <div class="bg-gray-100 p-4 rounded-md overflow-x-auto mb-4 text-sm">
-                    \( \mu_{2|1} = f_1 \frac{k_{12}}{k_{11}} \)
-                    <br><br>
-                    \( \sigma^2_{2|1} = k_{22} - \frac{k_{12}^2}{k_{11}} \)
-                </div>
-
-                <p class="mb-4 text-sm">For the general multivariate case (predicting \(\mathbf{f}^*\) given
-                    \(\mathbf{f}\)):</p>
-                <div class="bg-gray-100 p-4 rounded-md overflow-x-auto text-sm">
-                    \( \mu^* = K_{**} K^{-1} \mathbf{f} \)
-                    <br><br>
-                    \( \Sigma^* = K_{***} - K_{**} K^{-1} K_{**}^T \)
-                </div>
-                <p class="mt-2 text-sm text-red-600">
-                    <strong>The Computational Catch:</strong> Finding \(K^{-1}\) takes \(O(N^3)\) time, where \(N\) is
-                    the number of training data points. This cubic complexity is the primary limitation of Gaussian
-                    Processes.
-                </p>
-            </div>
+        <canvas id="approxCanvas" height="240"></canvas>
+        <div class="slider-group" style="margin-top:.9rem">
+          <label>Prior Mean \(\mu_{prior}\): <strong id="priorVal">0.0</strong></label>
+          <input type="range" id="priorSlider" min="-3.0" max="3.0" step="0.1" value="0.0">
+          <p>Move the prior. Watch the True Posterior skew and the Approximation attempt to match its mass.</p>
         </div>
+      </div>
 
-        <!-- Row 6: Overfitting and Confidence -->
-        <div class="note-row">
-            <div class="cue-column">
-                <h2 class="text-xl text-blue-700">6. Model Confidence</h2>
-                <ul class="mt-4 space-y-2 text-sm text-gray-500 font-normal">
-                    <li>Collapsing Error Bars</li>
-                    <li>Model vs. Reality</li>
-                    <li>Nyquist Sampling Theory connection</li>
-                </ul>
+      <div class="tag-row">
+        <span class="tag-pill">Link Functions</span>
+        <span class="tag-pill">Sigmoid / Probit</span>
+        <span class="tag-pill">EP vs. Variational</span>
+        <span class="tag-pill">KL Divergence</span>
+      </div>
+    </section>
+
+    <!-- §11 -->
+    <section class="note-section" id="s11">
+      <div class="sec-header">
+        <span class="sec-num">11</span>
+        <h2>Parameter Optimization</h2>
+      </div>
+
+      <p>Unlike standard kernel methods where you might find kernel parameters via cross-validation, in GPs we optimize them directly using the marginal likelihood (often called <strong>Type II Maximum Likelihood</strong>). The goal is to find the parameters (like length scale \(l\), variance \(\alpha^2\), and noise \(\sigma^2\)) that maximize the probability of the data we observed.</p>
+
+      <div class="math-block">\( \log P(\mathbf{y} | X) = -\frac{1}{2} \mathbf{y}^T K^{-1} \mathbf{y} - \frac{1}{2} \log |K| - \frac{N}{2} \log 2\pi \)</div>
+
+      <ul>
+        <li><strong>\(-\frac{1}{2} \mathbf{y}^T K^{-1} \mathbf{y}\) (Data Fit):</strong> This term penalizes the model if it doesn't fit the data well.</li>
+        <li><strong>\(-\frac{1}{2} \log |K|\) (Model Capacity):</strong> This is a complexity penalty. It penalizes the model for being too flexible or complex — an automatic Occam's Razor preventing overfitting.</li>
+      </ul>
+
+      <div class="callout callout-red">
+        <h4>The Non-Convex Optimization Problem</h4>
+        <p>While the optimization problem is convex with respect to the full covariance matrix \(K\) (if constrained to be positive definite), it is <strong>highly non-convex</strong> with respect to the hyperparameters (like \(l\) and \(\alpha\)) buried <em>inside</em> the kernel function. Practitioners must use techniques like gradient descent with multiple restarts to find a good set of hyperparameters.</p>
+      </div>
+
+      <div class="callout callout-yellow">
+        <h4>📌 What is the Determinant \(|K|\)?</h4>
+        <p>The determinant of \(K\) roughly measures the "volume" of uncertainty. If data points are highly uncorrelated (like white noise), the matrix is mostly diagonal, the volume is large, and the model is highly flexible — it can fit anything, but explains nothing. If data points are highly correlated, the determinant shrinks towards zero, and the model is very rigid (low capacity).</p>
+      </div>
+
+      <div class="tag-row">
+        <span class="tag-pill">Type II Maximum Likelihood</span>
+        <span class="tag-pill">Non-Convex Optimization</span>
+        <span class="tag-pill">Occam's Razor</span>
+      </div>
+    </section>
+
+    <!-- §12 -->
+    <section class="note-section" id="s12">
+      <div class="sec-header">
+        <span class="sec-num">12</span>
+        <h2>Geometry of the Objective</h2>
+      </div>
+
+      <p>If we break down the covariance matrix \(K\) using an eigendecomposition, we get \(K = R \Lambda R^T\), where \(R\) represents a rotation and \(\Lambda\) is a diagonal matrix of eigenvalues (representing length/scale in each direction).</p>
+
+      <ul>
+        <li><strong>The Capacity Term \(-\frac{1}{2} \log |K|\):</strong> The determinant \(|K|\) is exactly the product of its eigenvalues. Geometrically, this is the <em>volume</em> of the multidimensional Gaussian contour. A model with high volume (e.g., very short length scale, acting like white noise) can explain any dataset, but it is penalized heavily here.</li>
+        <li><strong>The Data Fit Term \(-\frac{1}{2} \mathbf{y}^T K^{-1} \mathbf{y}\):</strong> Think of this as the actual data vector \(\mathbf{y}\) sitting in space. The model tries to "rotate" its covariance ellipse and stretch its axes to encompass that data point efficiently.</li>
+      </ul>
+
+      <!-- Visualizer 4 -->
+      <div class="viz-wrap">
+        <h4>Interactive: The Marginal Likelihood Trade-off</h4>
+        <p class="hint">Adjust the length scale. A short \(l\) fits the data perfectly but suffers a massive complexity penalty. The optimal model sits in the "Goldilocks" zone.</p>
+        <div class="canvas-pair">
+          <div>
+            <p class="clabel">GP Fit to Data</p>
+            <canvas id="fitCanvas" height="180"></canvas>
+          </div>
+          <div>
+            <p class="clabel">Log Marginal Likelihood Components</p>
+            <canvas id="mlCanvas" height="180"></canvas>
+            <div class="legend-row" style="margin-top:.5rem;margin-bottom:0">
+              <span class="legend-item"><span class="legend-swatch" style="background:#ef4444"></span>Data Fit</span>
+              <span class="legend-item"><span class="legend-swatch" style="background:#3b82f6"></span>Complexity</span>
+              <span class="legend-item"><span class="legend-swatch" style="background:#000"></span>Total LML</span>
             </div>
-            <div class="content-column">
-                <h3 class="text-2xl font-bold mb-4">When Error Bars Collapse</h3>
-                <p class="mb-4">
-                    As you get more data points that are very close together relative to the length scale (\(l\)), the
-                    model's uncertainty variance collapses to near zero. It becomes incredibly confident about what the
-                    function does between those points.
-                </p>
-                <p class="mb-4">
-                    <strong>Why does this happen?</strong> Because a stationary kernel (like the Squared Exponential)
-                    acts like a low-pass filter in Fourier space. It essentially says, "I assume there are no high
-                    frequencies in this function." Similar to the <em>Nyquist sampling theorem</em>, if the model
-                    assumes a strict band-limit, and you sample densely enough, the model "knows" it can perfectly
-                    reconstruct the function.
-                </p>
-                <div class="bg-red-50 p-6 rounded-lg border border-red-100">
-                    <h4 class="font-bold text-red-800 mb-2">All Models Are Wrong</h4>
-                    <p class="text-sm">
-                        In reality, predicting with 100% confidence is dangerous. If your error bars collapse entirely,
-                        it usually means your data is rich enough to expose the flaws in your original model
-                        assumptions. A good probabilistic modeler knows that the GP's extreme confidence is an artifact
-                        of the chosen kernel, not necessarily a reflection of reality. Always be aware that your model
-                        might be wrong!
-                    </p>
-                </div>
-            </div>
+          </div>
         </div>
-
-        <!-- Row 6.5: Interpreting Error Bars -->
-        <div class="note-row">
-            <div class="cue-column">
-                <h2 class="text-xl text-blue-700">6.5. Interpreting Error Bars</h2>
-                <ul class="mt-4 space-y-2 text-sm text-gray-500 font-normal">
-                    <li>Marginal vs. Joint Uncertainty</li>
-                    <li>The "Mean" Illusion</li>
-                </ul>
-            </div>
-            <div class="content-column">
-                <h3 class="text-2xl font-bold mb-4">You Will Never Sample the Mean</h3>
-                <p class="mb-4">
-                    A critical point from the lecture: <strong>The mean function of a GP is an average, but no single
-                        generated sample will ever look like the mean.</strong> When visualizing a GP, we typically draw
-                    a solid line for the mean and shaded regions for the variance. If the mean line is perfectly flat
-                    between data points, people mistakenly think the model predicts a flat function. It doesn't! A flat
-                    mean just means the model expects the function to oscillate equally above and below that line.
-                </p>
-
-                <div class="bg-yellow-50 p-6 rounded-lg border border-yellow-200 mb-6">
-                    <h4 class="font-bold text-yellow-800 mb-2">📌 Additional Foundation: Marginal vs. Joint Error Bars
-                    </h4>
-                    <p class="text-sm mb-4">
-                        The shaded variance regions we plot are <strong>Marginal Error Bars</strong>. This means they
-                        only tell you the vertical uncertainty at one specific point \(x\), ignoring the rest of the
-                        function.
-                    </p>
-                    <p class="text-sm">
-                        However, the points are highly correlated (Joint Distribution). If you know the actual function
-                        hits the very top of the error bar at \(x_1\), the correlation means it <em>must</em> also be
-                        near the top at a nearby \(x_2\). Marginal error bars hide this joint relationship. To truly see
-                        what the GP believes, you must draw wavy <strong>samples</strong> from the joint distribution,
-                        rather than just staring at the static marginal bounds.
-                    </p>
-                </div>
-            </div>
+        <div class="slider-group" style="margin-top:.9rem">
+          <label>Length Scale \(l\): <strong id="lmlVal">1.0</strong></label>
+          <input type="range" id="lmlSlider" min="0.1" max="3.0" step="0.05" value="1.0">
         </div>
-
-        <!-- Row 7: Stats vs Machine Learning -->
-        <div class="note-row">
-            <div class="cue-column">
-                <h2 class="text-xl text-blue-700">7. Stats vs. Machine Learning</h2>
-                <ul class="mt-4 space-y-2 text-sm text-gray-500 font-normal">
-                    <li>Parameters vs. Predictions</li>
-                    <li>Interpretation (\(\beta\))</li>
-                    <li>Spatially Correlated Noise</li>
-                </ul>
-            </div>
-            <div class="content-column">
-                <h3 class="text-2xl font-bold mb-4">Differing Philosophies</h3>
-                <p class="mb-4">
-                    There is a fundamental difference in how statisticians and machine learning practitioners view
-                    models. Neither group is wrong; their goals dictate their methods.
-                </p>
-                <ul class="list-disc pl-6 mb-6 space-y-4">
-                    <li>
-                        <strong>Statistics (Interpretation First):</strong> Statisticians care deeply about the
-                        parameters (often denoted as \(\beta\)). For example, in an epidemiological model, they want to
-                        isolate the exact effect size of "smoking" on heart disease rates. They want their deterministic
-                        model to capture <em>everything</em>, aiming for the noise term (\(\epsilon\)) to be as close to
-                        zero (or white noise) as possible.
-                    </li>
-                    <li>
-                        <strong>Machine Learning (Prediction First):</strong> ML practitioners typically treat
-                        parameters (often denoted as \(w\)) as a means to an end. We care less about isolating the exact
-                        "smoking coefficient" and more about accurately predicting the final output \(y\) for a new
-                        user.
-                    </li>
-                </ul>
-
-                <div class="bg-indigo-50 p-6 rounded-lg border border-indigo-100">
-                    <h4 class="font-bold text-indigo-800 mb-2">GPs in Spatial Statistics</h4>
-                    <p class="text-sm">
-                        Interestingly, statisticians frequently use Gaussian Processes, but often model the
-                        <em>noise</em> (\(\epsilon\)) as a GP rather than the primary function. If two patients live in
-                        the same neighborhood but have unexplained similar heart disease rates, a statistician will use
-                        a spatial GP to absorb that spatially correlated error. By doing so, they explicitly acknowledge
-                        that unobserved factors are causing spatial correlation, allowing them to better isolate the
-                        fixed effects (\(\beta\)) they actually care about.
-                    </p>
-                </div>
-            </div>
-        </div>
-
-        <!-- Row 8: Noise and Additive Properties -->
-        <div class="note-row">
-            <div class="cue-column">
-                <h2 class="text-xl text-blue-700">8. Additive Properties & Noise</h2>
-                <ul class="mt-4 space-y-2 text-sm text-gray-500 font-normal">
-                    <li>Summing Gaussians</li>
-                    <li>Observational Noise (\(\sigma^2\))</li>
-                </ul>
-            </div>
-            <div class="content-column">
-                <h3 class="text-2xl font-bold mb-4">Adding Noise to the Process</h3>
-                <p class="mb-4">
-                    In the real world, we rarely observe the true underlying function \(f(x)\). We observe a corrupted
-                    version:
-                    <br><br>
-                    <span class="bg-gray-100 px-3 py-1 rounded font-mono text-sm">y_i = f(x_i) + \epsilon_i</span>
-                </p>
-                <p class="mb-4">
-                    If we assume \(\epsilon_i\) is independent Gaussian noise with variance \(\sigma^2\), incorporating
-                    this into our GP is trivial due to a beautiful property of Gaussian distributions:
-                </p>
-
-                <blockquote class="border-l-4 border-blue-500 pl-4 italic text-gray-700 mb-6">
-                    "If you have two Gaussian random variables and you add them together, the sum is also distributed as
-                    a Gaussian, and its covariance is the sum of their individual covariances: \(K_{sum} = K_1 + K_2\)."
-                </blockquote>
-
-                <p class="mb-4">
-                    Because I.I.D. noise only correlates a point with itself, its covariance matrix is simply \(\sigma^2
-                    I\) (the identity matrix scaled by the noise variance). Therefore, to add noise to our GP model, we
-                    simply add \(\sigma^2\) to the diagonal of our kernel matrix:
-                </p>
-
-                <div class="bg-gray-100 p-4 rounded-md overflow-x-auto text-center mb-4">
-                    \( K_y = K_f + \sigma^2 I \)
-                </div>
-            </div>
-        </div>
-
-        <!-- Row 9: The Core Challenges -->
-        <div class="note-row">
-            <div class="cue-column">
-                <h2 class="text-xl text-blue-700">9. The Core Challenges of GPs</h2>
-                <ul class="mt-4 space-y-2 text-sm text-gray-500 font-normal">
-                    <li>Non-Gaussian Data</li>
-                    <li>Computational Complexity</li>
-                    <li>Choosing Covariances</li>
-                    <li>Multiple Outputs</li>
-                </ul>
-            </div>
-            <div class="content-column">
-                <h3 class="text-2xl font-bold mb-4">Where GPs Hit Their Limits</h3>
-                <p class="mb-4">If you are working with Gaussian Processes in practice, you will inevitably run into
-                    three (or four) primary bottlenecks:</p>
-
-                <ol class="list-decimal pl-6 space-y-4 mb-6">
-                    <li>
-                        <strong>Computational Issues (\(O(N^3)\)):</strong> To make predictions, we must invert the
-                        training covariance matrix \(K\). Matrix inversion scales cubically with the number of data
-                        points. For large datasets, this becomes computationally intractable.
-                    </li>
-                    <li>
-                        <strong>Designing the Covariance Function:</strong> The kernel is where all the modeling
-                        happens. Choosing the wrong kernel means making the wrong assumptions about your data. For
-                        complex scenarios, designing the kernel is an art.
-                    </li>
-                    <li>
-                        <strong>Handling Multiple Outputs:</strong> If you are predicting the stock prices of two
-                        interacting companies, you need a kernel that takes both time and the stock index as inputs. You
-                        can use <em>separable covariance functions</em> (multiplying a time kernel by a
-                        stock-relationship kernel), or build richer cross-correlating functions.
-                    </li>
-                    <li>
-                        <strong>Non-Gaussian Data:</strong> What if your data is binary (classification) or counts
-                        (Poisson)? The elegant linear algebra of GPs breaks down when the likelihood function is no
-                        longer Gaussian.
-                    </li>
-                </ol>
-
-                <div class="bg-yellow-50 p-6 rounded-lg border border-yellow-200 mb-6">
-                    <h4 class="font-bold text-yellow-800 mb-2">📌 Additional Foundation: Separable Kernels for
-                        Multi-Output</h4>
-                    <p class="text-sm mb-4">
-                        How do we mathematically combine kernels for completely different types of inputs (e.g., Time
-                        \(t\) and Stock Index \(i\))?
-                    </p>
-                    <p class="text-sm">
-                        A separable kernel simply multiplies them: \( K((t_1, i_1), (t_2, i_2)) = K_{time}(t_1, t_2)
-                        \times K_{stock}(i_1, i_2) \). <br><br>
-                        In matrix algebra, constructing a full covariance matrix this way utilizes the <strong>Kronecker
-                            Product (\(\otimes\))</strong>. This assumes that the temporal correlation (how prices
-                        change over time) is strictly independent of the inter-stock correlation (how Stock A and B
-                        relate generally). It is highly computationally efficient but fails to capture complex delayed
-                        correlations (e.g., Stock A going down today directly causing Stock B to go down tomorrow).
-                    </p>
-                </div>
-            </div>
-        </div>
-
-        <!-- Row 10: Non-Gaussian Likelihoods -->
-        <div class="note-row">
-            <div class="cue-column">
-                <h2 class="text-xl text-blue-700">10. Non-Gaussian Data</h2>
-                <ul class="mt-4 space-y-2 text-sm text-gray-500 font-normal">
-                    <li>Link Functions</li>
-                    <li>Sigmoid / Probit</li>
-                    <li>Skewed Posteriors</li>
-                    <li>Gaussian Approximations (EP)</li>
-                </ul>
-            </div>
-            <div class="content-column">
-                <h3 class="text-2xl font-bold mb-4">Link Functions & Classification</h3>
-                <p class="mb-4">
-                    To model non-Gaussian data (like counts or binary classes), we borrow concepts from
-                    <strong>Generalized Linear Models (GLMs)</strong>. We use a Gaussian Process to model a latent
-                    (hidden) function, and then pass that function through a non-linear <em>transformation function</em>
-                    (the inverse of a link function) to map it to our desired output space.
-                </p>
-
-                <ul class="list-disc pl-6 mb-6 space-y-2 text-sm">
-                    <li><strong>Poisson (Count Data):</strong> We model \(\log(\lambda) = f(x)\). The transformation is
-                        \(\lambda = \exp(f(x))\). Note: This makes the model multiplicative in its effects, which can
-                        trip you up if you expect additive behavior!</li>
-                    <li><strong>Logistic/Sigmoid (Classification):</strong> We model the log-odds. The transformation is
-                        \( P(y=1) = \frac{1}{1 + \exp(-f(x))} \).</li>
-                    <li><strong>Probit (Classification):</strong> We use the cumulative Gaussian function instead of a
-                        sigmoid. It looks similar but falls off quadratically rather than linearly in the tails, making
-                        the math slightly easier for GPs.</li>
-                </ul>
-
-                <div class="bg-red-50 p-6 rounded-lg border border-red-200 mb-6">
-                    <h4 class="font-bold text-red-800 mb-2">The Clash: Prior vs. Likelihood</h4>
-                    <p class="text-sm mb-4">
-                        Bayesian inference is conceptually simple: <strong>Prior \(\times\) Likelihood =
-                            Posterior</strong>. <br>
-                        However, if your prior is Gaussian, but your likelihood is a Probit or Sigmoid step-function,
-                        their product is a <strong>skewed, non-Gaussian shape</strong>. Because it is no longer
-                        Gaussian, we lose our exact mathematical tractability.
-                    </p>
-                    <p class="text-sm">
-                        <strong>The Solution? Approximation.</strong> Methods like Expectation Propagation (EP), Laplace
-                        Approximation, and Variational Inference attempt to fit a new, "false" Gaussian that closely
-                        matches this skewed true posterior. If the approximation is good, we regain our tractability and
-                        the method works beautifully.
-                    </p>
-                </div>
-
-                <div class="bg-yellow-50 p-6 rounded-lg border border-yellow-200 mb-6">
-                    <h4 class="font-bold text-yellow-800 mb-2">📌 Additional Foundation: EP vs. Variational vs. Laplace
-                    </h4>
-                    <p class="text-sm mb-4">
-                        The lecture notes that these approximations minimize the <strong>KL Divergence</strong> (a
-                        metric measuring the difference between two probability distributions). Because KL Divergence is
-                        asymmetric (\(KL(P||Q) \neq KL(Q||P)\)), the direction you choose drastically changes the
-                        resulting Gaussian:
-                    </p>
-                    <ul class="list-disc pl-6 space-y-3 text-sm">
-                        <li><strong>Expectation Propagation (EP):</strong> Minimizes \(KL(\text{True} ||
-                            \text{Approx})\). This is known as "Moment Matching". The Gaussian will stretch out to cover
-                            the entire mass/tails of the true distribution. It is generally the preferred method for GP
-                            classification.</li>
-                        <li><strong>Variational Inference (VI):</strong> Minimizes \(KL(\text{Approx} || \text{True})\).
-                            This is "Zero-Forcing". The Gaussian approximation will squeeze itself entirely inside the
-                            tallest peak of the true distribution to avoid any areas where the true distribution has
-                            zero probability, often leading to severely underestimated variance.</li>
-                        <li><strong>Laplace Approximation:</strong> An older, simpler method mentioned at the very end
-                            of the lecture. It doesn't use KL Divergence at all. Instead, it finds the peak (mode) of
-                            the skewed posterior using gradient ascent, and then uses a <strong>Taylor
-                                Expansion</strong> (calculating the second derivative/Hessian at that peak) to fit a
-                            Gaussian curve. It is fast but can be highly inaccurate for heavily skewed distributions.
-                        </li>
-                    </ul>
-                </div>
-
-                <!-- Visualizer 3: Non-Gaussian Approximation -->
-                <div class="bg-white p-6 rounded-lg shadow-sm border border-gray-200">
-                    <h4 class="font-bold mb-4 text-center">Interactive Inference: Approximating a Skewed Posterior</h4>
-                    <p class="text-sm text-gray-600 mb-4 text-center">
-                        When we observe a positive class (\(y=1\)), the Likelihood pushes the probability right.
-                        Multiplying the Gaussian Prior by this Likelihood creates a skewed True Posterior. We then
-                        approximate it with a new Gaussian.
-                    </p>
-
-                    <div class="flex justify-center gap-4 mb-4 flex-wrap">
-                        <div class="legend-item">
-                            <div class="legend-color" style="background-color: #3b82f6;"></div> Prior \(\mathcal{N}\)
-                        </div>
-                        <div class="legend-item">
-                            <div class="legend-color" style="background-color: #22c55e;"></div> Likelihood (Sigmoid)
-                        </div>
-                        <div class="legend-item">
-                            <div class="legend-color" style="background-color: rgba(239, 68, 68, 0.3);"></div> True
-                            Skewed Posterior
-                        </div>
-                        <div class="legend-item">
-                            <div class="legend-color" style="border: 2px dashed #000; background: transparent;"></div>
-                            Gaussian Approx
-                        </div>
-                    </div>
-
-                    <canvas id="approxCanvas" height="250" class="interactive-canvas mb-4"></canvas>
-
-                    <div>
-                        <label class="block text-sm font-bold text-gray-700">Prior Mean (\(\mu_{prior}\)): <span
-                                id="priorVal">0.0</span></label>
-                        <input type="range" id="priorSlider" min="-3.0" max="3.0" step="0.1" value="0.0" class="w-full">
-                        <p class="text-xs text-gray-500">Move the prior. Watch the True Posterior skew and the
-                            Approximation attempt to match its mass.</p>
-                    </div>
-                </div>
-
-            </div>
-        </div>
-
-        <!-- Row 11: Parameter Optimization -->
-        <div class="note-row border-none">
-            <div class="cue-column">
-                <h2 class="text-xl text-blue-700">11. Parameter Optimization</h2>
-                <ul class="mt-4 space-y-2 text-sm text-gray-500 font-normal">
-                    <li>Type II Maximum Likelihood</li>
-                    <li>Non-Convexity</li>
-                    <li>Data Fit vs. Model Capacity</li>
-                </ul>
-            </div>
-            <div class="content-column">
-                <h3 class="text-2xl font-bold mb-4">Fitting the Covariance Parameters</h3>
-                <p class="mb-4">
-                    Unlike standard kernel methods where you might find kernel parameters via cross-validation, in
-                    Gaussian Processes, we optimize them directly using the marginal likelihood (often called
-                    <strong>Type II Maximum Likelihood</strong>). The goal is to find the parameters (like length scale
-                    \(l\), variance \(\alpha^2\), and noise \(\sigma^2\)) that maximize the probability of the data we
-                    observed, given the model.
-                </p>
-                <p class="mb-4">
-                    The log marginal likelihood we optimize looks like this:
-                </p>
-
-                <div class="bg-gray-100 p-4 rounded-md overflow-x-auto text-center mb-6">
-                    \( \log P(\mathbf{y} | X) = -\frac{1}{2} \mathbf{y}^T K^{-1} \mathbf{y} - \frac{1}{2} \log |K| -
-                    \frac{N}{2} \log 2\pi \)
-                </div>
-
-                <ul class="list-disc pl-6 mb-6 space-y-4">
-                    <li>
-                        <strong>\(-\frac{1}{2} \mathbf{y}^T K^{-1} \mathbf{y}\) (Data Fit):</strong> This term penalizes
-                        the model if it doesn't fit the data well.
-                    </li>
-                    <li>
-                        <strong>\(-\frac{1}{2} \log |K|\) (Model Capacity):</strong> This is a complexity penalty. It
-                        penalizes the model for being too flexible or complex. It acts as an automatic Occam's Razor,
-                        preventing overfitting.
-                    </li>
-                </ul>
-
-                <div class="bg-red-50 p-6 rounded-lg border border-red-200 mb-6">
-                    <h4 class="font-bold text-red-800 mb-2">The Non-Convex Optimization Problem</h4>
-                    <p class="text-sm">
-                        A crucial point discussed in the lecture: while the optimization problem is convex with respect
-                        to the full covariance matrix \(K\) (if constrained to be positive definite), it is
-                        <strong>highly non-convex</strong> with respect to the hyperparameters (like \(l\) and
-                        \(\alpha\)) buried <em>inside</em> the kernel function. Because of this, standard convex
-                        optimization theories often don't apply, and practitioners must use techniques like gradient
-                        descent with multiple restarts to find a good set of hyperparameters, as there may be many local
-                        optima.
-                    </p>
-                </div>
-
-                <div class="bg-yellow-50 p-6 rounded-lg border border-yellow-200">
-                    <h4 class="font-bold text-yellow-800 mb-2">📌 Additional Foundation: What is the Determinant
-                        \(|K|\)?</h4>
-                    <p class="text-sm mb-4">
-                        The lecture hints at a way of thinking about the determinant of \(K\) as a measure of model
-                        capacity. Here's the intuition:
-                    </p>
-                    <p class="text-sm">
-                        In a covariance matrix, the determinant roughly measures the "volume" of uncertainty. If data
-                        points are highly uncorrelated (like white noise), the matrix is mostly diagonal, the volume is
-                        large, and the model is highly flexible—it can fit anything, but explains nothing. If data
-                        points are highly correlated, the matrix columns are nearly linearly dependent, the determinant
-                        shrinks towards zero, and the model is very rigid (low capacity). The \(-\frac{1}{2} \log |K|\)
-                        term balances this, stopping the model from becoming needlessly rigid or needlessly noisy.
-                    </p>
-                </div>
-            </div>
-        </div>
-
-        <!-- Row 12: Deep Dive into the Objective Function -->
-        <div class="note-row">
-            <div class="cue-column">
-                <h2 class="text-xl text-blue-700">12. Geometry of the Objective</h2>
-                <ul class="mt-4 space-y-2 text-sm text-gray-500 font-normal">
-                    <li>Eigendecomposition of K</li>
-                    <li>Data Fit as a Quadratic Form</li>
-                    <li>The Trade-off Curve</li>
-                </ul>
-            </div>
-            <div class="content-column">
-                <h3 class="text-2xl font-bold mb-4">Volume vs. Rotation (The Occam's Razor)</h3>
-                <p class="mb-4">
-                    Let's look closer at the marginal likelihood terms. If we break down the covariance matrix \(K\)
-                    using an eigendecomposition, we get \(K = R \Lambda R^T\), where \(R\) represents a rotation and
-                    \(\Lambda\) is a diagonal matrix of eigenvalues (representing length/scale in each direction).
-                </p>
-                <ul class="list-disc pl-6 space-y-4 mb-6">
-                    <li>
-                        <strong>The Capacity Term (\(-\frac{1}{2} \log |K|\)):</strong> The determinant \(|K|\) is
-                        exactly the product of its eigenvalues. Geometrically, this is the <em>volume</em> of the
-                        multidimensional Gaussian contour. A model with high volume (e.g., very short length scale,
-                        acting like white noise) can explain any dataset, but it is penalized heavily here.
-                    </li>
-                    <li>
-                        <strong>The Data Fit Term (\(-\frac{1}{2} \mathbf{y}^T K^{-1} \mathbf{y}\)):</strong> Think of
-                        this as the actual data vector \(\mathbf{y}\) sitting in space. The model tries to "rotate" its
-                        covariance ellipse (using \(R\)) and stretch its axes to encompass that data point efficiently.
-                        To get a good fit <em>without</em> inflating the volume penalty, the model must adjust
-                        parameters like the length scale (\(l\)) so that correlated points align neatly along a narrow
-                        principal axis.
-                    </li>
-                </ul>
-
-                <!-- Visualizer 4: Marginal Likelihood Trade-off -->
-                <div class="bg-white p-6 rounded-lg shadow-sm border border-gray-200 mb-6">
-                    <h4 class="font-bold mb-4 text-center">Interactive: The Marginal Likelihood Trade-off</h4>
-                    <p class="text-sm text-gray-600 mb-4 text-center">
-                        Adjust the length scale (\(l\)). Watch how a short length scale fits the data perfectly but
-                        suffers a massive complexity penalty, while a long length scale is simple but misses the data.
-                        The optimal model sits in the "Goldilocks" zone.
-                    </p>
-
-                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
-                        <div>
-                            <p class="text-xs text-center font-bold mb-1">GP Fit to Data</p>
-                            <canvas id="fitCanvas" height="180" class="interactive-canvas"></canvas>
-                        </div>
-                        <div>
-                            <p class="text-xs text-center font-bold mb-1">Log Marginal Likelihood Components</p>
-                            <canvas id="mlCanvas" height="180" class="interactive-canvas"></canvas>
-                            <div class="flex justify-center gap-3 mt-2 flex-wrap">
-                                <div class="legend-item">
-                                    <div class="legend-color" style="background-color: #ef4444;"></div> Data Fit
-                                </div>
-                                <div class="legend-item">
-                                    <div class="legend-color" style="background-color: #3b82f6;"></div> Complexity
-                                    Penalty
-                                </div>
-                                <div class="legend-item">
-                                    <div class="legend-color" style="background-color: #000000;"></div> Total LML
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-
-                    <div>
-                        <label class="block text-sm font-bold text-gray-700">Length Scale (\(l\)): <span
-                                id="tradeoffLVal">0.5</span></label>
-                        <input type="range" id="tradeoffSlider" min="0.1" max="2.5" step="0.05" value="0.5"
-                            class="w-full">
-                    </div>
-                </div>
-
-                <div class="bg-red-50 p-6 rounded-lg border border-red-200">
-                    <h4 class="font-bold text-red-800 mb-2">Local Optima are a Trap</h4>
-                    <p class="text-sm">
-                        Because this objective function is highly non-convex with respect to hyper-parameters,
-                        optimizing it (usually via L-BFGS or Conjugate Gradients) can easily get stuck. <br>
-                        <strong>Example:</strong> Given a noisy time series, one local minimum might explain it as a
-                        smooth, slow wave with lots of noise (high length scale, high noise variance). Another local
-                        minimum might explain the exact same data as a jagged, erratic signal with almost zero noise
-                        (low length scale, low noise). Sometimes, their likelihood scores are virtually identical! A
-                        true Bayesian would use Hybrid Monte Carlo (HMC) to sample over these parameters instead of
-                        picking just one.
-                    </p>
-                </div>
-            </div>
-        </div>
-
-        <!-- Row 13: Basis Functions to GPs -->
-        <div class="note-row">
-            <div class="cue-column">
-                <h2 class="text-xl text-blue-700">13. From Parametric to Non-Parametric</h2>
-                <ul class="mt-4 space-y-2 text-sm text-gray-500 font-normal">
-                    <li>Basis Function Expansion</li>
-                    <li>Integrating out Weights</li>
-                    <li>The Design Matrix (\(\Phi\))</li>
-                    <li>Degenerate Kernels</li>
-                </ul>
-            </div>
-            <div class="content-column">
-                <h3 class="text-2xl font-bold mb-4">How do Neural Networks relate to GPs?</h3>
-                <p class="mb-4">
-                    To truly understand where covariance functions come from, we can build a GP from scratch using
-                    standard basis functions (like polynomials, radial basis functions, or even a hidden layer of a
-                    neural network).
-                </p>
-
-                <p class="mb-4 text-sm">Let's say we have a model that uses a weighted sum of \(k\) basis functions
-                    \(\phi(x)\):</p>
-                <div class="bg-gray-100 p-4 rounded-md overflow-x-auto text-center mb-4 text-sm">
-                    \( f(x) = \mathbf{\phi}(x)^T \mathbf{w} \)
-                </div>
-
-                <p class="mb-4">
-                    Normally, in machine learning, we try to optimize and find the specific weights \(\mathbf{w}\). But
-                    in Bayesian modeling, <em>we don't want to optimize; we want to integrate them out</em>. We do this
-                    by placing a Gaussian prior over the weights: \(\mathbf{w} \sim \mathcal{N}(0, \alpha I)\).
-                </p>
-
-                <div class="bg-indigo-50 p-6 rounded-lg border border-indigo-100 mb-6">
-                    <h4 class="font-bold text-indigo-800 mb-2">📌 The Golden Rule of Gaussians</h4>
-                    <p class="text-sm mb-4">
-                        If \(\mathbf{w}\) is Gaussian, and \(\mathbf{y}\) is just a linear transformation of
-                        \(\mathbf{w}\) (i.e., \(\mathbf{y} = \Phi \mathbf{w}\)), then \(\mathbf{y}\) is strictly
-                        guaranteed to be Gaussian as well!
-                    </p>
-                    <div class="text-center font-mono text-sm mb-2 text-indigo-900">
-                        Mean: \( \mathbb{E}[\mathbf{y}] = \Phi \mathbb{E}[\mathbf{w}] = 0 \) <br>
-                        Covariance: \( \text{Cov}[\mathbf{y}] = \Phi \text{Cov}[\mathbf{w}] \Phi^T = \alpha \Phi \Phi^T
-                        \)
-                    </div>
-                </div>
-
-                <p class="mb-4">
-                    By simply matrix-multiplying our basis functions (\(\Phi \Phi^T\)), we mathematically "integrate
-                    out" the weights. We have instantly derived a Gaussian Process! The kernel function is simply the
-                    inner product of the basis vectors: \( k(x_i, x_j) = \alpha \phi(x_i)^T \phi(x_j) \).
-                </p>
-
-                <h4 class="font-bold text-lg mb-2">Degenerate vs. Full Rank Kernels</h4>
-                <ul class="list-disc pl-6 space-y-2 mb-6">
-                    <li><strong>Degenerate (Parametric):</strong> If we use 10 basis functions, our \(\Phi\) matrix has
-                        10 columns. The resulting kernel matrix \(K\) will have a maximum rank of 10. It cannot model
-                        infinite complexity.</li>
-                    <li><strong>Full Rank (Non-Parametric):</strong> What if we scatter an <em>infinite</em> number of
-                        basis functions continuously across the real line? The sum becomes an integral. Miraculously, if
-                        you use infinite Gaussian bumps, the integral solves out to the <strong>Squared Exponential
-                            kernel</strong>! If you scatter infinite Sigmoid functions, you get the <strong>Neural
-                            Network Covariance Function</strong> (derived by Chris Williams in 1996).</li>
-                </ul>
-            </div>
-        </div>
-
-        <!-- Row 14: Covariance Math & Constraints -->
-        <div class="note-row">
-            <div class="cue-column">
-                <h2 class="text-xl text-blue-700">14. Advanced Math & Constraints</h2>
-                <ul class="mt-4 space-y-2 text-sm text-gray-500 font-normal">
-                    <li>Derivatives of GPs</li>
-                    <li>The Monotonicity Problem</li>
-                    <li>Multiplying by \(g(x)\)</li>
-                </ul>
-            </div>
-            <div class="content-column">
-                <h3 class="text-2xl font-bold mb-4">Playing with the Bounds of the GP</h3>
-
-                <p class="mb-4">
-                    Because differentiation and integration are linear operations, applying them to a Gaussian Process
-                    yields another Gaussian Process. <strong>The derivative of a GP is jointly Gaussian with the GP
-                        itself.</strong> This allows us to effortlessly include derivative observations (e.g., "I don't
-                    know the function value here, but I know its gradient is zero") in our training data.
-                </p>
-
-                <div class="bg-red-50 p-6 rounded-lg border border-red-200 mb-6">
-                    <h4 class="font-bold text-red-800 mb-2">Why GPs can't be strictly Monotonic or Convex</h4>
-                    <p class="text-sm">
-                        This beautiful linear property comes with a curse. If the derivative of a function is a Gaussian
-                        Process, that derivative has support over the entire real line \( (-\infty, \infty) \). This
-                        means it is mathematically impossible to guarantee that the derivative will <em>always</em> be
-                        positive. Therefore, a standard GP can never be strictly monotonic.
-                    </p>
-                    <p class="text-sm mt-2">
-                        To force monotonicity, practitioners have to use ugly hacks, like inserting "fake" data points
-                        with positive derivatives whenever the function threatens to dip down, or modeling the log of
-                        the function (which destroys the linear tractability).
-                    </p>
-                </div>
-
-                <h4 class="font-bold text-lg mb-2">The Multiplicative Rule</h4>
-                <p class="mb-4">
-                    If \(f(x)\) is a GP, and \(g(x)\) is any deterministic function, then \( f(x) \times g(x) \) is a
-                    valid GP with the covariance:
-                    <br>
-                    <span class="bg-gray-100 px-3 py-1 rounded font-mono text-sm">\( g(x) k(x, x') g(x') \)</span>
-                </p>
-                <p>
-                    This is a highly useful trick! If you know the physics of a system perfectly in region A, but it's a
-                    mystery in region B, you can multiply your GP by a deterministic sigmoidal step function. This
-                    effectively "switches off" the GP variance in region A (replacing it with a known mean function) and
-                    "switches on" the non-parametric GP uncertainty strictly in region B.
-                </p>
-            </div>
-        </div>
-
-        <!-- Row 15: Limitations -->
-        <div class="note-row border-none">
-            <div class="cue-column">
-                <h2 class="text-xl text-blue-700">15. Final Limitations</h2>
-                <ul class="mt-4 space-y-2 text-sm text-gray-500 font-normal">
-                    <li>$O(N^3)$ Runtime</li>
-                    <li>Discontinuities</li>
-                </ul>
-            </div>
-            <div class="content-column">
-                <h3 class="text-2xl font-bold mb-4">When NOT to use a Gaussian Process</h3>
-                <p class="mb-4">The lecture concludes with a stark reminder of when GPs fail:</p>
-
-                <ul class="list-disc pl-6 space-y-4">
-                    <li>
-                        <strong>Big Data:</strong> The inversion of the covariance matrix is \(O(N^3)\) and requires
-                        \(O(N^2)\) memory. If you have a billion data points and millions of labels, use a Deep Neural
-                        Network. GPs shine in the low-to-medium data regime where quantifying uncertainty is critical.
-                    </li>
-                    <li>
-                        <strong>Financial Crises & Jumps:</strong> Standard stationary GPs are extremely smooth. They do
-                        not handle sudden discontinuities (like stock market crashes) well. To model sudden jumps, you
-                        must either manually inject parameterized step functions into the covariance, or abandon
-                        standard GPs in favor of far more complex probabilist structures like <strong>Lévy Jump
-                            Processes</strong>.
-                    </li>
-                    <li>
-                        <strong>True "Non-Parametric Non-Stationarity":</strong> If the smoothness/behavior of the
-                        function fundamentally shifts across the domain in unpredictable ways, a single stationary
-                        kernel will fail. The bleeding-edge solution to this is <strong>Deep Gaussian Processes</strong>
-                        (feeding the output of one GP into another to warp the input space), but this drastically
-                        increases computational complexity.
-                    </li>
-                </ul>
-            </div>
-        </div>
-
-    </div>
-
-    <!-- JavaScript for Interactive Canvas elements -->
-    <script>
-        // --- Utility Math Functions ---
-        // Generate normally distributed random numbers (Box-Muller transform)
-        function randn() {
-            let u = 0, v = 0;
-            while (u === 0) u = Math.random();
-            while (v === 0) v = Math.random();
-            return Math.sqrt(-2.0 * Math.log(u)) * Math.cos(2.0 * Math.PI * v);
-        }
-
-        // Squared Exponential Kernel
-        function sqExpKernel(x1, x2, l, alpha) {
-            const distSq = Math.pow(x1 - x2, 2);
-            return (alpha * alpha) * Math.exp(-distSq / (2 * l * l));
-        }
-
-        // Cholesky Decomposition (returns lower triangular matrix L)
-        // A must be positive definite symmetric matrix
-        function cholesky(A) {
-            const n = A.length;
-            let L = Array(n).fill(0).map(() => Array(n).fill(0));
-
-            for (let i = 0; i < n; i++) {
-                for (let j = 0; j <= i; j++) {
-                    let sum = 0;
-                    for (let k = 0; k < j; k++) {
-                        sum += L[i][k] * L[j][k];
-                    }
-
-                    if (i === j) {
-                        let val = A[i][i] - sum;
-                        // Adding small jitter to prevent numerical instability
-                        L[i][j] = Math.sqrt(Math.max(val, 1e-8));
-                    } else {
-                        L[i][j] = (1.0 / L[j][j]) * (A[i][j] - sum);
-                    }
-                }
-            }
-            return L;
-        }
-
-        // Matrix-vector multiplication
-        function multiplyMV(M, v) {
-            let res = Array(M.length).fill(0);
-            for (let i = 0; i < M.length; i++) {
-                for (let j = 0; j < v.length; j++) {
-                    res[i] += M[i][j] * v[j];
-                }
-            }
-            return res;
-        }
-
-        // Matrix transpose
-        function transpose(M) {
-            let res = Array(M[0].length).fill(0).map(() => Array(M.length).fill(0));
-            for (let i = 0; i < M.length; i++) {
-                for (let j = 0; j < M[0].length; j++) {
-                    res[j][i] = M[i][j];
-                }
-            }
-            return res;
-        }
-
-        // Solve Lx = b (Forward substitution)
-        function solveForward(L, b) {
-            let n = L.length;
-            let x = Array(n).fill(0);
-            for (let i = 0; i < n; i++) {
-                let sum = 0;
-                for (let j = 0; j < i; j++) {
-                    sum += L[i][j] * x[j];
-                }
-                x[i] = (b[i] - sum) / L[i][i];
-            }
-            return x;
-        }
-
-        // Solve L^T x = b (Backward substitution)
-        function solveBackward(LT, b) {
-            let n = LT.length;
-            let x = Array(n).fill(0);
-            for (let i = n - 1; i >= 0; i--) {
-                let sum = 0;
-                for (let j = i + 1; j < n; j++) {
-                    sum += LT[i][j] * x[j];
-                }
-                x[i] = (b[i] - sum) / LT[i][i];
-            }
-            return x;
-        }
-
-
-        // --- VISUALIZATION 1: GP SAMPLER ---
-        const gpCanvas = document.getElementById('gpCanvas');
-        const gpCtx = gpCanvas.getContext('2d');
-
-        // Resize canvas to match CSS width
-        gpCanvas.width = gpCanvas.parentElement.clientWidth - 48; // padding adj
-
-        // Data setup
-        const N = 50; // Number of points
-        let xs = [];
-        for (let i = 0; i < N; i++) {
-            xs.push((i / (N - 1)) * 10); // X range 0 to 10
-        }
-
-        let baseRandoms = []; // Store base normal randoms so sliders look smooth
-        for (let i = 0; i < N; i++) baseRandoms.push(randn());
-
-        function drawGP() {
-            const l = parseFloat(document.getElementById('lSlider').value);
-            const alpha = Math.sqrt(parseFloat(document.getElementById('aSlider').value));
-
-            document.getElementById('lVal').innerText = l.toFixed(1);
-            document.getElementById('aVal').innerText = (alpha * alpha).toFixed(1);
-
-            // Build Covariance Matrix
-            let K = Array(N).fill(0).map(() => Array(N).fill(0));
-            for (let i = 0; i < N; i++) {
-                for (let j = 0; j < N; j++) {
-                    K[i][j] = sqExpKernel(xs[i], xs[j], l, alpha);
-                    if (i === j) K[i][j] += 1e-6; // jitter for numerical stability
-                }
-            }
-
-            // Cholesky L * z = sample
-            const L = cholesky(K);
-            const y = multiplyMV(L, baseRandoms);
-
-            // Plotting
-            gpCtx.clearRect(0, 0, gpCanvas.width, gpCanvas.height);
-
-            // Draw grid/axes
-            gpCtx.strokeStyle = '#e2e8f0';
-            gpCtx.beginPath();
-            gpCtx.moveTo(0, gpCanvas.height / 2);
-            gpCtx.lineTo(gpCanvas.width, gpCanvas.height / 2);
-            gpCtx.stroke();
-
-            // Draw Function
-            gpCtx.strokeStyle = '#2563eb';
-            gpCtx.lineWidth = 2;
-            gpCtx.beginPath();
-
-            const widthScale = gpCanvas.width / 10;
-            const heightScale = gpCanvas.height / 6; // scale domain -3 to 3 approx
-
-            for (let i = 0; i < N; i++) {
-                const px = xs[i] * widthScale;
-                // Invert Y axis for canvas drawing
-                const py = (gpCanvas.height / 2) - (y[i] * heightScale);
-                if (i === 0) gpCtx.moveTo(px, py);
-                else gpCtx.lineTo(px, py);
-            }
-            gpCtx.stroke();
-
-            // Draw dots
-            gpCtx.fillStyle = '#1d4ed8';
-            for (let i = 0; i < N; i++) {
-                const px = xs[i] * widthScale;
-                const py = (gpCanvas.height / 2) - (y[i] * heightScale);
-                gpCtx.beginPath();
-                gpCtx.arc(px, py, 3, 0, 2 * Math.PI);
-                gpCtx.fill();
-            }
-        }
-
-        document.getElementById('lSlider').addEventListener('input', drawGP);
-        document.getElementById('aSlider').addEventListener('input', drawGP);
-        document.getElementById('resampleBtn').addEventListener('click', () => {
-            for (let i = 0; i < N; i++) baseRandoms[i] = randn();
-            drawGP();
-        });
-
-
-        // --- VISUALIZATION 2: THE MOUNTAIN SLICE ---
-        const contourCanvas = document.getElementById('contourCanvas');
-        const cCtx = contourCanvas.getContext('2d');
-        const sliceCanvas = document.getElementById('sliceCanvas');
-        const sCtx = sliceCanvas.getContext('2d');
-
-        // Make crisp
-        contourCanvas.width = contourCanvas.parentElement.clientWidth;
-        sliceCanvas.width = sliceCanvas.parentElement.clientWidth;
-
-        function drawConditioning() {
-            const f1 = parseFloat(document.getElementById('f1Slider').value);
-            const rho = parseFloat(document.getElementById('corSlider').value); // correlation k12
-
-            document.getElementById('f1Val').innerText = f1.toFixed(1);
-            document.getElementById('corVal').innerText = rho.toFixed(2);
-
-            // Parameters for standard normal prior (variance 1)
-            const v11 = 1.0;
-            const v22 = 1.0;
-            const v12 = rho;
-
-            // 1. Draw 2D Contour (Ellipse representation)
-            cCtx.clearRect(0, 0, contourCanvas.width, contourCanvas.height);
-            const cx = contourCanvas.width / 2;
-            const cy = contourCanvas.height / 2;
-            const scale2D = Math.min(cx, cy) / 3; // fit 3 std devs
-
-            // Axes
-            cCtx.strokeStyle = '#e2e8f0';
-            cCtx.beginPath(); cCtx.moveTo(0, cy); cCtx.lineTo(contourCanvas.width, cy); cCtx.stroke(); // f1 axis
-            cCtx.beginPath(); cCtx.moveTo(cx, 0); cCtx.lineTo(cx, contourCanvas.height); cCtx.stroke(); // f2 axis
-
-            cCtx.fillStyle = '#64748b';
-            cCtx.font = '10px sans-serif';
-            cCtx.fillText('f1', contourCanvas.width - 15, cy - 5);
-            cCtx.fillText('f2', cx + 5, 10);
-
-            // Draw correlation ellipse roughly
-            cCtx.save();
-            cCtx.translate(cx, cy);
-            // angle of rotation for standardized bivariate normal is pi/4 if rho>0, -pi/4 if rho<0
-            const angle = Math.sign(rho) * Math.PI / 4;
-            cCtx.rotate(angle);
-            // Eigenvalues for standard bivariate normal: 1+rho, 1-rho
-            const a = Math.sqrt(1 + Math.abs(rho)) * scale2D;
-            const b = Math.sqrt(1 - Math.abs(rho)) * scale2D;
-
-            cCtx.beginPath();
-            cCtx.ellipse(0, 0, a * 1.5, b * 1.5, 0, 0, 2 * Math.PI); // 1.5 sigma contour
-            cCtx.strokeStyle = 'rgba(59, 130, 246, 0.5)';
-            cCtx.lineWidth = 2;
-            cCtx.stroke();
-            cCtx.fillStyle = 'rgba(59, 130, 246, 0.1)';
-            cCtx.fill();
-            cCtx.restore();
-
-            // Draw the slice line (observation of f1)
-            const sliceX = cx + (f1 * scale2D);
-            cCtx.strokeStyle = '#ef4444'; // Red line
-            cCtx.lineWidth = 2;
-            cCtx.beginPath();
-            cCtx.moveTo(sliceX, 0);
-            cCtx.lineTo(sliceX, contourCanvas.height);
-            cCtx.stroke();
-
-            // Draw observation point
-            cCtx.fillStyle = '#ef4444';
-            cCtx.beginPath();
-            cCtx.arc(sliceX, cy, 4, 0, 2 * Math.PI);
-            cCtx.fill();
-
-            // 2. Draw 1D Conditional Distribution
-            sCtx.clearRect(0, 0, sliceCanvas.width, sliceCanvas.height);
-            const scx = sliceCanvas.width / 2;
-            const scy = sliceCanvas.height - 20; // baseline
-            const scale1D = scx / 3;
-
-            // Conditional Math: p(f2 | f1)
-            // mu_2|1 = v12/v11 * f1
-            // sigma2_2|1 = v22 - (v12^2)/v11
-            const mu_cond = (v12 / v11) * f1;
-            const var_cond = Math.max(v22 - (v12 * v12) / v11, 0.001); // avoid exact 0
-            const std_cond = Math.sqrt(var_cond);
-
-            // Draw axis
-            sCtx.strokeStyle = '#e2e8f0';
-            sCtx.beginPath(); sCtx.moveTo(0, scy); sCtx.lineTo(sliceCanvas.width, scy); sCtx.stroke();
-            sCtx.fillStyle = '#64748b'; sCtx.fillText('f2', sliceCanvas.width - 15, scy - 5);
-
-            // Draw Prior normal (ghosted)
-            drawGaussian(sCtx, 0, 1.0, scx, scy, scale1D, 'rgba(148, 163, 184, 0.4)');
-
-            // Draw Conditional normal
-            drawGaussian(sCtx, mu_cond, std_cond, scx, scy, scale1D, 'rgba(37, 99, 235, 1.0)');
-
-            // Draw mean marker
-            const muPx = scx + (mu_cond * scale1D);
-            sCtx.strokeStyle = '#ef4444';
-            sCtx.beginPath();
-            sCtx.moveTo(muPx, scy);
-            sCtx.lineTo(muPx, scy - 100);
-            sCtx.stroke();
-
-            sCtx.fillStyle = '#ef4444';
-            sCtx.fillText('μ', muPx + 5, scy - 85);
-        }
-
-        function drawGaussian(ctx, mu, std, cx, cy, scaleX, color, dashed = false) {
-            ctx.strokeStyle = color;
-            ctx.lineWidth = 2;
-            if (dashed) ctx.setLineDash([5, 5]);
-            else ctx.setLineDash([]);
-            ctx.beginPath();
-
-            const scaleY = 100; // Peak height scale
-
-            for (let px = 0; px <= ctx.canvas.width; px += 2) {
-                const x = (px - cx) / scaleX;
-                const pdf = (1 / (std * Math.sqrt(2 * Math.PI))) * Math.exp(-0.5 * Math.pow((x - mu) / std, 2));
-                const py = cy - (pdf * scaleY);
-
-                if (px === 0) ctx.moveTo(px, py);
-                else ctx.lineTo(px, py);
-            }
-            ctx.stroke();
-            ctx.setLineDash([]); // reset
-        }
-
-        document.getElementById('f1Slider').addEventListener('input', drawConditioning);
-        document.getElementById('corSlider').addEventListener('input', drawConditioning);
-
-
-        // --- VISUALIZATION 3: NON-GAUSSIAN APPROXIMATION ---
-        const approxCanvas = document.getElementById('approxCanvas');
-        const aCtx = approxCanvas.getContext('2d');
-        approxCanvas.width = approxCanvas.parentElement.clientWidth - 48;
-
-        // Helper functions for math
-        function gaussianPDF(x, mu, sigma) {
-            return (1 / (sigma * Math.sqrt(2 * Math.PI))) * Math.exp(-0.5 * Math.pow((x - mu) / sigma, 2));
-        }
-        function sigmoid(x) {
-            return 1 / (1 + Math.exp(-1.5 * x)); // 1.5 multiplier to make it visually pop
-        }
-
-        function drawApproximation() {
-            const priorMu = parseFloat(document.getElementById('priorSlider').value);
-            const priorSigma = 1.0;
-
-            document.getElementById('priorVal').innerText = priorMu.toFixed(1);
-
-            aCtx.clearRect(0, 0, approxCanvas.width, approxCanvas.height);
-
-            const cx = approxCanvas.width / 2;
-            const cy = approxCanvas.height - 20;
-            const scaleX = cx / 4; // View from -4 to 4
-            const scaleY = 150; // Amplitude scale
-
-            // Draw axes
-            aCtx.strokeStyle = '#e2e8f0';
-            aCtx.beginPath(); aCtx.moveTo(0, cy); aCtx.lineTo(approxCanvas.width, cy); aCtx.stroke();
-            aCtx.beginPath(); aCtx.moveTo(cx, 0); aCtx.lineTo(cx, approxCanvas.height); aCtx.stroke();
-
-            // Arrays to store math for numerical integration
-            let xs = [];
-            let priorVals = [];
-            let likeVals = [];
-            let postVals = [];
-
-            let z = 0; // Normalization constant
-            let epMu = 0;
-
-            // 1. Calculate values and integrate
-            const dx = (8 / approxCanvas.width); // Total width is 8 units (-4 to 4)
-            for (let px = 0; px <= approxCanvas.width; px++) {
-                const x = (px - cx) / scaleX;
-                xs.push(x);
-
-                const p = gaussianPDF(x, priorMu, priorSigma);
-                const l = sigmoid(x);
-                const post = p * l;
-
-                priorVals.push(p);
-                likeVals.push(l);
-                postVals.push(post);
-
-                z += post * dx;
-            }
-
-            // Find Mean of True Posterior
-            for (let i = 0; i < xs.length; i++) {
-                const normalizedPost = postVals[i] / z;
-                epMu += xs[i] * normalizedPost * dx;
-            }
-
-            // Find Variance of True Posterior
-            let epVar = 0;
-            for (let i = 0; i < xs.length; i++) {
-                const normalizedPost = postVals[i] / z;
-                epVar += Math.pow(xs[i] - epMu, 2) * normalizedPost * dx;
-            }
-            const epSigma = Math.sqrt(epVar);
-
-            // 2. Draw Likelihood (Green)
-            aCtx.strokeStyle = '#22c55e';
-            aCtx.lineWidth = 2;
-            aCtx.beginPath();
-            for (let i = 0; i < xs.length; i++) {
-                const px = i;
-                const py = cy - (likeVals[i] * scaleY * 0.5); // scaled down visually
-                if (i === 0) aCtx.moveTo(px, py);
-                else aCtx.lineTo(px, py);
-            }
-            aCtx.stroke();
-
-            // 3. Draw True Skewed Posterior (Filled Red)
-            aCtx.fillStyle = 'rgba(239, 68, 68, 0.3)';
-            aCtx.strokeStyle = '#ef4444';
-            aCtx.lineWidth = 2;
-            aCtx.beginPath();
-            aCtx.moveTo(0, cy);
-            for (let i = 0; i < xs.length; i++) {
-                const px = i;
-                const py = cy - ((postVals[i] / z) * scaleY); // Normalize for visual comparison
-                aCtx.lineTo(px, py);
-            }
-            aCtx.lineTo(approxCanvas.width, cy);
-            aCtx.fill();
-            aCtx.stroke();
-
-            // 4. Draw Prior (Blue)
-            aCtx.strokeStyle = '#3b82f6';
-            aCtx.lineWidth = 2;
-            aCtx.beginPath();
-            for (let i = 0; i < xs.length; i++) {
-                const px = i;
-                const py = cy - (priorVals[i] * scaleY);
-                if (i === 0) aCtx.moveTo(px, py);
-                else aCtx.lineTo(px, py);
-            }
-            aCtx.stroke();
-
-            // 5. Draw EP Gaussian Approximation (Black Dashed)
-            drawGaussian(aCtx, epMu, epSigma, cx, cy, scaleX, '#000000', true);
-        }
-
-        document.getElementById('priorSlider').addEventListener('input', drawApproximation);
-
-        // --- VISUALIZATION 4: MARGINAL LIKELIHOOD TRADEOFF ---
-        const fitCanvas = document.getElementById('fitCanvas');
-        const fCtx = fitCanvas.getContext('2d');
-        const mlCanvas = document.getElementById('mlCanvas');
-        const mCtx = mlCanvas.getContext('2d');
-
-        fitCanvas.width = fitCanvas.parentElement.clientWidth;
-        mlCanvas.width = mlCanvas.parentElement.clientWidth;
-
-        // Toy Dataset
-        const trainX = [-2, 0, 1.5, 3];
-        const trainY = [0.5, 1.2, 0.8, -0.5];
-        const noiseSigma2 = 0.05; // fixed small noise
-        const alpha = 1.0;
-
-        // Pre-calculate LML curves
-        const lValues = [];
-        const dataFitVals = [];
-        const penaltyVals = [];
-        const totalLMLVals = [];
-
-        const steps = 100;
-        const minL = 0.1, maxL = 3.0;
-
-        for (let i = 0; i <= steps; i++) {
-            let currentL = minL + i * (maxL - minL) / steps;
-            lValues.push(currentL);
-
-            let n = trainX.length;
-            let K = Array(n).fill(0).map(() => Array(n).fill(0));
-            for (let a = 0; a < n; a++) {
-                for (let b = 0; b < n; b++) {
-                    K[a][b] = sqExpKernel(trainX[a], trainX[b], currentL, alpha);
-                    if (a === b) K[a][b] += noiseSigma2 + 1e-6;
-                }
-            }
-
-            let L = cholesky(K);
-            let LT = transpose(L);
-            // y^T K^-1 y  =>  y^T (LL^T)^-1 y => (L^-1 y)^T (L^-1 y)
-            // Let alpha_vec = L^-1 y
-            let alpha_vec = solveForward(L, trainY);
-
-            let dataFit = 0;
-            for (let a = 0; a < n; a++) dataFit += alpha_vec[a] * alpha_vec[a];
-            dataFit = -0.5 * dataFit;
-
-            // log |K| = 2 * sum(log L_ii)
-            let logDet = 0;
-            for (let a = 0; a < n; a++) logDet += Math.log(L[a][a]);
-            logDet = 2 * logDet;
-            let penalty = -0.5 * logDet;
-
-            // Ignoring constants
-            dataFitVals.push(dataFit);
-            penaltyVals.push(penalty);
-            totalLMLVals.push(dataFit + penalty);
-        }
-
-        // Normalize values for plotting bounds
-        const minLML = Math.min(...totalLMLVals, ...dataFitVals, ...penaltyVals);
-        const maxLML = Math.max(...totalLMLVals, ...dataFitVals, ...penaltyVals);
-
-        function drawTradeoff() {
-            const curL = parseFloat(document.getElementById('tradeoffSlider').value);
-            document.getElementById('tradeoffLVal').innerText = curL.toFixed(2);
-
-            // --- 1. Draw GP Fit ---
-            fCtx.clearRect(0, 0, fitCanvas.width, fitCanvas.height);
-
-            // Axes
-            const cx = fitCanvas.width / 2;
-            const cy = fitCanvas.height / 2;
-            const sX = fitCanvas.width / 8; // -4 to 4 space
-            const sY = fitCanvas.height / 4; // -2 to 2 space
-
-            fCtx.strokeStyle = '#e2e8f0';
-            fCtx.beginPath(); fCtx.moveTo(0, cy); fCtx.lineTo(fitCanvas.width, cy); fCtx.stroke();
-
-            // Construct matrix for this specific L
-            let K_train = Array(trainX.length).fill(0).map(() => Array(trainX.length).fill(0));
-            for (let i = 0; i < trainX.length; i++) {
-                for (let j = 0; j < trainX.length; j++) {
-                    K_train[i][j] = sqExpKernel(trainX[i], trainX[j], curL, alpha);
-                    if (i === j) K_train[i][j] += noiseSigma2 + 1e-6;
-                }
-            }
-            let L_train = cholesky(K_train);
-            let LT_train = transpose(L_train);
-            // alpha_vec = K^-1 y
-            let alpha_vec = solveBackward(LT_train, solveForward(L_train, trainY));
-
-            // Draw Mean function
-            fCtx.strokeStyle = '#2563eb';
-            fCtx.lineWidth = 2;
-            fCtx.beginPath();
-            for (let px = 0; px <= fitCanvas.width; px += 2) {
-                let x = (px - cx) / sX;
-                // k_star * alpha_vec
-                let mean_x = 0;
-                for (let i = 0; i < trainX.length; i++) {
-                    mean_x += sqExpKernel(x, trainX[i], curL, alpha) * alpha_vec[i];
-                }
-                let py = cy - (mean_x * sY);
-                if (px === 0) fCtx.moveTo(px, py);
-                else fCtx.lineTo(px, py);
-            }
-            fCtx.stroke();
-
-            // Draw dots
-            fCtx.fillStyle = '#ef4444';
-            for (let i = 0; i < trainX.length; i++) {
-                fCtx.beginPath();
-                fCtx.arc(cx + trainX[i] * sX, cy - trainY[i] * sY, 4, 0, 2 * Math.PI);
-                fCtx.fill();
-            }
-
-
-            // --- 2. Draw Marginal Likelihood Curves ---
-            mCtx.clearRect(0, 0, mlCanvas.width, mlCanvas.height);
-
-            // Mapping bounds to canvas
-            const mSx = mlCanvas.width / (maxL - minL);
-            const margin = 20;
-            const viewH = mlCanvas.height - 2 * margin;
-
-            function mapY(val) {
-                return mlCanvas.height - margin - ((val - minLML) / (maxLML - minLML)) * viewH;
-            }
-
-            // Draw Data Fit (Red)
-            mCtx.strokeStyle = '#ef4444';
-            mCtx.lineWidth = 2;
-            mCtx.beginPath();
-            for (let i = 0; i <= steps; i++) {
-                let px = (lValues[i] - minL) * mSx;
-                if (i === 0) mCtx.moveTo(px, mapY(dataFitVals[i]));
-                else mCtx.lineTo(px, mapY(dataFitVals[i]));
-            }
-            mCtx.stroke();
-
-            // Draw Capacity (Blue)
-            mCtx.strokeStyle = '#3b82f6';
-            mCtx.beginPath();
-            for (let i = 0; i <= steps; i++) {
-                let px = (lValues[i] - minL) * mSx;
-                if (i === 0) mCtx.moveTo(px, mapY(penaltyVals[i]));
-                else mCtx.lineTo(px, mapY(penaltyVals[i]));
-            }
-            mCtx.stroke();
-
-            // Draw Total LML (Black)
-            mCtx.strokeStyle = '#000000';
-            mCtx.beginPath();
-            for (let i = 0; i <= steps; i++) {
-                let px = (lValues[i] - minL) * mSx;
-                if (i === 0) mCtx.moveTo(px, mapY(totalLMLVals[i]));
-                else mCtx.lineTo(px, mapY(totalLMLVals[i]));
-            }
-            mCtx.stroke();
-
-            // Draw Scrubber / Current Position
-            let curPx = (curL - minL) * mSx;
-            mCtx.strokeStyle = '#94a3b8';
-            mCtx.setLineDash([5, 5]);
-            mCtx.beginPath();
-            mCtx.moveTo(curPx, 0);
-            mCtx.lineTo(curPx, mlCanvas.height);
-            mCtx.stroke();
-            mCtx.setLineDash([]);
-
-            // Intersection point on total
-            let idx = Math.floor(((curL - minL) / (maxL - minL)) * steps);
-            if (idx < 0) idx = 0; if (idx > steps) idx = steps;
-            mCtx.fillStyle = '#000000';
-            mCtx.beginPath();
-            mCtx.arc(curPx, mapY(totalLMLVals[idx]), 4, 0, 2 * Math.PI);
-            mCtx.fill();
-        }
-
-        document.getElementById('tradeoffSlider').addEventListener('input', drawTradeoff);
-
-
-        // General Resizer
-        window.addEventListener('resize', () => {
-            gpCanvas.width = gpCanvas.parentElement.clientWidth - 48;
-            contourCanvas.width = contourCanvas.parentElement.clientWidth;
-            sliceCanvas.width = sliceCanvas.parentElement.clientWidth;
-            approxCanvas.width = approxCanvas.parentElement.clientWidth - 48;
-
-            fitCanvas.width = fitCanvas.parentElement.clientWidth;
-            mlCanvas.width = mlCanvas.parentElement.clientWidth;
-
-            drawGP();
-            drawConditioning();
-            drawApproximation();
-            drawTradeoff();
-        });
-
-        // Initial Draws
-        setTimeout(() => {
-            drawGP();
-            drawConditioning();
-            drawApproximation();
-            drawTradeoff();
-        }, 100);
-
-    </script>
+      </div>
+
+      <div class="tag-row">
+        <span class="tag-pill">Eigendecomposition</span>
+        <span class="tag-pill">Volume vs. Rotation</span>
+        <span class="tag-pill">Trade-off Curve</span>
+      </div>
+    </section>
+
+  </article>
+</div>
+
+<!-- ─────────────────────── KaTeX render ─────────────────────── -->
+<script>
+document.addEventListener("DOMContentLoaded", function () {
+  renderMathInElement(document.body, {
+    delimiters: [
+      { left: '$$', right: '$$', display: true },
+      { left: '\\(', right: '\\)', display: false },
+      { left: '\\[', right: '\\]', display: true }
+    ]
+  });
+});
+</script>
+
+<!-- ─────────────────────── Progress bar ─────────────────────── -->
+<script>
+window.addEventListener('scroll', () => {
+  const el = document.documentElement;
+  const pct = (el.scrollTop / (el.scrollHeight - el.clientHeight)) * 100;
+  document.getElementById('progress').style.width = pct + '%';
+});
+</script>
+
+<!-- ─────────────────────── TOC highlight ─────────────────────── -->
+<script>
+const tocLinks = document.querySelectorAll('.toc-list a');
+const sections = document.querySelectorAll('.note-section');
+
+const obs = new IntersectionObserver(entries => {
+  entries.forEach(e => {
+    if (e.isIntersecting) {
+      tocLinks.forEach(l => l.classList.remove('active'));
+      const a = document.querySelector(`.toc-list a[href="#${e.target.id}"]`);
+      if (a) a.classList.add('active');
+    }
+  });
+}, { rootMargin: '-20% 0px -70% 0px' });
+
+sections.forEach(s => obs.observe(s));
+</script>
+
+<!-- ─────────────────────── Visualizer 1: GP Sampler ─────────── -->
+<script>
+(function(){
+  const canvas = document.getElementById('gpCanvas');
+  const lSlider = document.getElementById('lSlider');
+  const aSlider = document.getElementById('aSlider');
+  const lVal    = document.getElementById('lVal');
+  const aVal    = document.getElementById('aVal');
+  const btn     = document.getElementById('resampleBtn');
+
+  function squaredExp(x1, x2, l, alpha) {
+    return alpha * alpha * Math.exp(-((x1-x2)**2)/(2*l*l));
+  }
+  function cholDecomp(K) {
+    const n = K.length, L = Array.from({length:n}, () => new Array(n).fill(0));
+    for(let i=0;i<n;i++){
+      for(let j=0;j<=i;j++){
+        let s=K[i][j];
+        for(let k=0;k<j;k++) s-=L[i][k]*L[j][k];
+        L[i][j]=(i===j)?Math.sqrt(Math.max(s,1e-12)):s/L[j][j];
+      }
+    }
+    return L;
+  }
+  function sampleGP(n, l, alpha) {
+    const xs=[];
+    for(let i=0;i<n;i++) xs.push(-3+6*i/(n-1));
+    const K=xs.map(xi=>xs.map(xj=>squaredExp(xi,xj,l,alpha)+1e-9*(xi===xj?1:0)));
+    const L=cholDecomp(K);
+    const z=Array.from({length:n},()=>{let u=0;for(let k=0;k<6;k++)u+=Math.random()-0.5;return u*1.732;});
+    const f=new Array(n).fill(0);
+    for(let i=0;i<n;i++) for(let j=0;j<=i;j++) f[i]+=L[i][j]*z[j];
+    return {xs,ys:f};
+  }
+
+  let current = null;
+
+  function draw() {
+    const l = parseFloat(lSlider.value), a = parseFloat(aSlider.value);
+    lVal.textContent = l.toFixed(1); aVal.textContent = a.toFixed(1);
+    if (!current) current = sampleGP(60, l, a);
+    const ctx = canvas.getContext('2d');
+    const W = canvas.width = canvas.offsetWidth * devicePixelRatio;
+    const H = canvas.height = 220 * devicePixelRatio;
+    ctx.scale(1,1);
+    ctx.fillStyle = '#fff'; ctx.fillRect(0,0,W,H);
+    const {xs,ys} = current;
+    const pad = 20 * devicePixelRatio;
+    const toX = x => (x+3)/6*(W-2*pad)+pad;
+    const toY = y => H/2 - y*(H-2*pad)/8;
+    // grid
+    ctx.strokeStyle = '#f0f0ec'; ctx.lineWidth = devicePixelRatio;
+    for(let v=-3;v<=3;v+=1){ ctx.beginPath(); ctx.moveTo(toX(v),0); ctx.lineTo(toX(v),H); ctx.stroke(); }
+    ctx.beginPath(); ctx.moveTo(0,H/2); ctx.lineTo(W,H/2); ctx.stroke();
+    // zero line
+    ctx.strokeStyle='#cecec8'; ctx.lineWidth=devicePixelRatio;
+    ctx.setLineDash([4*devicePixelRatio,4*devicePixelRatio]);
+    ctx.beginPath(); ctx.moveTo(pad,H/2); ctx.lineTo(W-pad,H/2); ctx.stroke();
+    ctx.setLineDash([]);
+    // function
+    ctx.strokeStyle='#2563eb'; ctx.lineWidth=2*devicePixelRatio;
+    ctx.beginPath();
+    xs.forEach((x,i)=>{ const px=toX(x), py=toY(ys[i]); i===0?ctx.moveTo(px,py):ctx.lineTo(px,py); });
+    ctx.stroke();
+  }
+
+  btn.addEventListener('click', () => { current = null; draw(); });
+  lSlider.addEventListener('input', draw);
+  aSlider.addEventListener('input', draw);
+  window.addEventListener('resize', () => { current = null; draw(); });
+  setTimeout(draw, 50);
+})();
+</script>
+
+<!-- ─────────────────────── Visualizer 2: Conditioning ──────── -->
+<script>
+(function(){
+  const contour = document.getElementById('contourCanvas');
+  const slice   = document.getElementById('sliceCanvas');
+  const f1Sl    = document.getElementById('f1Slider');
+  const corSl   = document.getElementById('corSlider');
+  const f1V     = document.getElementById('f1Val');
+  const corV    = document.getElementById('corVal');
+
+  function normalPDF(x,mu,sig){ return Math.exp(-0.5*((x-mu)/sig)**2)/(sig*Math.sqrt(2*Math.PI)); }
+  function bivarNorm(x,y,rho){ const z=x*x-2*rho*x*y+y*y; return Math.exp(-z/(2*(1-rho*rho)))/(2*Math.PI*Math.sqrt(1-rho*rho)); }
+
+  function drawContour() {
+    const f1=parseFloat(f1Sl.value), rho=parseFloat(corSl.value);
+    f1V.textContent=f1.toFixed(1); corV.textContent=rho.toFixed(2);
+    const ctx=contour.getContext('2d');
+    const W=contour.width=contour.offsetWidth*devicePixelRatio;
+    const H=contour.height=200*devicePixelRatio;
+    ctx.fillStyle='#fff'; ctx.fillRect(0,0,W,H);
+    const res=40;
+    for(let xi=0;xi<res;xi++){
+      for(let yi=0;yi<res;yi++){
+        const x=-3+6*xi/(res-1), y=-3+6*yi/(res-1);
+        const v=bivarNorm(x,y,rho);
+        const light=Math.max(0,Math.min(255,Math.floor(255*(1-v*3))));
+        ctx.fillStyle=`rgb(${light},${light+Math.floor((255-light)*0.3)},255)`;
+        ctx.fillRect(xi*(W/res),yi*(H/res),W/res+1,H/res+1);
+      }
+    }
+    // slice line
+    const sx=(f1+3)/6*W;
+    ctx.strokeStyle='#ef4444'; ctx.lineWidth=2*devicePixelRatio;
+    ctx.beginPath(); ctx.moveTo(sx,0); ctx.lineTo(sx,H); ctx.stroke();
+  }
+
+  function drawSlice() {
+    const f1=parseFloat(f1Sl.value), rho=parseFloat(corSl.value);
+    const mu=rho*f1, sig=Math.sqrt(1-rho*rho);
+    const ctx=slice.getContext('2d');
+    const W=slice.width=slice.offsetWidth*devicePixelRatio;
+    const H=slice.height=200*devicePixelRatio;
+    ctx.fillStyle='#fff'; ctx.fillRect(0,0,W,H);
+    const pad=18*devicePixelRatio;
+    const toX=x=>(x+3)/6*(W-2*pad)+pad;
+    const pts=100;
+    let maxP=0;
+    const vals=[];
+    for(let i=0;i<=pts;i++){ const x=-3+6*i/pts; const p=normalPDF(x,mu,sig); vals.push({x,p}); maxP=Math.max(maxP,p); }
+    // fill
+    ctx.beginPath();
+    vals.forEach((v,i)=>{ const px=toX(v.x), py=H-pad-(v.p/maxP)*(H-2*pad); i===0?ctx.moveTo(px,py):ctx.lineTo(px,py); });
+    ctx.lineTo(toX(3),H-pad); ctx.lineTo(toX(-3),H-pad); ctx.closePath();
+    ctx.fillStyle='rgba(37,99,235,.12)'; ctx.fill();
+    // line
+    ctx.strokeStyle='#2563eb'; ctx.lineWidth=2*devicePixelRatio;
+    ctx.beginPath();
+    vals.forEach((v,i)=>{ const px=toX(v.x), py=H-pad-(v.p/maxP)*(H-2*pad); i===0?ctx.moveTo(px,py):ctx.lineTo(px,py); });
+    ctx.stroke();
+    // mean marker
+    const mx=toX(mu);
+    ctx.strokeStyle='#ef4444'; ctx.lineWidth=devicePixelRatio; ctx.setLineDash([4*devicePixelRatio,3*devicePixelRatio]);
+    ctx.beginPath(); ctx.moveTo(mx,pad); ctx.lineTo(mx,H-pad); ctx.stroke();
+    ctx.setLineDash([]);
+    ctx.fillStyle='#ef4444'; ctx.font=`${10*devicePixelRatio}px Inter,sans-serif`;
+    ctx.fillText(`μ=${mu.toFixed(2)}`,mx+4*devicePixelRatio,pad+12*devicePixelRatio);
+  }
+
+  function update(){ drawContour(); drawSlice(); }
+  f1Sl.addEventListener('input', update);
+  corSl.addEventListener('input', update);
+  window.addEventListener('resize', update);
+  setTimeout(update, 50);
+})();
+</script>
+
+<!-- ─────────────────────── Visualizer 3: Approx Posterior ───── -->
+<script>
+(function(){
+  const canvas=document.getElementById('approxCanvas');
+  const slider=document.getElementById('priorSlider');
+  const valEl =document.getElementById('priorVal');
+  function normalPDF(x,mu,sig){ return Math.exp(-0.5*((x-mu)/sig)**2)/(sig*Math.sqrt(2*Math.PI)); }
+  function sigmoid(x){ return 1/(1+Math.exp(-x)); }
+
+  function draw(){
+    const mu=parseFloat(slider.value); valEl.textContent=mu.toFixed(1);
+    const ctx=canvas.getContext('2d');
+    const W=canvas.width=canvas.offsetWidth*devicePixelRatio;
+    const H=canvas.height=240*devicePixelRatio;
+    ctx.fillStyle='#fff'; ctx.fillRect(0,0,W,H);
+    const pad=20*devicePixelRatio, n=200;
+    const toX=x=>(x+5)/10*(W-2*pad)+pad;
+    let maxVal=0;
+    const xs=[]; const prior=[]; const lik=[]; const post=[];
+    for(let i=0;i<=n;i++){
+      const x=-5+10*i/n;
+      xs.push(x);
+      const p=normalPDF(x,mu,1), l=sigmoid(x), po=p*l;
+      prior.push(p); lik.push(l*0.4); post.push(po);
+      maxVal=Math.max(maxVal,p,l*0.4,po);
+    }
+    const toY=v=>H-pad-(v/maxVal)*(H-2*pad);
+    // true posterior fill
+    ctx.beginPath(); xs.forEach((x,i)=>{ i===0?ctx.moveTo(toX(x),toY(post[i])):ctx.lineTo(toX(x),toY(post[i])); });
+    ctx.lineTo(toX(xs[n]),H-pad); ctx.lineTo(toX(xs[0]),H-pad); ctx.closePath();
+    ctx.fillStyle='rgba(239,68,68,.25)'; ctx.fill();
+    // prior
+    function stroke(arr,color,w=2){ ctx.strokeStyle=color; ctx.lineWidth=w*devicePixelRatio; ctx.beginPath(); xs.forEach((x,i)=>{ i===0?ctx.moveTo(toX(x),toY(arr[i])):ctx.lineTo(toX(x),toY(arr[i])); }); ctx.stroke(); }
+    stroke(prior, '#3b82f6');
+    stroke(lik,   '#22c55e');
+    stroke(post,  'rgba(239,68,68,.7)', 1.5);
+    // Gaussian approximation
+    let muPost=0, totW=0;
+    xs.forEach((x,i)=>{ muPost+=x*post[i]; totW+=post[i]; });
+    muPost/=totW;
+    let sigPost=0;
+    xs.forEach((x,i)=>{ sigPost+=(x-muPost)**2*post[i]; });
+    sigPost=Math.sqrt(sigPost/totW);
+    const approx=xs.map(x=>normalPDF(x,muPost,sigPost));
+    const approxScale=maxVal/Math.max(...approx)*0.95;
+    ctx.strokeStyle='#000'; ctx.lineWidth=1.5*devicePixelRatio; ctx.setLineDash([5*devicePixelRatio,4*devicePixelRatio]);
+    ctx.beginPath(); xs.forEach((x,i)=>{ i===0?ctx.moveTo(toX(x),toY(approx[i]*approxScale)):ctx.lineTo(toX(x),toY(approx[i]*approxScale)); }); ctx.stroke();
+    ctx.setLineDash([]);
+    // baseline
+    ctx.strokeStyle='#e8e8e4'; ctx.lineWidth=devicePixelRatio;
+    ctx.beginPath(); ctx.moveTo(pad,H-pad); ctx.lineTo(W-pad,H-pad); ctx.stroke();
+  }
+
+  slider.addEventListener('input', draw);
+  window.addEventListener('resize', draw);
+  setTimeout(draw, 50);
+})();
+</script>
+
+<!-- ─────────────────────── Visualizer 4: LML Trade-off ──────── -->
+<script>
+(function(){
+  const fitC  = document.getElementById('fitCanvas');
+  const mlC   = document.getElementById('mlCanvas');
+  const lmlSl = document.getElementById('lmlSlider');
+  const lmlV  = document.getElementById('lmlVal');
+
+  const trainX=[-2,-1.2,-0.3,0.5,1.4,2.2];
+  const trainY=[ 0.6, 1.2, 0.8,-0.4,-1.1, 0.3];
+
+  function seKernel(x1,x2,l){ return Math.exp(-((x1-x2)**2)/(2*l*l)); }
+  function buildK(xs,l){ return xs.map(xi=>xs.map(xj=>seKernel(xi,xj,l)+1e-4*(xi===xj?1:0))); }
+  function invertK(K) {
+    const n=K.length, A=K.map(r=>[...r]), inv=Array.from({length:n},(_,i)=>Array.from({length:n},(_,j)=>i===j?1:0));
+    for(let i=0;i<n;i++){
+      let pivot=A[i][i]; if(Math.abs(pivot)<1e-12) continue;
+      for(let j=0;j<n;j++){ A[i][j]/=pivot; inv[i][j]/=pivot; }
+      for(let k=0;k<n;k++){ if(k===i) continue; const f=A[k][i]; for(let j=0;j<n;j++){ A[k][j]-=f*A[i][j]; inv[k][j]-=f*inv[i][j]; } }
+    }
+    return inv;
+  }
+  function matVec(M,v){ return M.map(row=>row.reduce((s,m,j)=>s+m*v[j],0)); }
+  function dot(a,b){ return a.reduce((s,ai,i)=>s+ai*b[i],0); }
+  function logDet(K){ // Cholesky-based approx
+    const n=K.length, L=K.map(r=>[...r]);
+    let ld=0;
+    for(let i=0;i<n;i++){
+      for(let j=0;j<i;j++){ for(let k=0;k<j;k++) L[i][j]-=L[i][k]*L[j][k]; L[i][j]/=L[j][j]; }
+      let s=L[i][i]; for(let k=0;k<i;k++) s-=L[i][k]**2; L[i][i]=Math.sqrt(Math.max(s,1e-12));
+      ld+=Math.log(L[i][i]);
+    }
+    return 2*ld;
+  }
+
+  function computeLML(l){
+    const K=buildK(trainX,l), Ki=invertK(K);
+    const Kiy=matVec(Ki,trainY);
+    const dataFit=-0.5*dot(trainY,Kiy);
+    const complexity=-0.5*logDet(K);
+    return {dataFit, complexity, total:dataFit+complexity};
+  }
+
+  function drawFit(l){
+    const ctx=fitC.getContext('2d');
+    const W=fitC.width=fitC.offsetWidth*devicePixelRatio;
+    const H=fitC.height=180*devicePixelRatio;
+    ctx.fillStyle='#fff'; ctx.fillRect(0,0,W,H);
+    const pad=20*devicePixelRatio;
+    const toX=x=>(x+3)/6*(W-2*pad)+pad;
+    const toY=y=>H/2-y*(H-2*pad)/4;
+
+    const K=buildK(trainX,l), Ki=invertBy(K), ys=matVec(Ki,trainY);
+    const testXs=[]; for(let i=0;i<=80;i++) testXs.push(-3+6*i/80);
+    const means=testXs.map(xs=>{
+      const kstar=trainX.map(xi=>seKernel(xi,xs,l));
+      return dot(kstar,ys);
+    });
+    const vars=testXs.map(xs=>{
+      const kstar=trainX.map(xi=>seKernel(xi,xs,l));
+      const Kikstar=matVec(Ki,kstar);
+      return Math.max(0,seKernel(xs,xs,l)-dot(kstar,Kikstar));
+    });
+    // fill CI
+    ctx.beginPath(); testXs.forEach((x,i)=>{ i===0?ctx.moveTo(toX(x),toY(means[i]+Math.sqrt(vars[i]))):ctx.lineTo(toX(x),toY(means[i]+Math.sqrt(vars[i]))); });
+    testXs.slice().reverse().forEach((x,i)=>{ const ii=testXs.length-1-i; ctx.lineTo(toX(x),toY(means[ii]-Math.sqrt(vars[ii]))); });
+    ctx.closePath(); ctx.fillStyle='rgba(37,99,235,.08)'; ctx.fill();
+    // mean
+    ctx.strokeStyle='#2563eb'; ctx.lineWidth=2*devicePixelRatio;
+    ctx.beginPath(); testXs.forEach((x,i)=>{ i===0?ctx.moveTo(toX(x),toY(means[i])):ctx.lineTo(toX(x),toY(means[i]))); }); ctx.stroke();
+    // data pts
+    trainX.forEach((x,i)=>{ ctx.fillStyle='#0f0f0e'; ctx.beginPath(); ctx.arc(toX(x),toY(trainY[i]),4*devicePixelRatio,0,Math.PI*2); ctx.fill(); });
+  }
+
+  // fallback: simple matrix inversion alias
+  function invertBy(K){ return invertK(K); }
+
+  function drawML(){
+    const ctx=mlC.getContext('2d');
+    const W=mlC.width=mlC.offsetWidth*devicePixelRatio;
+    const H=mlC.height=180*devicePixelRatio;
+    ctx.fillStyle='#fff'; ctx.fillRect(0,0,W,H);
+    const pad=28*devicePixelRatio;
+    const ls=[]; const dfs=[]; const cps=[]; const tots=[];
+    for(let i=0;i<=60;i++){ const l=0.1+3*i/60; ls.push(l); const {dataFit,complexity,total}=computeLML(l); dfs.push(dataFit); cps.push(complexity); tots.push(total); }
+    const allVals=[...dfs,...cps,...tots];
+    const mn=Math.min(...allVals), mx=Math.max(...allVals);
+    const range=mx-mn||1;
+    const toX=i=>pad+(W-2*pad)*i/60;
+    const toY=v=>H-pad-(v-mn)/(range)*(H-2*pad);
+    function strokeArr(arr,color,dash=false){
+      ctx.strokeStyle=color; ctx.lineWidth=1.5*devicePixelRatio;
+      if(dash) ctx.setLineDash([4*devicePixelRatio,3*devicePixelRatio]);
+      ctx.beginPath(); arr.forEach((v,i)=>{ i===0?ctx.moveTo(toX(i),toY(v)):ctx.lineTo(toX(i),toY(v)); }); ctx.stroke();
+      ctx.setLineDash([]);
+    }
+    strokeArr(dfs,  '#ef4444', true);
+    strokeArr(cps,  '#3b82f6', true);
+    strokeArr(tots, '#000');
+    // current l marker
+    const curL=parseFloat(lmlSl.value);
+    const idx=Math.round((curL-0.1)/3*60);
+    ctx.strokeStyle='#7a7a74'; ctx.lineWidth=devicePixelRatio;
+    ctx.beginPath(); ctx.moveTo(toX(idx),pad); ctx.lineTo(toX(idx),H-pad); ctx.stroke();
+    ctx.fillStyle='#7a7a74'; ctx.font=`${9*devicePixelRatio}px Inter,sans-serif`;
+    ctx.fillText(`l=${curL}`,toX(idx)+3*devicePixelRatio,pad+10*devicePixelRatio);
+  }
+
+  function update(){
+    const l=parseFloat(lmlSl.value); lmlV.textContent=l.toFixed(2);
+    try { drawFit(l); } catch(e){}
+    drawML();
+  }
+  lmlSl.addEventListener('input', update);
+  window.addEventListener('resize', update);
+  setTimeout(update, 80);
+})();
+</script>
 
 </body>
-
 </html>
