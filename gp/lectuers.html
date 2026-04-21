@@ -2367,6 +2367,9 @@
             <h4>The Climate Record</h4>
             <p style="font-size:.8rem">When climate scientists take sparse spatial ice-core measurements and historical sea-surface temperatures (often corrupted by World War II sailors taking warm water from the engine room instead of throwing buckets overboard), and run a spatial "smoothing algorithm" over the globe, they are mathematically fitting a GP. Treating the algorithm as a black box instead of a probabilistic model hides the massive assumptions being made about spatial correlation.</p>
           </div>
+          <div class="callout callout-indigo" style="margin:0">
+            <h4>The Bicycle Altimeter</h4>
+            <p style="font-size:.8rem">The lecturer strapped a handheld barometric altimeter to a moving bicycle. When the cyclist hit a bump, the data looked completely wrong. Why? Because the manufacturer built a Kalman filter (an implicit GP) into the hardware firmware to smooth the data, assuming it would be held by a stationary pedestrian. Hardware filters are often just hardcoded GPs!</p>
           </div>
         </div>
 
