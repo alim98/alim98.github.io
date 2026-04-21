@@ -26,7 +26,7 @@ btns.forEach(btn => {
 });
 
 /* ── Keyboard shortcuts 1–4 ──────────────────────────── */
-const panelIds = ['experience', 'publications', 'projects', 'skills'];
+const panelIds = ['experience', 'publications', 'projects', 'skills', 'notes'];
 const hint     = document.getElementById('kbd-hint');
 let hintTimer;
 

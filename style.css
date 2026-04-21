@@ -596,6 +596,105 @@ a.pub-row:hover .pub-ext { opacity: 1; }
 .edu-note { color: var(--ink-4) !important; font-style: italic; margin-top: .1rem; }
 
 /* ─────────────────────────────────────
+   NOTES
+───────────────────────────────────── */
+.notes-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: .75rem;
+}
+
+.note-card {
+  display: block;
+  border: 1px solid var(--border);
+  border-radius: var(--r-lg);
+  padding: 1.1rem;
+  transition: border-color .2s, box-shadow .2s, transform .2s;
+  text-decoration: none;
+  color: inherit;
+}
+a.note-card:hover {
+  border-color: var(--border-h);
+  box-shadow: 0 4px 16px rgba(0,0,0,.07);
+  transform: translateY(-2px);
+}
+.note-card.placeholder {
+  border-style: dashed;
+  background: var(--off);
+}
+
+.note-card-top {
+  display: flex;
+  align-items: center;
+  gap: .6rem;
+  margin-bottom: .75rem;
+}
+
+.note-icon {
+  font-size: 1.35rem;
+  width: 36px;
+  height: 36px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--off);
+  border: 1px solid var(--border);
+  border-radius: var(--r);
+  flex-shrink: 0;
+  font-style: normal;
+}
+
+.note-meta { flex: 1; }
+.note-tag {
+  display: block;
+  font-size: .72rem;
+  font-weight: 600;
+  color: var(--ink-2);
+  margin-bottom: .1rem;
+}
+.note-date {
+  display: block;
+  font-size: .68rem;
+  color: var(--ink-4);
+}
+
+.note-ext {
+  color: var(--ink-4);
+  flex-shrink: 0;
+  opacity: 0;
+  transition: opacity .15s;
+}
+a.note-card:hover .note-ext { opacity: 1; }
+
+.note-card h3 {
+  font-size: .88rem;
+  font-weight: 600;
+  margin-bottom: .35rem;
+  letter-spacing: -.01em;
+  line-height: 1.35;
+}
+.note-card p {
+  font-size: .78rem;
+  color: var(--ink-3);
+  line-height: 1.6;
+  margin-bottom: .75rem;
+}
+
+.note-topics {
+  display: flex;
+  flex-wrap: wrap;
+  gap: .28rem;
+}
+.note-topics span {
+  font-size: .67rem;
+  padding: .14rem .45rem;
+  border-radius: 4px;
+  background: var(--off);
+  border: 1px solid var(--border);
+  color: var(--ink-3);
+}
+
+/* ─────────────────────────────────────
    KEYBOARD HINT
 ───────────────────────────────────── */
 .kbd-hint {

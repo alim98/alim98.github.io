@@ -62,6 +62,9 @@
         <button class="nav-btn" data-panel="skills" aria-pressed="false">
           <span>Skills &amp; Education</span><kbd>4</kbd>
         </button>
+        <button class="nav-btn" data-panel="notes" aria-pressed="false">
+          <span>Notes</span><kbd>5</kbd>
+        </button>
       </nav>
 
       <!-- Contact links -->
@@ -459,10 +462,51 @@
         </div>
       </div>
 
+      <!-- ─ NOTES ─ -->
+      <div class="panel" id="panel-notes">
+        <div class="panel-header">
+          <h2>Notes &amp; Resources</h2>
+          <span class="panel-meta">Study notes with interactive visualizations</span>
+        </div>
+
+        <div class="notes-grid">
+
+          <a href="gp/lectuers.html" class="note-card" target="_blank" rel="noopener">
+            <div class="note-card-top">
+              <div class="note-icon">∫</div>
+              <div class="note-meta">
+                <span class="note-tag">Gaussian Processes</span>
+                <span class="note-date">MLSS 2015 · Neil Lawrence</span>
+              </div>
+              <svg class="note-ext" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>
+            </div>
+            <h3>Gaussian Processes: Intuition &amp; Mathematics</h3>
+            <p>Full synthesis of Neil Lawrence's GP lecture — from Laplace's Demon and the philosophy of probability, through kernel functions and conditioning, to non-Gaussian likelihoods and parameter optimization.</p>
+            <div class="note-topics">
+              <span>Kernel Functions</span>
+              <span>Bayesian Inference</span>
+              <span>Marginalization</span>
+              <span>EP vs Variational</span>
+              <span>KaTeX Math</span>
+              <span>Interactive Demos</span>
+            </div>
+          </a>
+
+          <div class="note-card placeholder">
+            <div class="note-card-top">
+              <div class="note-icon" style="opacity:.3">+</div>
+            </div>
+            <h3 style="opacity:.4">More notes coming soon</h3>
+            <p style="opacity:.35">Currently studying and synthesizing additional lectures.</p>
+          </div>
+
+        </div>
+      </div>
+
     </main>
   </div>
 
-  <div class="kbd-hint" id="kbd-hint">Press <kbd>1</kbd>–<kbd>4</kbd> to switch sections</div>
+  <div class="kbd-hint" id="kbd-hint">Press <kbd>1</kbd>–<kbd>5</kbd> to switch sections</div>
 
   <script src="script.js?v=4"></script>
 </body>
