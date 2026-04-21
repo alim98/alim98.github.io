@@ -1773,8 +1773,9 @@
         }, 100);
 </script>
 
-<!-- ── Lecture 3 JavaScript (original, unchanged) ── -->
+<!-- ── Lecture 3 JavaScript ── -->
 <script>
+(function() {  // IIFE — prevents const/let collisions with the Lecture 1 script block
         // --- Visualizer 1: Brownian Motion / Gauss-Markov ---
         const bCanvas = document.getElementById('brownianCanvas');
         const bCtx = bCanvas.getContext('2d');
@@ -1937,6 +1938,7 @@
                 updateFaceFromLatent(0.5, 0.5);
             }
         }, 150);
+})(); // end IIFE
 </script>
 
 </body>
