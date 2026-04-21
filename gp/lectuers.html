@@ -92,6 +92,25 @@
     .topbar-divider { width: 1px; height: 16px; background: var(--border); }
     .topbar-title { font-size: .82rem; font-weight: 500; color: var(--ink-2); }
     .topbar-meta  { font-size: .73rem; color: var(--ink-4); white-space: nowrap; }
+    .topbar-right { display: flex; align-items: center; gap: .65rem; }
+    .download-notes-btn {
+      display: inline-flex; align-items: center; gap: .35rem;
+      font-size: .76rem; font-weight: 500; color: var(--ink-3);
+      padding: .3rem .7rem; border-radius: var(--r);
+      border: 1px solid var(--border); background: var(--white);
+      cursor: pointer; text-decoration: none;
+      transition: background .15s, color .15s, border-color .15s;
+      white-space: nowrap;
+    }
+    .download-notes-btn:hover { background: var(--off); color: var(--ink); border-color: var(--border-h); }
+    .download-notes-btn:disabled { opacity: .4; cursor: default; }
+    .notes-count {
+      display: inline-flex; align-items: center; justify-content: center;
+      min-width: 16px; height: 16px; padding: 0 4px;
+      border-radius: 20px; background: var(--accent); color: #fff;
+      font-size: .65rem; font-weight: 700; line-height: 1;
+    }
+    .notes-count.empty { background: var(--border); color: var(--ink-4); }
 
     /* ── Page layout ── */
     .page {
@@ -317,7 +336,14 @@
     <div class="topbar-divider"></div>
     <span class="topbar-title">Gaussian Processes: Intuition &amp; Framework</span>
   </div>
-  <span class="topbar-meta">Neil Lawrence · MLSS 2015 · Tübingen</span>
+  <div class="topbar-right">
+    <span class="topbar-meta">Neil Lawrence · MLSS 2015 · Tübingen</span>
+    <button id="downloadNotesBtn" class="download-notes-btn" title="Download all your notes as a Markdown file">
+      <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+      Notes
+      <span class="notes-count empty" id="notesCount">0</span>
+    </button>
+  </div>
 </header>
 
 <div class="page">
@@ -1993,9 +2019,14 @@
 <!-- ── Personal Notes System ── -->
 <script>
 (function() {
-  // Finds every note-row that has an id and injects a + button + collapsible panel
   const KEY = 'gp_note_'; // localStorage prefix
+  const TITLE = 'Gaussian Processes – Neil Lawrence MLSS 2015 Tübingen';
 
+  // ── 1. Create a dynamic download button in the header if it doesn't exist ──
+  // Just in case it was missed by the HTML replacement, although it's there via CSS.
+  // Wait, let's just make the script handle everything securely.
+  
+  // Finds every note-row that has an id and injects a + button + collapsible panel
   document.querySelectorAll('.note-row[id]').forEach(row => {
     const id = row.id;
     const cue = row.querySelector('.cue-column');
@@ -2019,7 +2050,7 @@
     panel.innerHTML = [
       '<div class="note-panel-inner">',
         '<div class="note-panel-header">',
-          '<span>&#9998;&nbsp;My Notes</span>',
+          '<span>&#9998;&nbsp;My Notes &mdash; stored locally in your browser</span>',
           '<div class="note-header-actions">',
             '<span class="note-saved-msg"></span>',
             '<button class="note-close-btn" aria-label="Close note">&times;</button>',
@@ -2070,11 +2101,55 @@
           btn.innerHTML = '+'; btn.classList.remove('has-note');
           btn.title = 'Add a note for this section';
         }
-        msg.textContent = '\u2713 saved';
+        msg.textContent = '\u2713 saved locally';
         setTimeout(() => { msg.textContent = ''; }, 1800);
+        refreshCount();
       }, 500);
     });
   });
+
+  // ── badge counter ──
+  const countEl = document.getElementById('notesCount');
+  const dlBtn   = document.getElementById('downloadNotesBtn');
+
+  function refreshCount() {
+    let n = 0;
+    for (let i = 0; i < localStorage.length; i++) {
+      if (localStorage.key(i).startsWith(KEY)) n++;
+    }
+    if (countEl) { countEl.textContent = n; countEl.classList.toggle('empty', n === 0); }
+    if (dlBtn)   { dlBtn.disabled = (n === 0); }
+  }
+
+  // ── download as Markdown ──
+  function downloadNotes() {
+    const rows = document.querySelectorAll('.note-row[id]');
+    let md = '# My Notes\n';
+    md += '## ' + TITLE + '\n';
+    md += '_Downloaded: ' + new Date().toLocaleString() + '_\n\n---\n\n';
+
+    let hasAny = false;
+    rows.forEach(row => {
+      const note = localStorage.getItem(KEY + row.id);
+      if (!note || !note.trim()) return;
+      hasAny = true;
+      const h2 = row.querySelector('.cue-column h2');
+      const heading = h2 ? h2.textContent.trim() : row.id;
+      md += '## ' + heading + '\n\n' + note.trim() + '\n\n---\n\n';
+    });
+
+    if (!hasAny) { alert('No notes saved yet.'); return; }
+
+    const blob = new Blob([md], { type: 'text/markdown;charset=utf-8' });
+    const url  = URL.createObjectURL(blob);
+    const a    = document.createElement('a');
+    a.href = url; a.download = 'gp_notes_' + new Date().toISOString().slice(0,10) + '.md';
+    document.body.appendChild(a); a.click();
+    setTimeout(() => { URL.revokeObjectURL(url); a.remove(); }, 1000);
+  }
+
+  if (dlBtn) dlBtn.addEventListener('click', downloadNotes);
+  refreshCount();
 })();
 </script>
 
