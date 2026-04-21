@@ -647,6 +647,153 @@
 
         <p>Because I.I.D. noise only correlates a point with itself, its covariance matrix is simply \(\sigma^2 I\) (the identity matrix scaled by the noise variance). Therefore, to add noise to our GP model, we simply add \(\sigma^2\) to the diagonal of our kernel matrix:</p>
         <div class="math-block">\( K_y = K_f + \sigma^2 I \)</div>
+
+        <!-- Section 8 Quiz -->
+        <div class="viz-wrap" style="margin-top: 2rem;">
+          <div class="viz-title" style="font-size: 1.05rem; margin-bottom: 1.2rem; color: var(--accent);">Concept Quiz: Additive Properties &amp; Noise</div>
+          
+          <div id="quiz-s8" style="display: flex; flex-direction: column; gap: 1.5rem;">
+            <!-- Q1 -->
+            <div class="quiz-q" data-ans="1">
+              <p style="font-weight: 600; font-size: 0.9rem; margin-bottom: 0.5rem; color: var(--ink);">1. When you add two independent Gaussian random variables together, what happens to the covariance of their sum?</p>
+              <div style="display: flex; flex-direction: column; gap: 0.4rem;">
+                <label style="font-size: 0.85rem; cursor: pointer; padding: 0.5rem; border: 1px solid var(--border); border-radius: var(--r); background: var(--off); transition: all 0.2s; color: var(--ink-2);">
+                  <input type="radio" name="q1" value="0" style="margin-right: 0.5rem;"> It is the product of their covariances.
+                </label>
+                <label style="font-size: 0.85rem; cursor: pointer; padding: 0.5rem; border: 1px solid var(--border); border-radius: var(--r); background: var(--off); transition: all 0.2s; color: var(--ink-2);">
+                  <input type="radio" name="q1" value="1" style="margin-right: 0.5rem;"> It is the sum of their individual covariances.
+                </label>
+                <label style="font-size: 0.85rem; cursor: pointer; padding: 0.5rem; border: 1px solid var(--border); border-radius: var(--r); background: var(--off); transition: all 0.2s; color: var(--ink-2);">
+                  <input type="radio" name="q1" value="2" style="margin-right: 0.5rem;"> It defaults to the identity matrix.
+                </label>
+                <label style="font-size: 0.85rem; cursor: pointer; padding: 0.5rem; border: 1px solid var(--border); border-radius: var(--r); background: var(--off); transition: all 0.2s; color: var(--ink-2);">
+                  <input type="radio" name="q1" value="3" style="margin-right: 0.5rem;"> The resulting distribution is non-Gaussian.
+                </label>
+              </div>
+            </div>
+
+            <!-- Q2 -->
+            <div class="quiz-q" data-ans="2">
+              <p style="font-weight: 600; font-size: 0.9rem; margin-bottom: 0.5rem; color: var(--ink);">2. How does independent, identically distributed (I.I.D.) Gaussian noise mathematically affect the covariance matrix of a GP?</p>
+              <div style="display: flex; flex-direction: column; gap: 0.4rem;">
+                <label style="font-size: 0.85rem; cursor: pointer; padding: 0.5rem; border: 1px solid var(--border); border-radius: var(--r); background: var(--off); transition: all 0.2s; color: var(--ink-2);">
+                  <input type="radio" name="q2" value="0" style="margin-right: 0.5rem;"> It scales the entire matrix.
+                </label>
+                <label style="font-size: 0.85rem; cursor: pointer; padding: 0.5rem; border: 1px solid var(--border); border-radius: var(--r); background: var(--off); transition: all 0.2s; color: var(--ink-2);">
+                  <input type="radio" name="q2" value="1" style="margin-right: 0.5rem;"> It adds a constant to all off-diagonal elements.
+                </label>
+                <label style="font-size: 0.85rem; cursor: pointer; padding: 0.5rem; border: 1px solid var(--border); border-radius: var(--r); background: var(--off); transition: all 0.2s; color: var(--ink-2);">
+                  <input type="radio" name="q2" value="2" style="margin-right: 0.5rem;"> It adds variance \(\sigma^2\) exclusively to the diagonal elements.
+                </label>
+                <label style="font-size: 0.85rem; cursor: pointer; padding: 0.5rem; border: 1px solid var(--border); border-radius: var(--r); background: var(--off); transition: all 0.2s; color: var(--ink-2);">
+                  <input type="radio" name="q2" value="3" style="margin-right: 0.5rem;"> It subtracts variance from the diagonal elements.
+                </label>
+              </div>
+            </div>
+
+            <!-- Q3 -->
+            <div class="quiz-q" data-ans="2">
+              <p style="font-weight: 600; font-size: 0.9rem; margin-bottom: 0.5rem; color: var(--ink);">3. In the observational equation \( y_i = f(x_i) + \epsilon_i \), what does \(\epsilon_i\) represent?</p>
+              <div style="display: flex; flex-direction: column; gap: 0.4rem;">
+                <label style="font-size: 0.85rem; cursor: pointer; padding: 0.5rem; border: 1px solid var(--border); border-radius: var(--r); background: var(--off); transition: all 0.2s; color: var(--ink-2);">
+                  <input type="radio" name="q3" value="0" style="margin-right: 0.5rem;"> The predictive mean of the Gaussian Process.
+                </label>
+                <label style="font-size: 0.85rem; cursor: pointer; padding: 0.5rem; border: 1px solid var(--border); border-radius: var(--r); background: var(--off); transition: all 0.2s; color: var(--ink-2);">
+                  <input type="radio" name="q3" value="1" style="margin-right: 0.5rem;"> Correlated noise between \(x_i\) and \(x_j\).
+                </label>
+                <label style="font-size: 0.85rem; cursor: pointer; padding: 0.5rem; border: 1px solid var(--border); border-radius: var(--r); background: var(--off); transition: all 0.2s; color: var(--ink-2);">
+                  <input type="radio" name="q3" value="2" style="margin-right: 0.5rem;"> Independent observational noise at point \(x_i\).
+                </label>
+                <label style="font-size: 0.85rem; cursor: pointer; padding: 0.5rem; border: 1px solid var(--border); border-radius: var(--r); background: var(--off); transition: all 0.2s; color: var(--ink-2);">
+                  <input type="radio" name="q3" value="3" style="margin-right: 0.5rem;"> The true underlying function's amplitude.
+                </label>
+              </div>
+            </div>
+
+            <!-- Q4 -->
+            <div class="quiz-q" data-ans="2">
+              <p style="font-weight: 600; font-size: 0.9rem; margin-bottom: 0.5rem; color: var(--ink);">4. If the latent function has covariance \(K_f\) and noise is \(\mathcal{N}(0, \sigma^2)\), what is the final covariance matrix \(K_y\)?</p>
+              <div style="display: flex; flex-direction: column; gap: 0.4rem;">
+                <label style="font-size: 0.85rem; cursor: pointer; padding: 0.5rem; border: 1px solid var(--border); border-radius: var(--r); background: var(--off); transition: all 0.2s; color: var(--ink-2);">
+                  <input type="radio" name="q4" value="0" style="margin-right: 0.5rem;"> \( K_y = K_f \times \sigma^2 \)
+                </label>
+                <label style="font-size: 0.85rem; cursor: pointer; padding: 0.5rem; border: 1px solid var(--border); border-radius: var(--r); background: var(--off); transition: all 0.2s; color: var(--ink-2);">
+                  <input type="radio" name="q4" value="1" style="margin-right: 0.5rem;"> \( K_y = K_f + \sigma I \)
+                </label>
+                <label style="font-size: 0.85rem; cursor: pointer; padding: 0.5rem; border: 1px solid var(--border); border-radius: var(--r); background: var(--off); transition: all 0.2s; color: var(--ink-2);">
+                  <input type="radio" name="q4" value="2" style="margin-right: 0.5rem;"> \( K_y = K_f + \sigma^2 I \)
+                </label>
+                <label style="font-size: 0.85rem; cursor: pointer; padding: 0.5rem; border: 1px solid var(--border); border-radius: var(--r); background: var(--off); transition: all 0.2s; color: var(--ink-2);">
+                  <input type="radio" name="q4" value="3" style="margin-right: 0.5rem;"> \( K_y = K_f \times (\sigma^2 I) \)
+                </label>
+              </div>
+            </div>
+          </div>
+          
+          <button id="s8-quiz-btn" class="viz-btn" style="margin-top: 1.5rem;">Check Answers</button>
+          
+          <div id="s8-quiz-res" style="margin-top: 1rem; font-weight: 600; font-size: 0.9rem; display: none; padding: 0.8rem; border-radius: var(--r);"></div>
+        </div>
+        
+        <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const btn = document.getElementById('s8-quiz-btn');
+            const res = document.getElementById('s8-quiz-res');
+            if(!btn) return;
+            
+            btn.addEventListener('click', () => {
+                let score = 0;
+                const questions = document.querySelectorAll('.quiz-q');
+                let allAnswered = true;
+                
+                questions.forEach(q => {
+                    const inputs = q.querySelectorAll('input[type="radio"]');
+                    const ans = q.getAttribute('data-ans');
+                    let answered = false;
+                    
+                    inputs.forEach(input => {
+                        const label = input.parentElement;
+                        label.style.borderColor = 'var(--border)';
+                        label.style.backgroundColor = 'var(--off)';
+                        label.style.color = 'var(--ink-2)';
+                        
+                        if (input.checked) {
+                            answered = true;
+                            if (input.value === ans) {
+                                score++;
+                            } else {
+                                label.style.borderColor = '#ef4444';
+                                label.style.backgroundColor = '#fef2f2';
+                                label.style.color = '#991b1b';
+                            }
+                        }
+                        
+                        // Always highlight the correct answer if the user attempted the question array
+                        if (input.value === ans && answered) {
+                            label.style.borderColor = 'var(--green)';
+                            label.style.backgroundColor = 'var(--green-bg)';
+                            label.style.color = '#166534';
+                        }
+                    });
+                    
+                    if (!answered) allAnswered = false;
+                });
+                
+                res.style.display = 'block';
+                if (!allAnswered) {
+                     res.style.backgroundColor = '#fffbeb';
+                     res.style.color = '#92400e';
+                     res.style.border = '1px solid #fde68a';
+                     res.innerHTML = "Please answer all 4 questions before checking!";
+                } else {
+                     res.style.backgroundColor = 'var(--green-bg)';
+                     res.style.color = '#166534';
+                     res.style.border = '1px solid var(--green-bd)';
+                     res.innerHTML = `You scored ${score} out of 4! ${score === 4 ? 'Masterful understanding!' : 'Review the highlighted answers above.'}`;
+                }
+            });
+        });
+        </script>
       </div>
     </div>
 
