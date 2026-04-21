@@ -719,6 +719,16 @@
           </ul>
         </div>
 
+        <div class="callout callout-indigo">
+          <h4>📌 The 2D Intuition (The "Version Space")</h4>
+          <p>The lecturer provides a critical 2D geometric intuition for why classification likelihoods break Gaussianity:</p>
+          <ul style="margin-top:0.4rem; font-size:0.9rem;">
+              <li><strong>The Regression Tunnel:</strong> In regression, observing a data point creates a clean "Gaussian tunnel" through your prior space (e.g., \(f_1\) vs \(f_2\)). This slice perfectly leaves a shifted 2D Gaussian posterior.</li>
+              <li><strong>The Classification Squash:</strong> In classification, observing a positive class isn't a tunnel. It operates like a sigmoidal step function cutting across the plane, saying, "The answer is definitely <em>not</em> in this half." This forcibly squashes the prior into a constrained corner known as the <em>version space</em>.</li>
+              <li><strong>Why EP Excels:</strong> EP operates iteratively on these 1D slices but mathematically minimizes the KL divergence <em>globally</em>. This allows it to capture the mass of this "squashed corner" much more accurately than the Laplace Approximation, which simply scales the highest peak and fits a crude parabola.</li>
+          </ul>
+        </div>
+
         <!-- Visualizer 3 -->
         <div class="viz-wrap">
           <div class="viz-title">Interactive Inference: Approximating a Skewed Posterior</div>
@@ -772,7 +782,10 @@
 
         <ul>
             <li>
-                <strong style="color:#3b82f6">Model Capacity (\(\frac{1}{2} \log |\mathbf{K}|\)):</strong> This acts as our regularizer. The determinant \(|\mathbf{K}|\) is the product of its eigenvalues, which geometrically represents the "volume" the Gaussian distribution covers. Minimizing this penalizes overly complex, high-volume models (acting as an automatic Occam's razor).
+                <strong style="color:#3b82f6">Model Capacity (\(\frac{1}{2} \log |\mathbf{K}|\)):</strong> This acts as our regularizer. The determinant \(|\mathbf{K}|\) is the product of its eigenvalues (\(\prod \lambda_i\)), which geometrically represents the "volume" the Gaussian distribution covers. Minimizing this penalizes overly complex, high-volume models (acting as an automatic Occam's razor).
+                <div class="callout callout-yellow mt-3 mb-2" style="padding:0.75rem 1rem">
+                    <strong>📌 Trace vs. Determinant:</strong> The lecturer highlights that while the Determinant measures the geometric <em>volume</em>, the <strong>Trace</strong> (\(\sum \lambda_i\)) measures the <em>total variance</em>. Since the total variance mathematically upper-bounds the entropy (Log Determinant), optimizing the Trace is convex and often serves as a powerful proxy for controlling capacity in Semi-Definite Programming.
+                </div>
             </li>
             <li style="margin-top:0.4rem">
                 <strong style="color:#ef4444">Data Fit (\(\frac{1}{2} \mathbf{y}^\top \mathbf{K}^{-1} \mathbf{y}\)):</strong> Notice that the latent function \(\mathbf{f}\) has been completely integrated out! There is no function parameter to fit. This quadratic form measures how well our actual data vector \(\mathbf{y}\) aligns with the rotated and scaled covariance ellipse we just defined. 
@@ -805,8 +818,12 @@
         </div>
 
         <div class="callout callout-red mt-6">
-            <h4>The Non-Convex Trap</h4>
-            <p>While the objective is technically convex with respect to the matrix \(\mathbf{K}\) itself, it is <strong>highly non-convex</strong> with respect to the hyperparameters \(\boldsymbol{\theta}\) (like the lengthscale \(l\)). Because of this, optimizing \(E(\boldsymbol{\theta})\) can easily get stuck in local optima (e.g., finding a solution with pure noise vs. one with a clear signal), making parameter optimization one of the trickier parts of GPs.</p>
+            <h4>The Non-Convex Trap &amp; The "Ridge of Solutions"</h4>
+            <p>While the objective is technically convex with respect to the matrix \(\mathbf{K}\) itself, it is <strong>highly non-convex</strong> with respect to the hyperparameters \(\boldsymbol{\theta}\).</p>
+            <p style="margin-top:0.4rem;">Practitioners often factor out scale to fit the <strong>Signal-to-Noise Ratio (SNR)</strong> by rewriting the covariance like so:
+            <br>
+            <span style="font-family:'JetBrains Mono', monospace; font-size:0.9rem;">&nbsp;&nbsp;&nbsp;&nbsp;\( \mathbf{K}_y = \alpha \left( \mathbf{K}_{f\_normalized} + \frac{1}{\text{SNR}} \mathbf{I} \right) \)</span></p>
+            <p style="margin-top:0.4rem;"><strong>The Ridge Trap:</strong> Visualizing the error surface of \(\log(\text{SNR})\) vs. \(\log(l)\) frequently reveals a "ridge of solutions"—a long valley where a model with high noise and a long lengthscale has an almost identical likelihood to a model with low noise and a short lengthscale. Because gradient ascent simply picks one arbitrary point on this ridge, the true Bayesian solution is to use <strong>Hybrid Monte Carlo (HMC)</strong> to sample <em>across</em> these hyperparameters rather than settling for a single point estimate.</p>
         </div>
       </div>
     </div>
@@ -846,6 +863,13 @@
           <li><strong>Degenerate (Parametric):</strong> If we use 10 basis functions, our \(\Phi\) matrix has 10 columns. The resulting kernel matrix \(K\) will have a maximum rank of 10. It cannot model infinite complexity.</li>
           <li><strong>Full Rank (Non-Parametric):</strong> What if we scatter an <em>infinite</em> number of basis functions continuously across the real line? The sum becomes an integral. Miraculously, if you use infinite Gaussian bumps, the integral solves out to the <strong>Squared Exponential kernel</strong>! If you scatter infinite Sigmoid functions, you get the <strong>Neural Network Covariance Function</strong> (derived by Chris Williams in 1996).</li>
         </ul>
+
+        <div class="callout callout-indigo mt-4">
+          <h4>📌 The Neural Network Covariance &amp; Non-Stationarity</h4>
+          <p>If you define a neural network hidden unit as a sigmoid, \(\sigma(\mathbf{w}^\top\mathbf{x} + b)\), and place Gaussian priors on the weights \(\mathbf{w}\) and bias \(b\), integrating them out mathematically yields the exact NN Covariance formula:</p>
+          <div class="math-block math-block-sm" style="font-size:1.05rem;">\( k(\mathbf{x}, \mathbf{x}') = \frac{2}{\pi} \arcsin \left( \frac{2 \mathbf{x}^\top \boldsymbol{\Sigma} \mathbf{x}'}{\sqrt{(1 + 2 \mathbf{x}^\top \boldsymbol{\Sigma} \mathbf{x})(1 + 2 \mathbf{x}'^\top \boldsymbol{\Sigma} \mathbf{x}')}} \right) \)</div>
+          <p style="margin-top:0.6rem;"><strong>The Non-Stationarity Intuition:</strong> Because the bias \(b\) is sampled from a Gaussian centered at zero, the sigmoids naturally clump around the origin. This makes the GP highly active (wiggly) in the middle of your input space, but it progressively flattens out and saturates at the edges. Since its behavior strictly depends on <em>where</em> you are in space, not just the distance \( |\mathbf{x} - \mathbf{x}'| \), it acts as a profoundly non-stationary kernel.</p>
+        </div>
       </div>
     </div>
 
@@ -890,7 +914,15 @@
         <p>The lecture concludes with a stark reminder of when GPs fail:</p>
         <ul>
           <li><strong>Big Data:</strong> The inversion of the covariance matrix is \(O(N^3)\) and requires \(O(N^2)\) memory. If you have a billion data points and millions of labels, use a Deep Neural Network. GPs shine in the low-to-medium data regime where quantifying uncertainty is critical.</li>
-          <li><strong>Financial Crises &amp; Jumps:</strong> Standard stationary GPs are extremely smooth. They do not handle sudden discontinuities (like stock market crashes) well. To model sudden jumps, you must either manually inject parameterized step functions into the covariance, or abandon standard GPs in favor of far more complex probabilist structures like <strong>Lévy Jump Processes</strong>.</li>
+          <li><strong>Financial Crises &amp; Jumps:</strong> Standard stationary GPs are extremely smooth. They do not inherently handle sudden discontinuities (like stock market crashes) well.
+            <div class="callout callout-yellow mt-2">
+              <h4>📌 The Multiplicative Switch-On/Switch-Off Trick</h4>
+              <p>The lecturer provides an elegant hack to model absolute discontinuities using standard GPs without resorting to Lévy Jump Processes. Using the multiplicative rule (\(f(x) \times g(x)\)), you can model a market crash by multiplying your pre-crash GP by a deterministic step function \(g(x)\) that drops to 0 at the exact moment of the crash.</p>
+              <p style="margin-top:0.4rem;">You then take a <em>second, independent</em> GP, multiply it by an inverse step function (which is 0 before the crash and 1 after), and add the two together:</p>
+              <div class="math-block math-block-sm">\( \mathbf{K}_{jump} = g(x)\mathbf{K}_1(x, x')g(x') + (1-g(x))\mathbf{K}_2(x, x')(1-g(x')) \)</div>
+              <p style="margin-top:0.4rem;">This shuts off the first GP and instantly turns on the second, allowing for a pure mathematical discontinuity, provided you manually parameterize <em>where</em> that jump occurs.</p>
+            </div>
+          </li>
           <li><strong>True "Non-Parametric Non-Stationarity":</strong> If the smoothness/behavior of the function fundamentally shifts across the domain in unpredictable ways, a single stationary kernel will fail. The bleeding-edge solution to this is <strong>Deep Gaussian Processes</strong> (feeding the output of one GP into another to warp the input space), but this drastically increases computational complexity.</li>
         </ul>
       </div>
