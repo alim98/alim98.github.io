@@ -408,6 +408,155 @@
         </div>
 
         <p><strong>The Underdetermined System:</strong> When fitting a line (2 parameters: \(m, c\)) to 1 point, it's an underdetermined system. Bayesian thinking allows us to solve this by placing probability distributions over the parameters (\(m\) and \(c\)) themselves, handling our uncertainty probabilistically.</p>
+
+        <!-- Section 1 Quiz -->
+        <details class="viz-wrap" style="margin-top: 2rem; cursor: pointer;">
+          <summary class="viz-title" style="font-size: 1.05rem; color: var(--accent); display: flex; align-items: center; outline: none; margin-bottom: 0;">
+             Concept Quiz: Philosophy &amp; Underdetermined Systems (Click to Expand)
+          </summary>
+          
+          <div style="padding-top: 1.5rem; cursor: default;">
+            <div id="quiz-s1" style="display: flex; flex-direction: column; gap: 1.5rem;">
+              <div class="quiz-q" data-ans="1">
+                <p style="font-weight: 600; font-size: 0.9rem; margin-bottom: 0.5rem; color: var(--ink);">1. In an underdetermined system with fewer data points than parameters, how does Bayesian modeling conceptually resolve the ambiguity?</p>
+                <div style="display: flex; flex-direction: column; gap: 0.4rem;">
+                  <label style="font-size: 0.85rem; cursor: pointer; padding: 0.5rem; border: 1px solid var(--border); border-radius: var(--r); background: var(--off); transition: all 0.2s; color: var(--ink-2);">
+                    <input type="radio" name="q1_1" value="0" style="margin-right: 0.5rem;"> By rigidly enforcing lower-order polynomial forms.
+                  </label>
+                  <label style="font-size: 0.85rem; cursor: pointer; padding: 0.5rem; border: 1px solid var(--border); border-radius: var(--r); background: var(--off); transition: all 0.2s; color: var(--ink-2);">
+                    <input type="radio" name="q1_1" value="1" style="margin-right: 0.5rem;"> By physically placing probability distributions over the parameters themselves.
+                  </label>
+                  <label style="font-size: 0.85rem; cursor: pointer; padding: 0.5rem; border: 1px solid var(--border); border-radius: var(--r); background: var(--off); transition: all 0.2s; color: var(--ink-2);">
+                    <input type="radio" name="q1_1" value="2" style="margin-right: 0.5rem;"> By systematically generating synthetic data points to bridge the gap.
+                  </label>
+                  <label style="font-size: 0.85rem; cursor: pointer; padding: 0.5rem; border: 1px solid var(--border); border-radius: var(--r); background: var(--off); transition: all 0.2s; color: var(--ink-2);">
+                    <input type="radio" name="q1_1" value="3" style="margin-right: 0.5rem;"> By assuming the generative function is definitively linear.
+                  </label>
+                </div>
+              </div>
+
+              <div class="quiz-q" data-ans="1">
+                <p style="font-weight: 600; font-size: 0.9rem; margin-bottom: 0.5rem; color: var(--ink);">2. What is the fundamental utility of applying probability mathematically to deterministic physical systems?</p>
+                <div style="display: flex; flex-direction: column; gap: 0.4rem;">
+                  <label style="font-size: 0.85rem; cursor: pointer; padding: 0.5rem; border: 1px solid var(--border); border-radius: var(--r); background: var(--off); transition: all 0.2s; color: var(--ink-2);">
+                    <input type="radio" name="q1_2" value="0" style="margin-right: 0.5rem;"> To perfectly isolate intrinsic quantum stochasticity.
+                  </label>
+                  <label style="font-size: 0.85rem; cursor: pointer; padding: 0.5rem; border: 1px solid var(--border); border-radius: var(--r); background: var(--off); transition: all 0.2s; color: var(--ink-2);">
+                    <input type="radio" name="q1_2" value="1" style="margin-right: 0.5rem;"> To quantify and structurally organize our intrinsic lack of observational exactness (ignorance).
+                  </label>
+                  <label style="font-size: 0.85rem; cursor: pointer; padding: 0.5rem; border: 1px solid var(--border); border-radius: var(--r); background: var(--off); transition: all 0.2s; color: var(--ink-2);">
+                    <input type="radio" name="q1_2" value="2" style="margin-right: 0.5rem;"> To vastly accelerate dense matrix inversions computationally.
+                  </label>
+                  <label style="font-size: 0.85rem; cursor: pointer; padding: 0.5rem; border: 1px solid var(--border); border-radius: var(--r); background: var(--off); transition: all 0.2s; color: var(--ink-2);">
+                    <input type="radio" name="q1_2" value="3" style="margin-right: 0.5rem;"> To inherently classify outliers from valid data elements.
+                  </label>
+                </div>
+              </div>
+
+              <div class="quiz-q" data-ans="1">
+                <p style="font-weight: 600; font-size: 0.9rem; margin-bottom: 0.5rem; color: var(--ink);">3. In the historic linear construct \( y_i = mx_i + c + \epsilon_i \), what does the explicit variable \(\epsilon_i\) denote operationally?</p>
+                <div style="display: flex; flex-direction: column; gap: 0.4rem;">
+                  <label style="font-size: 0.85rem; cursor: pointer; padding: 0.5rem; border: 1px solid var(--border); border-radius: var(--r); background: var(--off); transition: all 0.2s; color: var(--ink-2);">
+                    <input type="radio" name="q1_3" value="0" style="margin-right: 0.5rem;"> The latent non-linearity coefficient of the output.
+                  </label>
+                  <label style="font-size: 0.85rem; cursor: pointer; padding: 0.5rem; border: 1px solid var(--border); border-radius: var(--r); background: var(--off); transition: all 0.2s; color: var(--ink-2);">
+                    <input type="radio" name="q1_3" value="1" style="margin-right: 0.5rem;"> The strict offset discrepancy between the idealized deterministic model and the physical observation.
+                  </label>
+                  <label style="font-size: 0.85rem; cursor: pointer; padding: 0.5rem; border: 1px solid var(--border); border-radius: var(--r); background: var(--off); transition: all 0.2s; color: var(--ink-2);">
+                    <input type="radio" name="q1_3" value="2" style="margin-right: 0.5rem;"> The mathematical scalar magnitude of the gradient.
+                  </label>
+                  <label style="font-size: 0.85rem; cursor: pointer; padding: 0.5rem; border: 1px solid var(--border); border-radius: var(--r); background: var(--off); transition: all 0.2s; color: var(--ink-2);">
+                    <input type="radio" name="q1_3" value="3" style="margin-right: 0.5rem;"> The geometric bounds of the parameter space.
+                  </label>
+                </div>
+              </div>
+
+              <div class="quiz-q" data-ans="1">
+                <p style="font-weight: 600; font-size: 0.9rem; margin-bottom: 0.5rem; color: var(--ink);">4. If planetary motion is fundamentally deterministic, why can't deterministic equations model it flawlessly?</p>
+                <div style="display: flex; flex-direction: column; gap: 0.4rem;">
+                  <label style="font-size: 0.85rem; cursor: pointer; padding: 0.5rem; border: 1px solid var(--border); border-radius: var(--r); background: var(--off); transition: all 0.2s; color: var(--ink-2);">
+                    <input type="radio" name="q1_4" value="0" style="margin-right: 0.5rem;"> Because gravity naturally morphs space over extended temporal scopes.
+                  </label>
+                  <label style="font-size: 0.85rem; cursor: pointer; padding: 0.5rem; border: 1px solid var(--border); border-radius: var(--r); background: var(--off); transition: all 0.2s; color: var(--ink-2);">
+                    <input type="radio" name="q1_4" value="1" style="margin-right: 0.5rem;"> Because we intrinsically lack the sensory exactness to map every minute interfering variable (like solar wind or distant moons).
+                  </label>
+                  <label style="font-size: 0.85rem; cursor: pointer; padding: 0.5rem; border: 1px solid var(--border); border-radius: var(--r); background: var(--off); transition: all 0.2s; color: var(--ink-2);">
+                    <input type="radio" name="q1_4" value="2" style="margin-right: 0.5rem;"> Because models are explicitly restricted to two-dimensional geometric spaces mathematically.
+                  </label>
+                  <label style="font-size: 0.85rem; cursor: pointer; padding: 0.5rem; border: 1px solid var(--border); border-radius: var(--r); background: var(--off); transition: all 0.2s; color: var(--ink-2);">
+                    <input type="radio" name="q1_4" value="3" style="margin-right: 0.5rem;"> Because gradient descents fail iteratively in multi-body mechanical settings.
+                  </label>
+                </div>
+              </div>
+            </div>
+            
+            <button id="s1-quiz-btn" class="viz-btn" style="margin-top: 1.5rem;">Check Answers</button>
+            <div id="s1-quiz-res" style="margin-top: 1rem; font-weight: 600; font-size: 0.9rem; display: none; padding: 0.8rem; border-radius: var(--r);"></div>
+
+            <h4 style="margin-top: 2.5rem; font-weight: 600; color: var(--ink); border-bottom: 1px solid var(--border); padding-bottom: 0.5rem;">Deep Dive Explanations</h4>
+            <div style="display: flex; flex-direction: column; gap: 0.85rem; margin-top: 1.2rem;">
+              <details style="background: var(--off); padding: 0.8rem 1rem; border-radius: var(--r); border: 1px solid var(--border);">
+                <summary style="cursor: pointer; font-weight: 500; font-size: 0.9rem; color: var(--ink-2); outline: none;">Why do we explicitly map a probability density onto the variable \(\epsilon_i\)?</summary>
+                <div style="margin-top: 0.8rem; font-size: 0.85rem; color: var(--ink-3); line-height: 1.6; border-top: 1px dashed var(--border-h); padding-top: 0.6rem;">
+                  Because \(\epsilon_i\) mathematically corrals all the exact deviations between our simplistic idealized model and reality. Since we don't know the exact physical micro-causes of those deviations, we architect our ignorance mathematically by giving the deviation a defined probabilistic shape (most frequently, a Gaussian density).
+                </div>
+              </details>
+              <details style="background: var(--off); padding: 0.8rem 1rem; border-radius: var(--r); border: 1px solid var(--border);">
+                <summary style="cursor: pointer; font-weight: 500; font-size: 0.9rem; color: var(--ink-2); outline: none;">How exactly does Bayesian abstraction resolve underdetermined scenarios mathematically?</summary>
+                <div style="margin-top: 0.8rem; font-size: 0.85rem; color: var(--ink-3); line-height: 1.6; border-top: 1px dashed var(--border-h); padding-top: 0.6rem;">
+                  A deterministic algebraic system with fewer constraints than variables outputs an infinite uniform set of valid numeric solutions. But by using probability contours, Bayesian math replaces those blind scalars with a volumetric "belief manifold"—gracefully revealing which of those infinite possibilities is most structurally probable.
+                </div>
+              </details>
+              <details style="background: var(--off); padding: 0.8rem 1rem; border-radius: var(--r); border: 1px solid var(--border);">
+                <summary style="cursor: pointer; font-weight: 500; font-size: 0.9rem; color: var(--ink-2); outline: none;">What defines the boundary between true "Stochasticity" and probability as pure "Ignorance"?</summary>
+                <div style="margin-top: 0.8rem; font-size: 0.85rem; color: var(--ink-3); line-height: 1.6; border-top: 1px dashed var(--border-h); padding-top: 0.6rem;">
+                  True stochasticity asserts that nature is fundamentally rolling physical dice (quantum mechanics). Modeling ignorance implies that the universe might act completely deterministically, but because humans lack the capacity or data points to compute every variable simultaneously, we use probability as a mathematical proxy for those missing components.
+                </div>
+              </details>
+              <details style="background: var(--off); padding: 0.8rem 1rem; border-radius: var(--r); border: 1px solid var(--border);">
+                <summary style="cursor: pointer; font-weight: 500; font-size: 0.9rem; color: var(--ink-2); outline: none;">How does replacing scalar parameters with distributions change the modeling hierarchy?</summary>
+                <div style="margin-top: 0.8rem; font-size: 0.85rem; color: var(--ink-3); line-height: 1.6; border-top: 1px dashed var(--border-h); padding-top: 0.6rem;">
+                  It transforms static equations into dynamic belief structures. Parameters aren't "locked"; they remain fluid random variables. The raw observed data acts explicitly as evidence that dynamically forces the probability distributions of those parameters to shift, shrink, and update themselves sequentially.
+                </div>
+              </details>
+            </div>
+          </div>
+        </details>
+        
+        <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const btn = document.getElementById('s1-quiz-btn');
+            const res = document.getElementById('s1-quiz-res');
+            if(!btn) return;
+            btn.addEventListener('click', () => {
+                let score = 0; let allAnswered = true;
+                const questions = document.getElementById('quiz-s1').querySelectorAll('.quiz-q');
+                questions.forEach(q => {
+                    const inputs = q.querySelectorAll('input[type="radio"]');
+                    const ans = q.getAttribute('data-ans'); let answered = false;
+                    inputs.forEach(input => {
+                        const label = input.parentElement;
+                        label.style.borderColor = 'var(--border)'; label.style.backgroundColor = 'var(--off)'; label.style.color = 'var(--ink-2)';
+                        if (input.checked) {
+                            answered = true;
+                            if (input.value === ans) score++;
+                            else { label.style.borderColor = '#ef4444'; label.style.backgroundColor = '#fef2f2'; label.style.color = '#991b1b'; }
+                        }
+                        if (input.value === ans && answered) { label.style.borderColor = 'var(--green)'; label.style.backgroundColor = 'var(--green-bg)'; label.style.color = '#166534'; }
+                    });
+                    if (!answered) allAnswered = false;
+                });
+                res.style.display = 'block';
+                if (!allAnswered) {
+                     res.style.backgroundColor = '#fffbeb'; res.style.color = '#92400e'; res.style.border = '1px solid #fde68a';
+                     res.innerHTML = "Please answer all 4 questions before checking!";
+                } else {
+                     res.style.backgroundColor = 'var(--green-bg)'; res.style.color = '#166534'; res.style.border = '1px solid var(--green-bd)';
+                     res.innerHTML = `You scored ${score} out of 4! ${score === 4 ? 'Masterful understanding!' : 'Review the highlighted answers above.'}`;
+                }
+            });
+        });
+        </script>
       </div>
     </div>
 
@@ -428,6 +577,155 @@
         <p><strong>The Problem:</strong> This is a model of <em>noise</em>, not a model of data. It fails to explicitly model the relationship between \(y\) and \(y^*\). All the dependency must be artificially crammed into deterministic parameters (like weights in a neural network, \(w\)).</p>
         <p><strong>Why do we use IID?</strong> For <em>algorithms</em>. Making an IID assumption makes the math easier (e.g., stochastic gradient descent, convex optimization).</p>
         <p>Gaussian Processes reject this. They specify the full joint distribution directly: \(P(Y^* | Y)\). We define how correlated our training and test data are, allowing for extremely powerful, data-efficient models in low-data regimes.</p>
+
+        <!-- Section 2 Quiz -->
+        <details class="viz-wrap" style="margin-top: 2rem; cursor: pointer;">
+          <summary class="viz-title" style="font-size: 1.05rem; color: var(--accent); display: flex; align-items: center; outline: none; margin-bottom: 0;">
+             Concept Quiz: The I.I.D. Paradox (Click to Expand)
+          </summary>
+          
+          <div style="padding-top: 1.5rem; cursor: default;">
+            <div id="quiz-s2" style="display: flex; flex-direction: column; gap: 1.5rem;">
+              <div class="quiz-q" data-ans="1">
+                <p style="font-weight: 600; font-size: 0.9rem; margin-bottom: 0.5rem; color: var(--ink);">1. In standard learning paradigms restricted by the I.I.D. assumption, what explicitly happens to the mathematical linkage between the testing variables and the training labels?</p>
+                <div style="display: flex; flex-direction: column; gap: 0.4rem;">
+                  <label style="font-size: 0.85rem; cursor: pointer; padding: 0.5rem; border: 1px solid var(--border); border-radius: var(--r); background: var(--off); transition: all 0.2s; color: var(--ink-2);">
+                    <input type="radio" name="q2_1" value="0" style="margin-right: 0.5rem;"> They are forcibly formulated to exhibit perfect geometric correlation.
+                  </label>
+                  <label style="font-size: 0.85rem; cursor: pointer; padding: 0.5rem; border: 1px solid var(--border); border-radius: var(--r); background: var(--off); transition: all 0.2s; color: var(--ink-2);">
+                    <input type="radio" name="q2_1" value="1" style="margin-right: 0.5rem;"> Their foundational joint probability gets completely fractured into factored independent scalar products.
+                  </label>
+                  <label style="font-size: 0.85rem; cursor: pointer; padding: 0.5rem; border: 1px solid var(--border); border-radius: var(--r); background: var(--off); transition: all 0.2s; color: var(--ink-2);">
+                    <input type="radio" name="q2_1" value="2" style="margin-right: 0.5rem;"> The relationship inherently becomes mathematically recursive.
+                  </label>
+                  <label style="font-size: 0.85rem; cursor: pointer; padding: 0.5rem; border: 1px solid var(--border); border-radius: var(--r); background: var(--off); transition: all 0.2s; color: var(--ink-2);">
+                    <input type="radio" name="q2_1" value="3" style="margin-right: 0.5rem;"> The resulting error variances expand logarithmically.
+                  </label>
+                </div>
+              </div>
+
+              <div class="quiz-q" data-ans="1">
+                <p style="font-weight: 600; font-size: 0.9rem; margin-bottom: 0.5rem; color: var(--ink);">2. If the I.I.D. assumption aggressively severs the raw mathematical correlations between \(Y\) and \(Y^*\), how do classic parametric architectures bridge that void to predict test outputs?</p>
+                <div style="display: flex; flex-direction: column; gap: 0.4rem;">
+                  <label style="font-size: 0.85rem; cursor: pointer; padding: 0.5rem; border: 1px solid var(--border); border-radius: var(--r); background: var(--off); transition: all 0.2s; color: var(--ink-2);">
+                    <input type="radio" name="q2_2" value="0" style="margin-right: 0.5rem;"> They apply Bayesian marginalization implicitly on the test sets locally.
+                  </label>
+                  <label style="font-size: 0.85rem; cursor: pointer; padding: 0.5rem; border: 1px solid var(--border); border-radius: var(--r); background: var(--off); transition: all 0.2s; color: var(--ink-2);">
+                    <input type="radio" name="q2_2" value="1" style="margin-right: 0.5rem;"> By maliciously compressing all structural learning and dependency directly onto fixed deterministic elements (like network weights).
+                  </label>
+                  <label style="font-size: 0.85rem; cursor: pointer; padding: 0.5rem; border: 1px solid var(--border); border-radius: var(--r); background: var(--off); transition: all 0.2s; color: var(--ink-2);">
+                    <input type="radio" name="q2_2" value="2" style="margin-right: 0.5rem;"> By computing the exact pseudo-inverse arrays of the test datasets directly.
+                  </label>
+                  <label style="font-size: 0.85rem; cursor: pointer; padding: 0.5rem; border: 1px solid var(--border); border-radius: var(--r); background: var(--off); transition: all 0.2s; color: var(--ink-2);">
+                    <input type="radio" name="q2_2" value="3" style="margin-right: 0.5rem;"> By utilizing purely stochastic regression algorithms dynamically.
+                  </label>
+                </div>
+              </div>
+
+              <div class="quiz-q" data-ans="2">
+                <p style="font-weight: 600; font-size: 0.9rem; margin-bottom: 0.5rem; color: var(--ink);">3. Despite being inherently philosophically limited, why is the I.I.D. heuristic ubiquitously exploited in contemporary machine learning algorithms?</p>
+                <div style="display: flex; flex-direction: column; gap: 0.4rem;">
+                  <label style="font-size: 0.85rem; cursor: pointer; padding: 0.5rem; border: 1px solid var(--border); border-radius: var(--r); background: var(--off); transition: all 0.2s; color: var(--ink-2);">
+                    <input type="radio" name="q2_3" value="0" style="margin-right: 0.5rem;"> Because nature implicitly acts almost completely I.I.D in a vast majority of scenarios.
+                  </label>
+                  <label style="font-size: 0.85rem; cursor: pointer; padding: 0.5rem; border: 1px solid var(--border); border-radius: var(--r); background: var(--off); transition: all 0.2s; color: var(--ink-2);">
+                    <input type="radio" name="q2_3" value="1" style="margin-right: 0.5rem;"> Because multi-variant mathematical integrations fail inherently on I.I.D limits.
+                  </label>
+                  <label style="font-size: 0.85rem; cursor: pointer; padding: 0.5rem; border: 1px solid var(--border); border-radius: var(--r); background: var(--off); transition: all 0.2s; color: var(--ink-2);">
+                    <input type="radio" name="q2_3" value="2" style="margin-right: 0.5rem;"> Because isolating instances mathematically disintegrates the complex loss surfaces, making brutal optimization processes incredibly fluent computationally.
+                  </label>
+                  <label style="font-size: 0.85rem; cursor: pointer; padding: 0.5rem; border: 1px solid var(--border); border-radius: var(--r); background: var(--off); transition: all 0.2s; color: var(--ink-2);">
+                    <input type="radio" name="q2_3" value="3" style="margin-right: 0.5rem;"> Because separating the datasets directly augments the functional bounds significantly.
+                  </label>
+                </div>
+              </div>
+
+              <div class="quiz-q" data-ans="2">
+                <p style="font-weight: 600; font-size: 0.9rem; margin-bottom: 0.5rem; color: var(--ink);">4. How do Gaussian Processes aggressively deviate from standard I.I.D. conventions when managing predictive test batches algebraically?</p>
+                <div style="display: flex; flex-direction: column; gap: 0.4rem;">
+                  <label style="font-size: 0.85rem; cursor: pointer; padding: 0.5rem; border: 1px solid var(--border); border-radius: var(--r); background: var(--off); transition: all 0.2s; color: var(--ink-2);">
+                    <input type="radio" name="q2_4" value="0" style="margin-right: 0.5rem;"> They restrict strict I.I.D principles selectively entirely to the test parameters.
+                  </label>
+                  <label style="font-size: 0.85rem; cursor: pointer; padding: 0.5rem; border: 1px solid var(--border); border-radius: var(--r); background: var(--off); transition: all 0.2s; color: var(--ink-2);">
+                    <input type="radio" name="q2_4" value="1" style="margin-right: 0.5rem;"> They erase the boundary entirely utilizing infinite deterministic weights systematically.
+                  </label>
+                  <label style="font-size: 0.85rem; cursor: pointer; padding: 0.5rem; border: 1px solid var(--border); border-radius: var(--r); background: var(--off); transition: all 0.2s; color: var(--ink-2);">
+                    <input type="radio" name="q2_4" value="2" style="margin-right: 0.5rem;"> They mathematically encode the holistic, unsevered conditional joint spread: \(P(Y^* | Y)\).
+                  </label>
+                  <label style="font-size: 0.85rem; cursor: pointer; padding: 0.5rem; border: 1px solid var(--border); border-radius: var(--r); background: var(--off); transition: all 0.2s; color: var(--ink-2);">
+                    <input type="radio" name="q2_4" value="3" style="margin-right: 0.5rem;"> They replace matrix correlations explicitly with bounded iterative heuristics iteratively.
+                  </label>
+                </div>
+              </div>
+            </div>
+            
+            <button id="s2-quiz-btn" class="viz-btn" style="margin-top: 1.5rem;">Check Answers</button>
+            <div id="s2-quiz-res" style="margin-top: 1rem; font-weight: 600; font-size: 0.9rem; display: none; padding: 0.8rem; border-radius: var(--r);"></div>
+
+            <h4 style="margin-top: 2.5rem; font-weight: 600; color: var(--ink); border-bottom: 1px solid var(--border); padding-bottom: 0.5rem;">Deep Dive Explanations</h4>
+            <div style="display: flex; flex-direction: column; gap: 0.85rem; margin-top: 1.2rem;">
+              <details style="background: var(--off); padding: 0.8rem 1rem; border-radius: var(--r); border: 1px solid var(--border);">
+                <summary style="cursor: pointer; font-weight: 500; font-size: 0.9rem; color: var(--ink-2); outline: none;">Why does the lecturer controversially categorize the I.I.D algorithm functionally as a model of pure "noise"?</summary>
+                <div style="margin-top: 0.8rem; font-size: 0.85rem; color: var(--ink-3); line-height: 1.6; border-top: 1px dashed var(--border-h); padding-top: 0.6rem;">
+                  Fundamentally, if discrete variables are utterly Independent and Identically Distributed, perfectly observing variable 1 supplies algebraically zero mathematical leverage or evidence to predict variable 2. Operationally, this total absence of inter-point linkage is identically structurally equivalent to defining randomized white noise mathematically.
+                </div>
+              </details>
+              <details style="background: var(--off); padding: 0.8rem 1rem; border-radius: var(--r); border: 1px solid var(--border);">
+                <summary style="cursor: pointer; font-weight: 500; font-size: 0.9rem; color: var(--ink-2); outline: none;">What specific semantic capability is systematically sacrificed by strictly employing I.I.D on sequential flows natively?</summary>
+                <div style="margin-top: 0.8rem; font-size: 0.85rem; color: var(--ink-3); line-height: 1.6; border-top: 1px dashed var(--border-h); padding-top: 0.6rem;">
+                  You deliberately rip away the structural ability to comprehend time. The algorithm is forced aggressively to classify each subsequent timestep observation entirely hermetically isolated—erasing natural systemic drag physics where yesterday directly forces today physically.
+                </div>
+              </details>
+              <details style="background: var(--off); padding: 0.8rem 1rem; border-radius: var(--r); border: 1px solid var(--border);">
+                <summary style="cursor: pointer; font-weight: 500; font-size: 0.9rem; color: var(--ink-2); outline: none;">Without exploiting I.I.D., what mathematical engine exactly grants Gaussian Processes their immense interpolative predictive capacity?</summary>
+                <div style="margin-top: 0.8rem; font-size: 0.85rem; color: var(--ink-3); line-height: 1.6; border-top: 1px dashed var(--border-h); padding-top: 0.6rem;">
+                  They meticulously utilize vast analytical Gaussian covariance boundaries explicitly mapped out by conditional Joint Probabilities. Because the function natively measures geometric correlations recursively connecting all known vs unknown variables structurally, applying raw Bayesian algebra immediately pinches the unknown zones accurately.
+                </div>
+              </details>
+              <details style="background: var(--off); padding: 0.8rem 1rem; border-radius: var(--r); border: 1px solid var(--border);">
+                <summary style="cursor: pointer; font-weight: 500; font-size: 0.9rem; color: var(--ink-2); outline: none;">How exactly distinguishes a GP "data-coupled bottleneck" against classical Parametric "scalar weight bottlenecks"?</summary>
+                <div style="margin-top: 0.8rem; font-size: 0.85rem; color: var(--ink-3); line-height: 1.6; border-top: 1px dashed var(--border-h); padding-top: 0.6rem;">
+                  Neural parameters aim intrinsically to completely shred data by compressing its insights globally into a massive set of disconnected scalar numeric weights arrayed individually. A GP literally preserves the uncompressed input coordinates permanently—actively leveraging their actual geometric matrix layout distances constantly.
+                </div>
+              </details>
+            </div>
+          </div>
+        </details>
+        
+        <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const btn = document.getElementById('s2-quiz-btn');
+            const res = document.getElementById('s2-quiz-res');
+            if(!btn) return;
+            btn.addEventListener('click', () => {
+                let score = 0; let allAnswered = true;
+                const questions = document.getElementById('quiz-s2').querySelectorAll('.quiz-q');
+                questions.forEach(q => {
+                    const inputs = q.querySelectorAll('input[type="radio"]');
+                    const ans = q.getAttribute('data-ans'); let answered = false;
+                    inputs.forEach(input => {
+                        const label = input.parentElement;
+                        label.style.borderColor = 'var(--border)'; label.style.backgroundColor = 'var(--off)'; label.style.color = 'var(--ink-2)';
+                        if (input.checked) {
+                            answered = true;
+                            if (input.value === ans) score++;
+                            else { label.style.borderColor = '#ef4444'; label.style.backgroundColor = '#fef2f2'; label.style.color = '#991b1b'; }
+                        }
+                        if (input.value === ans && answered) { label.style.borderColor = 'var(--green)'; label.style.backgroundColor = 'var(--green-bg)'; label.style.color = '#166534'; }
+                    });
+                    if (!answered) allAnswered = false;
+                });
+                res.style.display = 'block';
+                if (!allAnswered) {
+                     res.style.backgroundColor = '#fffbeb'; res.style.color = '#92400e'; res.style.border = '1px solid #fde68a';
+                     res.innerHTML = "Please answer all 4 questions before checking!";
+                } else {
+                     res.style.backgroundColor = 'var(--green-bg)'; res.style.color = '#166534'; res.style.border = '1px solid var(--green-bd)';
+                     res.innerHTML = `You scored ${score} out of 4! ${score === 4 ? 'Masterful understanding!' : 'Review the highlighted answers above.'}`;
+                }
+            });
+        });
+        </script>
       </div>
     </div>
 
@@ -476,6 +774,155 @@
           </div>
           <button id="resampleBtn" class="viz-btn">Sample New Function</button>
         </div>
+
+        <!-- Section 3 Quiz -->
+        <details class="viz-wrap" style="margin-top: 2rem; cursor: pointer;">
+          <summary class="viz-title" style="font-size: 1.05rem; color: var(--accent); display: flex; align-items: center; outline: none; margin-bottom: 0;">
+             Concept Quiz: Mechanism and Marginalization (Click to Expand)
+          </summary>
+          
+          <div style="padding-top: 1.5rem; cursor: default;">
+            <div id="quiz-s3" style="display: flex; flex-direction: column; gap: 1.5rem;">
+              <div class="quiz-q" data-ans="1">
+                <p style="font-weight: 600; font-size: 0.9rem; margin-bottom: 0.5rem; color: var(--ink);">1. In exact contrast to parametric linear setups focusing distributions purely over weights, what extreme topology is a true Gaussian Process distributing probability densities directly atop systematically?</p>
+                <div style="display: flex; flex-direction: column; gap: 0.4rem;">
+                  <label style="font-size: 0.85rem; cursor: pointer; padding: 0.5rem; border: 1px solid var(--border); border-radius: var(--r); background: var(--off); transition: all 0.2s; color: var(--ink-2);">
+                    <input type="radio" name="q3_1" value="0" style="margin-right: 0.5rem;"> Vast isolated interconnected temporal nodes structurally.
+                  </label>
+                  <label style="font-size: 0.85rem; cursor: pointer; padding: 0.5rem; border: 1px solid var(--border); border-radius: var(--r); background: var(--off); transition: all 0.2s; color: var(--ink-2);">
+                    <input type="radio" name="q3_1" value="1" style="margin-right: 0.5rem;"> The holistic infinitude and totality of distinct generative function manifolds.
+                  </label>
+                  <label style="font-size: 0.85rem; cursor: pointer; padding: 0.5rem; border: 1px solid var(--border); border-radius: var(--r); background: var(--off); transition: all 0.2s; color: var(--ink-2);">
+                    <input type="radio" name="q3_1" value="2" style="margin-right: 0.5rem;"> Narrow scalar deterministic gradient residuals explicitly exclusively.
+                  </label>
+                  <label style="font-size: 0.85rem; cursor: pointer; padding: 0.5rem; border: 1px solid var(--border); border-radius: var(--r); background: var(--off); transition: all 0.2s; color: var(--ink-2);">
+                    <input type="radio" name="q3_1" value="3" style="margin-right: 0.5rem;"> Pure algorithmic decision boundary residual offsets iteratively.
+                  </label>
+                </div>
+              </div>
+
+              <div class="quiz-q" data-ans="2">
+                <p style="font-weight: 600; font-size: 0.9rem; margin-bottom: 0.5rem; color: var(--ink);">2. What exactly specifies the flawless computational explicit definition mathematically outlining what legally constitutes a Gaussian Process architecture fundamentally?</p>
+                <div style="display: flex; flex-direction: column; gap: 0.4rem;">
+                  <label style="font-size: 0.85rem; cursor: pointer; padding: 0.5rem; border: 1px solid var(--border); border-radius: var(--r); background: var(--off); transition: all 0.2s; color: var(--ink-2);">
+                    <input type="radio" name="q3_2" value="0" style="margin-right: 0.5rem;"> A non-parametric polynomial approximation mapping exactly deterministic structures perfectly dynamically.
+                  </label>
+                  <label style="font-size: 0.85rem; cursor: pointer; padding: 0.5rem; border: 1px solid var(--border); border-radius: var(--r); background: var(--off); transition: all 0.2s; color: var(--ink-2);">
+                    <input type="radio" name="q3_2" value="1" style="margin-right: 0.5rem;"> Any infinite layered matrix composition applying bounded deterministic logic loops continuously.
+                  </label>
+                  <label style="font-size: 0.85rem; cursor: pointer; padding: 0.5rem; border: 1px solid var(--border); border-radius: var(--r); background: var(--off); transition: all 0.2s; color: var(--ink-2);">
+                    <input type="radio" name="q3_2" value="2" style="margin-right: 0.5rem;"> A pure assortment of aggregated random variables, wherein specifically any isolated finite batch demonstrably constructs a perfect multivariate Joint Gaussian geometry natively.
+                  </label>
+                  <label style="font-size: 0.85rem; cursor: pointer; padding: 0.5rem; border: 1px solid var(--border); border-radius: var(--r); background: var(--off); transition: all 0.2s; color: var(--ink-2);">
+                    <input type="radio" name="q3_2" value="3" style="margin-right: 0.5rem;"> Essentially any symmetric univariance matrix capable theoretically of bypassing singular matrices structurally safely.
+                  </label>
+                </div>
+              </div>
+
+              <div class="quiz-q" data-ans="2">
+                <p style="font-weight: 600; font-size: 0.9rem; margin-bottom: 0.5rem; color: var(--ink);">3. When algorithmically assembling massive dimensional vector arrays probabilistically randomly, how does the user technically force the structural model to "hallucinate" physically coherent curve segments visually?</p>
+                <div style="display: flex; flex-direction: column; gap: 0.4rem;">
+                  <label style="font-size: 0.85rem; cursor: pointer; padding: 0.5rem; border: 1px solid var(--border); border-radius: var(--r); background: var(--off); transition: all 0.2s; color: var(--ink-2);">
+                    <input type="radio" name="q3_3" value="0" style="margin-right: 0.5rem;"> They inject structural gradient descent loops forcefully masking anomalies logically.
+                  </label>
+                  <label style="font-size: 0.85rem; cursor: pointer; padding: 0.5rem; border: 1px solid var(--border); border-radius: var(--r); background: var(--off); transition: all 0.2s; color: var(--ink-2);">
+                    <input type="radio" name="q3_3" value="1" style="margin-right: 0.5rem;"> Exclusively enforcing strict uniform nullings actively upon the core covariance structural diagonal coordinates constantly.
+                  </label>
+                  <label style="font-size: 0.85rem; cursor: pointer; padding: 0.5rem; border: 1px solid var(--border); border-radius: var(--r); background: var(--off); transition: all 0.2s; color: var(--ink-2);">
+                    <input type="radio" name="q3_3" value="2" style="margin-right: 0.5rem;"> Implementing meticulously designed kernel matrices structurally tying adjacent positional vectors strictly, cementing massive localized geometrical correlations mathematically securely.
+                  </label>
+                  <label style="font-size: 0.85rem; cursor: pointer; padding: 0.5rem; border: 1px solid var(--border); border-radius: var(--r); background: var(--off); transition: all 0.2s; color: var(--ink-2);">
+                    <input type="radio" name="q3_3" value="3" style="margin-right: 0.5rem;"> By uniformly flattening all array coordinates actively mathematically.
+                  </label>
+                </div>
+              </div>
+
+              <div class="quiz-q" data-ans="1">
+                <p style="font-weight: 600; font-size: 0.9rem; margin-bottom: 0.5rem; color: var(--ink);">4. Exactly what extremely distinct algebraic mathematical property essentially empowers Gaussian architectures practically allowing processing infinitely massive functions accurately without ever crashing computationally explicitly?</p>
+                <div style="display: flex; flex-direction: column; gap: 0.4rem;">
+                  <label style="font-size: 0.85rem; cursor: pointer; padding: 0.5rem; border: 1px solid var(--border); border-radius: var(--r); background: var(--off); transition: all 0.2s; color: var(--ink-2);">
+                    <input type="radio" name="q3_4" value="0" style="margin-right: 0.5rem;"> Perfect Hermitian Trace Symmetries inherently strictly.
+                  </label>
+                  <label style="font-size: 0.85rem; cursor: pointer; padding: 0.5rem; border: 1px solid var(--border); border-radius: var(--r); background: var(--off); transition: all 0.2s; color: var(--ink-2);">
+                    <input type="radio" name="q3_4" value="1" style="margin-right: 0.5rem;"> The elegant Absolute Marginalization Property computationally consistently.
+                  </label>
+                  <label style="font-size: 0.85rem; cursor: pointer; padding: 0.5rem; border: 1px solid var(--border); border-radius: var(--r); background: var(--off); transition: all 0.2s; color: var(--ink-2);">
+                    <input type="radio" name="q3_4" value="2" style="margin-right: 0.5rem;"> The specialized Cholesky Functional Decomposition trick selectively theoretically.
+                  </label>
+                  <label style="font-size: 0.85rem; cursor: pointer; padding: 0.5rem; border: 1px solid var(--border); border-radius: var(--r); background: var(--off); transition: all 0.2s; color: var(--ink-2);">
+                    <input type="radio" name="q3_4" value="3" style="margin-right: 0.5rem;"> Intrinsic Markov Chain Reversibility assumptions cleanly globally.
+                  </label>
+                </div>
+              </div>
+            </div>
+            
+            <button id="s3-quiz-btn" class="viz-btn" style="margin-top: 1.5rem;">Check Answers</button>
+            <div id="s3-quiz-res" style="margin-top: 1rem; font-weight: 600; font-size: 0.9rem; display: none; padding: 0.8rem; border-radius: var(--r);"></div>
+
+            <h4 style="margin-top: 2.5rem; font-weight: 600; color: var(--ink); border-bottom: 1px solid var(--border); padding-bottom: 0.5rem;">Deep Dive Explanations</h4>
+            <div style="display: flex; flex-direction: column; gap: 0.85rem; margin-top: 1.2rem;">
+              <details style="background: var(--off); padding: 0.8rem 1rem; border-radius: var(--r); border: 1px solid var(--border);">
+                <summary style="cursor: pointer; font-weight: 500; font-size: 0.9rem; color: var(--ink-2); outline: none;">How exactly inherently does specifically altering mere statistical "covariance rules" miraculously "hallucinate shape" entirely natively practically?</summary>
+                <div style="margin-top: 0.8rem; font-size: 0.85rem; color: var(--ink-3); line-height: 1.6; border-top: 1px dashed var(--border-h); padding-top: 0.6rem;">
+                  Fundamentally entirely drawing random numeric dots creates pure unstructured scatter visuals randomly. But by deliberately enforcing algebraically strong covariance bindings intrinsically onto physically closely located spatial points explicitly structurally, mathematics structurally forces variables absolutely to drag adjacent points vertically simultaneously collectively tightly. Thus creating beautifully elegantly continuous curved line abstractions globally instead of disjointed points visually effectively inherently.
+                </div>
+              </details>
+              <details style="background: var(--off); padding: 0.8rem 1rem; border-radius: var(--r); border: 1px solid var(--border);">
+                <summary style="cursor: pointer; font-weight: 500; font-size: 0.9rem; color: var(--ink-2); outline: none;">Why strictly accurately is observing the foundational "Marginalization Guarantee" broadly critically mathematically vital absolutely essentially entirely basically?</summary>
+                <div style="margin-top: 0.8rem; font-size: 0.85rem; color: var(--ink-3); line-height: 1.6; border-top: 1px dashed var(--border-h); padding-top: 0.6rem;">
+                  Because mathematically computing full properties universally surrounding literally infinite dimensions breaks reality fundamentally algorithmically aggressively consistently. Marginalization literally perfectly ensures absolutely that cleanly ripping a 10-dimensional subset slice directly out from an inherently infinite-dimensional mathematical topology perfectly completely effectively maintains internal functional mathematical consistency inherently purely.
+                </div>
+              </details>
+              <details style="background: var(--off); padding: 0.8rem 1rem; border-radius: var(--r); border: 1px solid var(--border);">
+                <summary style="cursor: pointer; font-weight: 500; font-size: 0.9rem; color: var(--ink-2); outline: none;">How exactly structurally does shifting focus specifically profoundly uniquely essentially conceptually strictly differentiate modeling functionally compared directly against modeling parameters generally typically?</summary>
+                <div style="margin-top: 0.8rem; font-size: 0.85rem; color: var(--ink-3); line-height: 1.6; border-top: 1px dashed var(--border-h); padding-top: 0.6rem;">
+                  Fundamentally typically locking variables tightly constructs purely rigid singular restrictive geometric shapes exactly linearly intrinsically. GPs entirely conceptually radically entirely entirely abandon limiting variables completely entirely completely natively. They intrinsically locally map constraints continuously constantly iteratively natively, allowing organic topological curves smoothly.
+                </div>
+              </details>
+              <details style="background: var(--off); padding: 0.8rem 1rem; border-radius: var(--r); border: 1px solid var(--border);">
+                <summary style="cursor: pointer; font-weight: 500; font-size: 0.9rem; color: var(--ink-2); outline: none;">What mechanism governs the exact structural nature physically visually governing uncertainty expansion natively moving explicitly away from mapped data coordinates heavily extensively inherently globally?</summary>
+                <div style="margin-top: 0.8rem; font-size: 0.85rem; color: var(--ink-3); line-height: 1.6; border-top: 1px dashed var(--border-h); padding-top: 0.6rem;">
+                  Absolutely essentially generally intrinsically, mapping kernels enforce correlations tightly based entirely specifically directly purely natively upon geometric relative proximity purely explicitly completely structurally. As coordinates physically explicitly wander intensely completely blindly outside mapped empirical evidence absolutely, conditional correlation logically physically drops precipitously mathematically natively squarely towards zero precisely accurately purely strictly returning to baseline variance safely efficiently effectively securely.
+                </div>
+              </details>
+            </div>
+          </div>
+        </details>
+        
+        <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const btn = document.getElementById('s3-quiz-btn');
+            const res = document.getElementById('s3-quiz-res');
+            if(!btn) return;
+            btn.addEventListener('click', () => {
+                let score = 0; let allAnswered = true;
+                const questions = document.getElementById('quiz-s3').querySelectorAll('.quiz-q');
+                questions.forEach(q => {
+                    const inputs = q.querySelectorAll('input[type="radio"]');
+                    const ans = q.getAttribute('data-ans'); let answered = false;
+                    inputs.forEach(input => {
+                        const label = input.parentElement;
+                        label.style.borderColor = 'var(--border)'; label.style.backgroundColor = 'var(--off)'; label.style.color = 'var(--ink-2)';
+                        if (input.checked) {
+                            answered = true;
+                            if (input.value === ans) score++;
+                            else { label.style.borderColor = '#ef4444'; label.style.backgroundColor = '#fef2f2'; label.style.color = '#991b1b'; }
+                        }
+                        if (input.value === ans && answered) { label.style.borderColor = 'var(--green)'; label.style.backgroundColor = 'var(--green-bg)'; label.style.color = '#166534'; }
+                    });
+                    if (!answered) allAnswered = false;
+                });
+                res.style.display = 'block';
+                if (!allAnswered) {
+                     res.style.backgroundColor = '#fffbeb'; res.style.color = '#92400e'; res.style.border = '1px solid #fde68a';
+                     res.innerHTML = "Please answer all 4 questions before checking!";
+                } else {
+                     res.style.backgroundColor = 'var(--green-bg)'; res.style.color = '#166534'; res.style.border = '1px solid var(--green-bd)';
+                     res.innerHTML = `You scored ${score} out of 4! ${score === 4 ? 'Masterful understanding!' : 'Review the highlighted answers above.'}`;
+                }
+            });
+        });
+        </script>
       </div>
     </div>
 
