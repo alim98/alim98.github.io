@@ -575,11 +575,27 @@
       </div>
       <div class="content-column">
         <h3>Why I.I.D. is Philosophically Flawed</h3>
-        <p>The standard approach in machine learning is to assume data is <strong>I.I.D.</strong> (Independent and Identically Distributed). Under this assumption, the joint probability of training data \(Y\) and test data \(Y^*\) factors into independent products:</p>
+        <p>The standard approach in machine learning is to assume data is <strong>I.I.D.</strong> (Independent and Identically Distributed). Under this assumption, the joint probability of training data \(\mathbf{Y}\) and test data \(\mathbf{Y}^*\) factors into independent products:</p>
         <div class="math-block">\( P(\mathbf{Y}, \mathbf{Y}^*) = \prod_{i} P(y_i) \prod_{j} P(y^*_j) \)</div>
-        <p><strong>The Problem:</strong> This is a model of <em>noise</em>, not a model of data. It fails to explicitly model the relationship between \(y\) and \(y^*\). All the dependency must be artificially crammed into deterministic parameters (like weights in a neural network, \(w\)).</p>
-        <p><strong>Why do we use IID?</strong> For <em>algorithms</em>. Making an IID assumption makes the math easier (e.g., stochastic gradient descent, convex optimization).</p>
-        <p>Gaussian Processes reject this. They specify the full joint distribution directly: \(P(Y^* | Y)\). We define how correlated our training and test data are, allowing for extremely powerful, data-efficient models in low-data regimes.</p>
+        
+        <div class="callout callout-indigo">
+          <h4>Deconstructing the Equation &amp; Joint Distributions</h4>
+          <p>A <strong>Joint Distribution</strong> \( P(\mathbf{Y}, \mathbf{Y}^*) \) simply asks: <em>"What is the probability of observing this specific training data AND this specific test data happening together at the same time?"</em></p>
+          <p>The equation above shows what happens mathematically under the I.I.D. assumption: the joint probability shatters. The large \(\prod\) symbol represents multiplication. It claims that the probability of seeing all the data is just the probability of seeing each point individually, multiplied together. This means seeing \(y_1\) gives you <strong>zero</strong> mathematical information about \(y_2\). It effectively treats data as completely disconnected, random white noise.</p>
+        </div>
+
+        <h4 class="section-sub">The Parametric Bottleneck: Cramming Dependency</h4>
+        <p>If the I.I.D. assumption explicitly severs the raw mathematical correlation between training data \(\mathbf{Y}\) and test data \(\mathbf{Y}^*\), how do parametric models (like deep neural networks) actually predict anything?</p>
+        <p><strong>They cram the dependency into deterministic parameters.</strong> Because the I.I.D. math refuses to link \(\mathbf{Y}\) and \(\mathbf{Y}^*\) directly, a neural network must use the training data to optimize a fixed set of scalar numbers (the network weights, \(w\)). Once those weights are learned, the actual training data is completely thrown away. The model now relies <em>entirely</em> on those fixed weights to predict \(\mathbf{Y}^*\). It acts as an artificial bottleneck, maliciously compressing all structural learning and real-world physical correlations into a rigid matrix of static, deterministic numbers.</p>
+
+        <h4 class="section-sub">The GP Approach: Native Joint Modeling</h4>
+        <p>Gaussian Processes reject the I.I.D. assumption entirely. They refuse to throw away the data or use scalar weights as a bottleneck. Instead, they explicitly model the full joint distribution natively.</p>
+        <p>By defining exactly how correlated our training and test data are based on their geometric relationships, a GP directly calculates \(P(\mathbf{Y}^* | \mathbf{Y})\)—the conditional probability of the unknown test data <em>given</em> the known training data.</p>
+        
+        <div class="callout callout-blue">
+          <h4>What is Bayesian Marginalization?</h4>
+          <p>To manipulate these massive joint distributions gracefully, GPs rely heavily on <strong>Bayesian Marginalization</strong>. This is the mathematical process of taking a massive joint distribution of many variables, and "integrating out" (summing over) all the unknown latent variables you don't care about. Because Gaussians have a magical marginalization property, doing this leaves you with exactly the isolated probability shape for the specific variables you want to predict, without losing any structural information.</p>
+        </div>
 
         <!-- Section 2 Quiz -->
         <details class="viz-wrap" style="margin-top: 2rem; cursor: pointer;">
