@@ -357,16 +357,19 @@
       <li><a href="#s3">3. What is a GP?</a></li>
       <li><a href="#s4">4. The Covariance Function</a></li>
       <li><a href="#s5">5. Conditioning &amp; Inference</a></li>
+      <li><a href="#s55">5.5 Numerical Practices</a></li>
       <li><a href="#s6">6. Model Confidence</a></li>
       <li><a href="#s65">6.5 Interpreting Error Bars</a></li>
       <li><a href="#s7">7. Stats vs. Machine Learning</a></li>
       <li><a href="#s8">8. Additive Properties &amp; Noise</a></li>
       <li><a href="#s9">9. Core Challenges of GPs</a></li>
+      <li><a href="#s95">9.5 Sparse GPs</a></li>
       <li><a href="#s10">10. Non-Gaussian Data</a></li>
       <li><a href="#s11">11. Learning Covariance Parameters</a></li>
       <li><a href="#s13">12. Parametric to Non-Parametric</a></li>
       <li><a href="#s14">13. Advanced Math &amp; Constraints</a></li>
       <li><a href="#s15">14. Final Limitations</a></li>
+      <li><a href="#s16">15. Bayesian Optimization</a></li>
       <li style="margin-top:.8rem"><div class="toc-label" style="margin-bottom:.4rem">Lecture 3</div></li>
       <li><a href="#s3-1">1. Gauss-Markov Processes</a></li>
       <li><a href="#s3-2">2. Brownian Motion Kernel</a></li>
@@ -947,6 +950,14 @@
         </ul>
         <p>When a new test point \(x^*\) comes in, we calculate its correlation with all existing training points \(X\) by passing them through this kernel to build the test-train covariance vector.</p>
 
+        <h4 class="section-sub">Kernel Arithmetic</h4>
+        <p>Real-world data isn't just smooth. Kernels can be treated like building blocks to encode complex human knowledge into the model:</p>
+        <ul>
+          <li><strong>Addition (OR logic):</strong> \(K_1 + K_2\). If you add a linear kernel and a periodic kernel, the GP models a function that is <em>either</em> trending linearly <em>or</em> oscillating.</li>
+          <li><strong>Multiplication (AND logic):</strong> \(K_1 \times K_2\). If you multiply a linear kernel and a periodic kernel, the GP models a function whose oscillations grow larger over time (increasing amplitude).</li>
+          <li><strong>The Ultimate Example:</strong> Mention the famous "Mauna Loa CO2 dataset" (from Rasmussen &amp; Williams), where atmospheric CO2 is modeled flawlessly by summing a long-term smooth trend (RBF), a seasonal trend (Periodic), and medium-term irregularities (Rational Quadratic).</li>
+        </ul>
+
         <!-- Section 4 Quiz -->
         <details class="viz-wrap" style="margin-top: 2rem; cursor: pointer;">
           <summary class="viz-title" style="font-size: 1.05rem; color: var(--accent); display: flex; align-items: center; outline: none; margin-bottom: 0;">
@@ -1138,6 +1149,31 @@
             });
         });
         </script>
+      </div>
+    </div>
+
+    <!-- ─ Row 5.5 ─ -->
+    <div class="note-row" id="s55">
+      <div class="cue-column">
+        <h2>5.5. Numerical Practices</h2>
+        <ul>
+          <li>Never invert \(K\)</li>
+          <li>Cholesky Decomposition</li>
+          <li>Log-determinants</li>
+        </ul>
+      </div>
+      <div class="content-column">
+        <h3>How to Actually Code It</h3>
+        <p>In theory, the predictive mean is \(\mu^* = K_{**} K^{-1} \mathbf{f}\). In practice, if you ever write <code>inv(K)</code> or \(K^{-1}\) in your code, your GP will crash and burn. Covariance matrices frequently become poorly conditioned (eigenvalues close to zero), and standard inversion causes catastrophic floating-point errors.</p>
+        
+        <div class="callout callout-red">
+          <h4>The Method: Cholesky Decomposition</h4>
+          <p>Instead of inverting, we decompose the noisy covariance matrix into a lower-triangular matrix \(L\) such that \(K + \sigma^2I = LL^T\).</p>
+          <ul>
+            <li><strong>The Math:</strong> To solve for the weights \(\boldsymbol{\alpha} = K^{-1}\mathbf{y}\), we use fast, numerically stable forward and backward substitution:<br>1. Solve \(L\mathbf{a} = \mathbf{y}\) for \(\mathbf{a}\)<br>2. Solve \(L^T\boldsymbol{\alpha} = \mathbf{a}\) for \(\boldsymbol{\alpha}\)</li>
+            <li><strong>The Benefit:</strong> It reduces the constant factor in \(O(N^3)\) complexity, guarantees positive-definiteness, and allows us to compute the log-determinant (for the marginal likelihood) almost for free: \(\log|K| = 2 \sum \log(L_{ii})\).</li>
+          </ul>
+        </div>
       </div>
     </div>
 
@@ -1707,6 +1743,26 @@
       </div>
     </div>
 
+    <!-- ─ Row 9.5 ─ -->
+    <div class="note-row" id="s95">
+      <div class="cue-column">
+        <h2>9.5. Breaking the Compute Barrier</h2>
+        <ul>
+          <li>\(O(N^3)\) bottleneck</li>
+          <li>Inducing Points</li>
+          <li>Sparse Approximations</li>
+        </ul>
+      </div>
+      <div class="content-column">
+        <h3>Sparse GPs</h3>
+        <p>As mentioned, the \(O(N^3)\) complexity is the bottleneck. If you have 100,000 data points, a standard GP is dead. Modern ML solves this by introducing <strong>Inducing Points</strong> (pseudo-inputs).</p>
+        <ul>
+          <li><strong>The Concept:</strong> Instead of every data point correlating with every other data point, we optimize a small "committee" of \(M\) synthetic points (where \(M \ll N\)). All \(N\) training points only communicate with each other <em>through</em> this committee.</li>
+          <li><strong>The Result:</strong> The computational complexity drops from \(O(N^3)\) to \(O(NM^2)\), and memory drops from \(O(N^2)\) to \(O(NM)\). This is the only way GPs are used in modern deep learning frameworks.</li>
+        </ul>
+      </div>
+    </div>
+
     <!-- ─ Row 10 ─ -->
     <div class="note-row" id="s10">
       <div class="cue-column">
@@ -1863,6 +1919,14 @@
                 <strong style="color:#ef4444">Data Fit (\(\frac{1}{2} \mathbf{y}^\top \mathbf{K}^{-1} \mathbf{y}\)):</strong> Notice that the latent function \(\mathbf{f}\) has been completely integrated out! There is no function parameter to fit. This quadratic form measures how well our actual data vector \(\mathbf{y}\) aligns with the rotated and scaled covariance ellipse we just defined. 
             </li>
         </ul>
+
+        <h4 class="section-sub">Numerical Optimization</h4>
+        <p>We have the elegant equation for the Marginal Likelihood trade-off, but how do we actually find the optimal length scale \(l\) and variance \(\alpha\)? We don't guess—we use gradient descent.</p>
+        <p>We calculate the partial derivative of the marginal likelihood with respect to any hyperparameter \(\theta_j\):</p>
+        <div class="math-block">
+            \(\frac{\partial}{\partial \theta_j} \log p(\mathbf{y}|X, \theta) = \frac{1}{2} \text{tr}\left( (\boldsymbol{\alpha}\boldsymbol{\alpha}^T - K^{-1}) \frac{\partial K}{\partial \theta_j} \right)\)
+        </div>
+        <p>Training a GP simply means calculating this gradient for length-scales and noise, and passing it to an optimizer like L-BFGS or Adam.</p>
 
         <!-- Visualizer: Marginal Likelihood Trade-off -->
         <div class="viz-wrap mt-6">
@@ -2145,6 +2209,32 @@
             });
         });
         </script>
+      </div>
+    </div>
+
+
+    <!-- ─ Row 15 ─ -->
+    <div class="note-row" id="s16">
+      <div class="cue-column">
+        <h2>15. Putting GPs to Work: Bayesian Optimization</h2>
+        <ul>
+          <li>Active Learning</li>
+          <li>Explore/Exploit Trade-off</li>
+          <li>Acquisition Functions</li>
+        </ul>
+      </div>
+      <div class="content-column">
+        <h3>Bayesian Optimization</h3>
+        <p>GPs are beautiful, but <em>what do we use them for?</em> We use them to optimize black-box functions that are too expensive to evaluate everywhere (e.g., tuning deep neural network hyperparameters, drug discovery, or drilling for oil).</p>
+        <ul>
+          <li><strong>The Explore/Exploit Trade-off:</strong> We use the GP's predictive mean to exploit known good areas, and the GP's error bars to explore highly uncertain areas.</li>
+          <li><strong>Acquisition Functions:</strong> Introduce a simple acquisition function like <strong>Upper Confidence Bound (UCB)</strong>:
+            <div class="math-block">
+              \(\text{UCB}(x) = \mu(x) + \beta\sigma(x)\)
+            </div>
+            By maximizing this simple function, the GP tells you exactly <em>where you should collect your next data point</em>.
+          </li>
+        </ul>
       </div>
     </div>
 
