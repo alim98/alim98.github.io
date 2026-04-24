@@ -1,796 +1,825 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
-<meta charset="UTF-8" />
-<meta name="viewport" content="width=device-width, initial-scale=1.0" />
-<title>Vesicle Segmentation Pipeline</title>
-<link href="https://fonts.googleapis.com/css2?family=Inter:ital,wght@0,400;0,500;0,600;0,700;1,400&display=swap" rel="stylesheet"/>
-<script src="https://unpkg.com/react@18.3.1/umd/react.development.js" integrity="sha384-hD6/rw4ppMLGNu3tX5cjIb+uRZ7UkRJ6BPkLpg4hAu/6onKUg4lLsHAs9EBPT82L" crossorigin="anonymous"></script>
-<script src="https://unpkg.com/react-dom@18.3.1/umd/react-dom.development.js" integrity="sha384-u6aeetuaXnQ38mYT8rp6sbXaQe3NL9t+IBXmnYxwkUI2Hw4bsp2Wvmx4yRQF1uAm" crossorigin="anonymous"></script>
-<script src="https://unpkg.com/@babel/standalone@7.29.0/babel.min.js" integrity="sha384-m08KidiNqLdpJqLq95G/LEi8Qvjl/xUYll3QILypMoQ65QorJ9Lvtp2RXYGBFj1y" crossorigin="anonymous"></script>
-<style>
-* { box-sizing: border-box; margin: 0; padding: 0; }
-body {
-  background: #f7f8fa;
-  font-family: 'Inter', sans-serif;
-  color: #111;
-  min-height: 100vh;
-  font-size: 14px;
-}
-:root {
-  --blue: #2563a8;
-  --blue-lt: #dbeafe;
-  --amber: #b45309;
-  --amber-lt: #fef3c7;
-  --green: #166534;
-  --green-lt: #dcfce7;
-  --red: #991b1b;
-  --red-lt: #fee2e2;
-  --purple: #5b21b6;
-  --purple-lt: #ede9fe;
-  --border: #d1d5db;
-  --surface: #ffffff;
-  --ink: #111827;
-}
-.tab-btn {
-  font-family: 'Inter', sans-serif;
-  font-size: 13px;
-  font-weight: 500;
-  background: transparent;
-  border: none;
-  border-bottom: 2px solid transparent;
-  padding: 8px 16px;
-  cursor: pointer;
-  color: #6b7280;
-  transition: color .15s, border-color .15s;
-}
-.tab-btn.active { color: var(--blue); border-bottom-color: var(--blue); font-weight: 600; }
-.tab-btn:hover:not(.active) { color: #374151; }
-.card {
-  background: var(--surface);
-  border: 1px solid var(--border);
-  border-radius: 6px;
-}
-.tag {
-  display: inline-block;
-  font-size: 11px;
-  font-weight: 600;
-  padding: 2px 7px;
-  border-radius: 4px;
-  letter-spacing: 0.02em;
-}
-/* Architecture diagram specific */
-.arch-block {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  border-radius: 4px;
-  font-size: 11px;
-  font-weight: 600;
-  text-align: center;
-  line-height: 1.3;
-  padding: 6px 8px;
-  border: 1.5px solid currentColor;
-  position: relative;
-}
-.arch-arrow {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  color: #9ca3af;
-}
-</style>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Vesicle Segmentation Pipeline</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:ital,wght@0,400;0,500;0,600;0,700;1,400&display=swap"
+    rel="stylesheet" />
+  <script src="https://unpkg.com/react@18.3.1/umd/react.development.js"
+    integrity="sha384-hD6/rw4ppMLGNu3tX5cjIb+uRZ7UkRJ6BPkLpg4hAu/6onKUg4lLsHAs9EBPT82L"
+    crossorigin="anonymous"></script>
+  <script src="https://unpkg.com/react-dom@18.3.1/umd/react-dom.development.js"
+    integrity="sha384-u6aeetuaXnQ38mYT8rp6sbXaQe3NL9t+IBXmnYxwkUI2Hw4bsp2Wvmx4yRQF1uAm"
+    crossorigin="anonymous"></script>
+  <script src="https://unpkg.com/@babel/standalone@7.29.0/babel.min.js"
+    integrity="sha384-m08KidiNqLdpJqLq95G/LEi8Qvjl/xUYll3QILypMoQ65QorJ9Lvtp2RXYGBFj1y"
+    crossorigin="anonymous"></script>
+  <style>
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      background: #f7f8fa;
+      font-family: 'Inter', sans-serif;
+      color: #111;
+      min-height: 100vh;
+      font-size: 14px;
+    }
+
+    :root {
+      --blue: #2563a8;
+      --blue-lt: #dbeafe;
+      --amber: #b45309;
+      --amber-lt: #fef3c7;
+      --green: #166534;
+      --green-lt: #dcfce7;
+      --red: #991b1b;
+      --red-lt: #fee2e2;
+      --purple: #5b21b6;
+      --purple-lt: #ede9fe;
+      --border: #d1d5db;
+      --surface: #ffffff;
+      --ink: #111827;
+    }
+
+    .tab-btn {
+      font-family: 'Inter', sans-serif;
+      font-size: 13px;
+      font-weight: 500;
+      background: transparent;
+      border: none;
+      border-bottom: 2px solid transparent;
+      padding: 8px 16px;
+      cursor: pointer;
+      color: #6b7280;
+      transition: color .15s, border-color .15s;
+    }
+
+    .tab-btn.active {
+      color: var(--blue);
+      border-bottom-color: var(--blue);
+      font-weight: 600;
+    }
+
+    .tab-btn:hover:not(.active) {
+      color: #374151;
+    }
+
+    .card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 6px;
+    }
+
+    .tag {
+      display: inline-block;
+      font-size: 11px;
+      font-weight: 600;
+      padding: 2px 7px;
+      border-radius: 4px;
+      letter-spacing: 0.02em;
+    }
+
+    /* Architecture diagram specific */
+    .arch-block {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      border-radius: 4px;
+      font-size: 11px;
+      font-weight: 600;
+      text-align: center;
+      line-height: 1.3;
+      padding: 6px 8px;
+      border: 1.5px solid currentColor;
+      position: relative;
+    }
+
+    .arch-arrow {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: #9ca3af;
+    }
+  </style>
 </head>
+
 <body>
-<script type="text/babel">
+  <script type="text/babel">
 
 
-const { useState } = React;
+    const { useState } = React;
 
-const TABS = ['Pipeline Overview', 'Architecture', 'Data Versions', 'Inference'];
+    const TABS = ['Pipeline Overview', 'Architecture', 'Data Versions', 'Inference'];
 
-function TabBar({ active, setActive }) {
-  return (
-    <div style={{ background: '#fff', borderBottom: '1px solid var(--border)', padding: '0 24px', display: 'flex', alignItems: 'center', gap: 4 }}>
-      <span style={{ fontSize: 13, fontWeight: 700, color: '#374151', marginRight: 16, padding: '10px 0', letterSpacing: '-0.01em' }}>
-        Vesicle Instance Segmentation
-      </span>
-      {TABS.map((t) =>
-      <button key={t} className={`tab-btn${active === t ? ' active' : ''}`} onClick={() => setActive(t)}>{t}</button>
-      )}
-    </div>);
+    function TabBar({ active, setActive }) {
+      return (
+        <div style={{ background: '#fff', borderBottom: '1px solid var(--border)', padding: '0 24px', display: 'flex', alignItems: 'center', gap: 4 }}>
+          <span style={{ fontSize: 13, fontWeight: 700, color: '#374151', marginRight: 16, padding: '10px 0', letterSpacing: '-0.01em' }}>
+            Vesicle Instance Segmentation
+          </span>
+          {TABS.map((t) =>
+            <button key={t} className={`tab-btn${active === t ? ' active' : ''}`} onClick={() => setActive(t)}>{t}</button>
+          )}
+        </div>);
 
-}
+    }
 
-/* ─── helpers ─── */
-function Tag({ children, color, bg }) {
-  return <span className="tag" style={{ color, background: bg || color + '18', border: `1px solid ${color}44` }}>{children}</span>;
-}
+    /* ─── helpers ─── */
+    function Tag({ children, color, bg }) {
+      return <span className="tag" style={{ color, background: bg || color + '18', border: `1px solid ${color}44` }}>{children}</span>;
+    }
 
-function SArrow({ dir = 'right', color = '#9ca3af', label = '' }) {
-  if (dir === 'down') return (
-    <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 0, margin: '2px 0' }}>
-      {label && <span style={{ fontSize: 10, color: '#9ca3af', marginBottom: 1 }}>{label}</span>}
-      <svg width="12" height="18" viewBox="0 0 12 18"><line x1="6" y1="0" x2="6" y2="14" stroke={color} strokeWidth="1.5" /><polygon points="6,18 2,11 10,11" fill={color} /></svg>
-    </div>);
+    function SArrow({ dir = 'right', color = '#9ca3af', label = '' }) {
+      if (dir === 'down') return (
+        <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 0, margin: '2px 0' }}>
+          {label && <span style={{ fontSize: 10, color: '#9ca3af', marginBottom: 1 }}>{label}</span>}
+          <svg width="12" height="18" viewBox="0 0 12 18"><line x1="6" y1="0" x2="6" y2="14" stroke={color} strokeWidth="1.5" /><polygon points="6,18 2,11 10,11" fill={color} /></svg>
+        </div>);
 
-  return (
-    <div style={{ display: 'flex', alignItems: 'center', flexShrink: 0 }}>
-      {label && <span style={{ fontSize: 10, color: '#9ca3af', marginRight: 2 }}>{label}</span>}
-      <svg width="22" height="12" viewBox="0 0 22 12"><line x1="0" y1="6" x2="18" y2="6" stroke={color} strokeWidth="1.5" /><polygon points="22,6 15,2 15,10" fill={color} /></svg>
-    </div>);
+      return (
+        <div style={{ display: 'flex', alignItems: 'center', flexShrink: 0 }}>
+          {label && <span style={{ fontSize: 10, color: '#9ca3af', marginRight: 2 }}>{label}</span>}
+          <svg width="22" height="12" viewBox="0 0 22 12"><line x1="0" y1="6" x2="18" y2="6" stroke={color} strokeWidth="1.5" /><polygon points="22,6 15,2 15,10" fill={color} /></svg>
+        </div>);
 
-}
+    }
 
-/* ══════════ Mini stage diagrams ══════════ */
-function StageDiagram({ type }) {
-  const style = { display: 'block', width: '100%', height: 'auto' };
-  const F = 'Inter, sans-serif';
+    /* ══════════ Mini stage diagrams ══════════ */
+    function StageDiagram({ type }) {
+      const style = { display: 'block', width: '100%', height: 'auto' };
+      const F = 'Inter, sans-serif';
 
-  // Primitives
-  function Blk({ x, y, w, h = 44, fill, stroke, label, sub }) {
-    return (
-      <g>
-        <rect x={x} y={y} width={w} height={h} rx="4" fill={fill} stroke={stroke} strokeWidth="1.4" />
-        <text x={x + w / 2} y={y + h / 2 - (sub ? 7 : 0)} textAnchor="middle" dominantBaseline="middle"
-        fontSize="10" fontWeight="700" fontFamily={F} fill={stroke}>{label}</text>
-        {sub && <text x={x + w / 2} y={y + h / 2 + 8} textAnchor="middle" dominantBaseline="middle"
-        fontSize="8.5" fontFamily={F} fill={stroke + 'aa'}>{sub}</text>}
-      </g>);
+      // Primitives
+      function Blk({ x, y, w, h = 44, fill, stroke, label, sub }) {
+        return (
+          <g>
+            <rect x={x} y={y} width={w} height={h} rx="4" fill={fill} stroke={stroke} strokeWidth="1.4" />
+            <text x={x + w / 2} y={y + h / 2 - (sub ? 7 : 0)} textAnchor="middle" dominantBaseline="middle"
+              fontSize="10" fontWeight="700" fontFamily={F} fill={stroke}>{label}</text>
+            {sub && <text x={x + w / 2} y={y + h / 2 + 8} textAnchor="middle" dominantBaseline="middle"
+              fontSize="8.5" fontFamily={F} fill={stroke + 'aa'}>{sub}</text>}
+          </g>);
 
-  }
-  function Arr({ x1, y1, x2, y2, color = '#aaa', dashed = false }) {
-    const dx = x2 - x1,dy = y2 - y1,len = Math.sqrt(dx * dx + dy * dy);
-    const ux = dx / len,uy = dy / len;
-    const ex = x2 - ux * 6,ey = y2 - uy * 6;
-    return (
-      <g>
-        <line x1={x1} y1={y1} x2={ex} y2={ey} stroke={color} strokeWidth="1.3"
-        strokeDasharray={dashed ? '4 3' : 'none'} />
-        <polygon points={`${x2},${y2} ${ex - uy * 3},${ey + ux * 3} ${ex + uy * 3},${ey - ux * 3}`} fill={color} />
-      </g>);
+      }
+      function Arr({ x1, y1, x2, y2, color = '#aaa', dashed = false }) {
+        const dx = x2 - x1, dy = y2 - y1, len = Math.sqrt(dx * dx + dy * dy);
+        const ux = dx / len, uy = dy / len;
+        const ex = x2 - ux * 6, ey = y2 - uy * 6;
+        return (
+          <g>
+            <line x1={x1} y1={y1} x2={ex} y2={ey} stroke={color} strokeWidth="1.3"
+              strokeDasharray={dashed ? '4 3' : 'none'} />
+            <polygon points={`${x2},${y2} ${ex - uy * 3},${ey + ux * 3} ${ex + uy * 3},${ey - ux * 3}`} fill={color} />
+          </g>);
 
-  }
-  function Label({ x, y, text, color = '#6b7280', size = 8.5, bold = false }) {
-    return <text x={x} y={y} textAnchor="middle" fontSize={size} fontFamily={F}
-    fontWeight={bold ? '700' : '400'} fill={color}>{text}</text>;
-  }
+      }
+      function Label({ x, y, text, color = '#6b7280', size = 8.5, bold = false }) {
+        return <text x={x} y={y} textAnchor="middle" fontSize={size} fontFamily={F}
+          fontWeight={bold ? '700' : '400'} fill={color}>{text}</text>;
+      }
 
-  if (type === 'pretrain') {
-    const W = 360,H = 100;
-    return (
-      <svg width={W} height={H} viewBox={`0 0 ${W} ${H}`} style={style}>
-        {/* Input patches */}
-        <rect x="4" y="14" width="50" height="50" rx="4" fill="#f9fafb" stroke="#9ca3af" strokeWidth="1.3" />
-        {[0, 1, 2, 3].map((r) => [0, 1, 2, 3].map((c) => {
-          const masked = r === 0 && c === 1 || r === 1 && c === 0 || r === 1 && c === 3 || r === 2 && c === 2 || r === 3 && c === 1 || r === 0 && c === 3;
-          return <rect key={`${r}-${c}`} x={7 + c * 11} y={17 + r * 11} width="9" height="9" rx="1.5"
-          fill={masked ? '#374151' : '#bfdbfe'} stroke="none" />;
-        }))}
-        <text x="29" y="74" textAnchor="middle" fontSize="8.5" fontFamily={F} fill="#6b7280">input</text>
-        <text x="29" y="84" textAnchor="middle" fontSize="8" fontFamily={F} fill="#9ca3af">75% masked</text>
+      if (type === 'pretrain') {
+        const W = 360, H = 100;
+        return (
+          <svg width={W} height={H} viewBox={`0 0 ${W} ${H}`} style={style}>
+            {/* Input patches */}
+            <rect x="4" y="14" width="50" height="50" rx="4" fill="#f9fafb" stroke="#9ca3af" strokeWidth="1.3" />
+            {[0, 1, 2, 3].map((r) => [0, 1, 2, 3].map((c) => {
+              const masked = r === 0 && c === 1 || r === 1 && c === 0 || r === 1 && c === 3 || r === 2 && c === 2 || r === 3 && c === 1 || r === 0 && c === 3;
+              return <rect key={`${r}-${c}`} x={7 + c * 11} y={17 + r * 11} width="9" height="9" rx="1.5"
+                fill={masked ? '#374151' : '#bfdbfe'} stroke="none" />;
+            }))}
+            <text x="29" y="74" textAnchor="middle" fontSize="8.5" fontFamily={F} fill="#6b7280">input</text>
+            <text x="29" y="84" textAnchor="middle" fontSize="8" fontFamily={F} fill="#9ca3af">75% masked</text>
 
-        <Arr x1={56} y1={39} x2={70} y2={39} color="#9ca3af" />
+            <Arr x1={56} y1={39} x2={70} y2={39} color="#9ca3af" />
 
-        {/* ViT Encoder */}
-        <rect x="71" y="10" width="68" height="58" rx="4" fill="#eff6ff" stroke="#2563a8" strokeWidth="1.4" />
-        <text x="105" y="34" textAnchor="middle" fontSize="10" fontWeight="700" fontFamily={F} fill="#2563a8">ViT Encoder</text>
-        <text x="105" y="47" textAnchor="middle" fontSize="8" fontFamily={F} fill="#2563a8aa">depth 12 · d=192</text>
-        <text x="105" y="78" textAnchor="middle" fontSize="8" fontFamily={F} fill="#2563a8">pretrained</text>
+            {/* ViT Encoder */}
+            <rect x="71" y="10" width="68" height="58" rx="4" fill="#eff6ff" stroke="#2563a8" strokeWidth="1.4" />
+            <text x="105" y="34" textAnchor="middle" fontSize="10" fontWeight="700" fontFamily={F} fill="#2563a8">ViT Encoder</text>
+            <text x="105" y="47" textAnchor="middle" fontSize="8" fontFamily={F} fill="#2563a8aa">depth 12 · d=192</text>
+            <text x="105" y="78" textAnchor="middle" fontSize="8" fontFamily={F} fill="#2563a8">pretrained</text>
 
-        <Arr x1={141} y1={39} x2={155} y2={39} color="#9ca3af" />
+            <Arr x1={141} y1={39} x2={155} y2={39} color="#9ca3af" />
 
-        {/* MAE Decoder */}
-        <rect x="156" y="14" width="64" height="50" rx="4" fill="#e0e7ff" stroke="#4338ca" strokeWidth="1.4" />
-        <text x="188" y="36" textAnchor="middle" fontSize="10" fontWeight="700" fontFamily={F} fill="#4338ca">MAE Dec.</text>
-        <text x="188" y="49" textAnchor="middle" fontSize="8" fontFamily={F} fill="#4338caaa">reconstruct</text>
+            {/* MAE Decoder */}
+            <rect x="156" y="14" width="64" height="50" rx="4" fill="#e0e7ff" stroke="#4338ca" strokeWidth="1.4" />
+            <text x="188" y="36" textAnchor="middle" fontSize="10" fontWeight="700" fontFamily={F} fill="#4338ca">MAE Dec.</text>
+            <text x="188" y="49" textAnchor="middle" fontSize="8" fontFamily={F} fill="#4338caaa">reconstruct</text>
 
-        <Arr x1={222} y1={39} x2={236} y2={39} color="#9ca3af" />
+            <Arr x1={222} y1={39} x2={236} y2={39} color="#9ca3af" />
 
-        {/* Reconstructed */}
-        <rect x="237" y="14" width="50" height="50" rx="4" fill="#f9fafb" stroke="#9ca3af" strokeWidth="1.3" />
-        {[0, 1, 2, 3].map((r) => [0, 1, 2, 3].map((c) =>
-        <rect key={`${r}-${c}`} x={240 + c * 11} y={17 + r * 11} width="9" height="9" rx="1.5" fill="#bfdbfe" stroke="none" />
-        ))}
-        <text x="262" y="74" textAnchor="middle" fontSize="8.5" fontFamily={F} fill="#6b7280">reconstructed</text>
+            {/* Reconstructed */}
+            <rect x="237" y="14" width="50" height="50" rx="4" fill="#f9fafb" stroke="#9ca3af" strokeWidth="1.3" />
+            {[0, 1, 2, 3].map((r) => [0, 1, 2, 3].map((c) =>
+              <rect key={`${r}-${c}`} x={240 + c * 11} y={17 + r * 11} width="9" height="9" rx="1.5" fill="#bfdbfe" stroke="none" />
+            ))}
+            <text x="262" y="74" textAnchor="middle" fontSize="8.5" fontFamily={F} fill="#6b7280">reconstructed</text>
 
-        <Arr x1={289} y1={39} x2={300} y2={39} color="#166534" dashed={true} />
+            <Arr x1={289} y1={39} x2={300} y2={39} color="#166534" dashed={true} />
 
-        {/* Checkpoint */}
-        <rect x="301" y="18" width="56" height="42" rx="4" fill="#dcfce7" stroke="#166534" strokeWidth="1.4" />
-        <text x="329" y="35" textAnchor="middle" fontSize="9" fontWeight="700" fontFamily={F} fill="#166534">encoder</text>
-        <text x="329" y="47" textAnchor="middle" fontSize="8" fontFamily={F} fill="#166534aa">ckpt → S2</text>
-      </svg>);
+            {/* Checkpoint */}
+            <rect x="301" y="18" width="56" height="42" rx="4" fill="#dcfce7" stroke="#166534" strokeWidth="1.4" />
+            <text x="329" y="35" textAnchor="middle" fontSize="9" fontWeight="700" fontFamily={F} fill="#166534">encoder</text>
+            <text x="329" y="47" textAnchor="middle" fontSize="8" fontFamily={F} fill="#166534aa">ckpt → S2</text>
+          </svg>);
 
-  }
+      }
 
-  if (type === 'finetune') {
-    const W = 360,H = 116;
-    return (
-      <svg width={W} height={H} viewBox={`0 0 ${W} ${H}`} style={style}>
-        {/* Input */}
-        <rect x="4" y="24" width="40" height="42" rx="3" fill="#f9fafb" stroke="#9ca3af" strokeWidth="1.3" />
-        <text x="24" y="42" textAnchor="middle" fontSize="12" fontWeight="700" fontFamily={F} fill="#374151">40³</text>
-        <text x="24" y="55" textAnchor="middle" fontSize="8" fontFamily={F} fill="#9ca3af">padded</text>
-        <text x="24" y="78" textAnchor="middle" fontSize="8.5" fontFamily={F} fill="#6b7280">raw input</text>
+      if (type === 'finetune') {
+        const W = 360, H = 116;
+        return (
+          <svg width={W} height={H} viewBox={`0 0 ${W} ${H}`} style={style}>
+            {/* Input */}
+            <rect x="4" y="24" width="40" height="42" rx="3" fill="#f9fafb" stroke="#9ca3af" strokeWidth="1.3" />
+            <text x="24" y="42" textAnchor="middle" fontSize="12" fontWeight="700" fontFamily={F} fill="#374151">40³</text>
+            <text x="24" y="55" textAnchor="middle" fontSize="8" fontFamily={F} fill="#9ca3af">padded</text>
+            <text x="24" y="78" textAnchor="middle" fontSize="8.5" fontFamily={F} fill="#6b7280">raw input</text>
 
-        <Arr x1={46} y1={45} x2={60} y2={45} color="#9ca3af" />
+            <Arr x1={46} y1={45} x2={60} y2={45} color="#9ca3af" />
 
-        {/* ViT Encoder */}
-        <rect x="61" y="10" width="74" height="70" rx="4" fill="#eff6ff" stroke="#2563a8" strokeWidth="1.5" />
-        <text x="98" y="40" textAnchor="middle" fontSize="10.5" fontWeight="700" fontFamily={F} fill="#2563a8">ViT Encoder</text>
-        <text x="98" y="54" textAnchor="middle" fontSize="8" fontFamily={F} fill="#2563a8aa">depth 12 · d=192</text>
+            {/* ViT Encoder */}
+            <rect x="61" y="10" width="74" height="70" rx="4" fill="#eff6ff" stroke="#2563a8" strokeWidth="1.5" />
+            <text x="98" y="40" textAnchor="middle" fontSize="10.5" fontWeight="700" fontFamily={F} fill="#2563a8">ViT Encoder</text>
+            <text x="98" y="54" textAnchor="middle" fontSize="8" fontFamily={F} fill="#2563a8aa">depth 12 · d=192</text>
 
-        {/* Skip connection: dashed arc below */}
-        <path d="M 98 80 Q 152 100 192 80" fill="none" stroke="#db2777" strokeWidth="1" strokeDasharray="4 2" />
-        <text x="145" y="108" textAnchor="middle" fontSize="8" fontWeight="600" fontFamily={F} fill="#db2777">skip @ L3, L6, L9, L12</text>
+            {/* Skip connection: dashed arc below */}
+            <path d="M 98 80 Q 152 100 192 80" fill="none" stroke="#db2777" strokeWidth="1" strokeDasharray="4 2" />
+            <text x="145" y="108" textAnchor="middle" fontSize="8" fontWeight="600" fontFamily={F} fill="#db2777">skip @ L3, L6, L9, L12</text>
 
-        <Arr x1={137} y1={45} x2={151} y2={45} color="#2563a8" />
+            <Arr x1={137} y1={45} x2={151} y2={45} color="#2563a8" />
 
-        {/* UNETR Decoder */}
-        <rect x="152" y="10" width="74" height="70" rx="4" fill="#f0fdf4" stroke="#15803d" strokeWidth="1.5" />
-        <text x="189" y="38" textAnchor="middle" fontSize="10.5" fontWeight="700" fontFamily={F} fill="#15803d">UNETR</text>
-        <text x="189" y="52" textAnchor="middle" fontSize="10.5" fontWeight="700" fontFamily={F} fill="#15803d">Decoder</text>
-        <text x="189" y="66" textAnchor="middle" fontSize="7.5" fontFamily={F} fill="#15803daa">+ CNN stem</text>
+            {/* UNETR Decoder */}
+            <rect x="152" y="10" width="74" height="70" rx="4" fill="#f0fdf4" stroke="#15803d" strokeWidth="1.5" />
+            <text x="189" y="38" textAnchor="middle" fontSize="10.5" fontWeight="700" fontFamily={F} fill="#15803d">UNETR</text>
+            <text x="189" y="52" textAnchor="middle" fontSize="10.5" fontWeight="700" fontFamily={F} fill="#15803d">Decoder</text>
+            <text x="189" y="66" textAnchor="middle" fontSize="7.5" fontFamily={F} fill="#15803daa">+ CNN stem</text>
 
-        <Arr x1={228} y1={33} x2={244} y2={28} color="#9ca3af" />
-        <Arr x1={228} y1={57} x2={244} y2={62} color="#9ca3af" />
+            <Arr x1={228} y1={33} x2={244} y2={28} color="#9ca3af" />
+            <Arr x1={228} y1={57} x2={244} y2={62} color="#9ca3af" />
 
-        {/* Dual heads */}
-        <rect x="245" y="14" width="58" height="22" rx="3" fill="#dcfce7" stroke="#16a34a" strokeWidth="1.2" />
-        <text x="274" y="27" textAnchor="middle" fontSize="9" fontWeight="700" fontFamily={F} fill="#15803d" style={{ opacity: "1" }}>head_sem</text>
+            {/* Dual heads */}
+            <rect x="245" y="14" width="58" height="22" rx="3" fill="#dcfce7" stroke="#16a34a" strokeWidth="1.2" />
+            <text x="274" y="27" textAnchor="middle" fontSize="9" fontWeight="700" fontFamily={F} fill="#15803d" style={{ opacity: "1" }}>head_sem</text>
 
-        <rect x="245" y="54" width="58" height="22" rx="3" fill="#fee2e2" stroke="#dc2626" strokeWidth="1.2" />
-        <text x="274" y="67" textAnchor="middle" fontSize="9" fontWeight="700" fontFamily={F} fill="#dc2626">head_flow</text>
+            <rect x="245" y="54" width="58" height="22" rx="3" fill="#fee2e2" stroke="#dc2626" strokeWidth="1.2" />
+            <text x="274" y="67" textAnchor="middle" fontSize="9" fontWeight="700" fontFamily={F} fill="#dc2626">head_flow</text>
 
-        <Arr x1={305} y1={25} x2={320} y2={25} color="#15803d" />
-        <Arr x1={305} y1={65} x2={320} y2={65} color="#dc2626" />
+            <Arr x1={305} y1={25} x2={320} y2={25} color="#15803d" />
+            <Arr x1={305} y1={65} x2={320} y2={65} color="#dc2626" />
 
-        {/* Output labels */}
-        <text x="322" y="19" fontSize="8.5" fontFamily={F} fontWeight="600" fill="#15803d">semantic</text>
-        <text x="322" y="29" fontSize="7.5" fontFamily={F} fill="#15803daa">BCE+Dice</text>
-        <text x="322" y="59" fontSize="8.5" fontFamily={F} fontWeight="600" fill="#dc2626">flow field</text>
-        <text x="322" y="69" fontSize="7.5" fontFamily={F} fill="#dc2626aa">MSE·fg</text>
-      </svg>);
+            {/* Output labels */}
+            <text x="322" y="19" fontSize="8.5" fontFamily={F} fontWeight="600" fill="#15803d">semantic</text>
+            <text x="322" y="29" fontSize="7.5" fontFamily={F} fill="#15803daa">BCE+Dice</text>
+            <text x="322" y="59" fontSize="8.5" fontFamily={F} fontWeight="600" fill="#dc2626">flow field</text>
+            <text x="322" y="69" fontSize="7.5" fontFamily={F} fill="#dc2626aa">MSE·fg</text>
+          </svg>);
 
-  }
+      }
 
-  if (type === 'infer') {
-    const W = 360,H = 100;
-    return (
-      <svg width={W} height={H} viewBox={`0 0 ${W} ${H}`} style={style}>
-        {/* EM Volume with tiling grid */}
-        <rect x="4" y="14" width="48" height="52" rx="4" fill="#f9fafb" stroke="#9ca3af" strokeWidth="1.3" />
-        {[1, 2, 3].map((i) => <line key={i} x1="4" y1={14 + i * 13} x2="52" y2={14 + i * 13} stroke="#e5e7eb" strokeWidth="0.8" />)}
-        {[1, 2].map((i) => <line key={i} x1={4 + i * 16} y1="14" x2={4 + i * 16} y2="66" stroke="#e5e7eb" strokeWidth="0.8" />)}
-        <rect x="20" y="27" width="13" height="13" rx="1.5" fill="#bfdbfe" stroke="#2563a8" strokeWidth="1" />
-        <text x="28" y="77" textAnchor="middle" fontSize="8.5" fontFamily={F} fill="#6b7280">tiled EM vol</text>
+      if (type === 'infer') {
+        const W = 360, H = 100;
+        return (
+          <svg width={W} height={H} viewBox={`0 0 ${W} ${H}`} style={style}>
+            {/* EM Volume with tiling grid */}
+            <rect x="4" y="14" width="48" height="52" rx="4" fill="#f9fafb" stroke="#9ca3af" strokeWidth="1.3" />
+            {[1, 2, 3].map((i) => <line key={i} x1="4" y1={14 + i * 13} x2="52" y2={14 + i * 13} stroke="#e5e7eb" strokeWidth="0.8" />)}
+            {[1, 2].map((i) => <line key={i} x1={4 + i * 16} y1="14" x2={4 + i * 16} y2="66" stroke="#e5e7eb" strokeWidth="0.8" />)}
+            <rect x="20" y="27" width="13" height="13" rx="1.5" fill="#bfdbfe" stroke="#2563a8" strokeWidth="1" />
+            <text x="28" y="77" textAnchor="middle" fontSize="8.5" fontFamily={F} fill="#6b7280">tiled EM vol</text>
 
-        <Arr x1={54} y1={40} x2={68} y2={40} color="#9ca3af" />
+            <Arr x1={54} y1={40} x2={68} y2={40} color="#9ca3af" />
 
-        {/* Model */}
-        <rect x="69" y="12" width="62" height="56" rx="4" fill="#eff6ff" stroke="#2563a8" strokeWidth="1.4" />
-        <text x="100" y="36" textAnchor="middle" fontSize="10" fontWeight="700" fontFamily={F} fill="#2563a8">Model</text>
-        <text x="100" y="49" textAnchor="middle" fontSize="8" fontFamily={F} fill="#2563a8aa">ViT + UNETR</text>
-        <text x="100" y="77" textAnchor="middle" fontSize="8" fontFamily={F} fill="#2563a8">sliding window</text>
+            {/* Model */}
+            <rect x="69" y="12" width="62" height="56" rx="4" fill="#eff6ff" stroke="#2563a8" strokeWidth="1.4" />
+            <text x="100" y="36" textAnchor="middle" fontSize="10" fontWeight="700" fontFamily={F} fill="#2563a8">Model</text>
+            <text x="100" y="49" textAnchor="middle" fontSize="8" fontFamily={F} fill="#2563a8aa">ViT + UNETR</text>
+            <text x="100" y="77" textAnchor="middle" fontSize="8" fontFamily={F} fill="#2563a8">sliding window</text>
 
-        <Arr x1={133} y1={30} x2={147} y2={26} color="#9ca3af" />
-        <Arr x1={133} y1={50} x2={147} y2={54} color="#9ca3af" />
+            <Arr x1={133} y1={30} x2={147} y2={26} color="#9ca3af" />
+            <Arr x1={133} y1={50} x2={147} y2={54} color="#9ca3af" />
 
-        <rect x="148" y="14" width="48" height="18" rx="3" fill="#dcfce7" stroke="#16a34a" strokeWidth="1.2" />
-        <text x="172" y="25" textAnchor="middle" fontSize="8.5" fontWeight="600" fontFamily={F} fill="#15803d">sem. mask</text>
-        <rect x="148" y="48" width="48" height="18" rx="3" fill="#fef3c7" stroke="#d97706" strokeWidth="1.2" />
-        <text x="172" y="59" textAnchor="middle" fontSize="8.5" fontWeight="600" fontFamily={F} fill="#92400e">flow field</text>
+            <rect x="148" y="14" width="48" height="18" rx="3" fill="#dcfce7" stroke="#16a34a" strokeWidth="1.2" />
+            <text x="172" y="25" textAnchor="middle" fontSize="8.5" fontWeight="600" fontFamily={F} fill="#15803d">sem. mask</text>
+            <rect x="148" y="48" width="48" height="18" rx="3" fill="#fef3c7" stroke="#d97706" strokeWidth="1.2" />
+            <text x="172" y="59" textAnchor="middle" fontSize="8.5" fontWeight="600" fontFamily={F} fill="#92400e">flow field</text>
 
-        <Arr x1={198} y1={40} x2={210} y2={40} color="#9ca3af" />
+            <Arr x1={198} y1={40} x2={210} y2={40} color="#9ca3af" />
 
-        {/* Flow integration */}
-        <rect x="211" y="12" width="62" height="56" rx="4" fill="#fffbeb" stroke="#d97706" strokeWidth="1.4" />
-        <text x="242" y="36" textAnchor="middle" fontSize="10" fontWeight="700" fontFamily={F} fill="#d97706">Flow</text>
-        <text x="242" y="49" textAnchor="middle" fontSize="10" fontWeight="700" fontFamily={F} fill="#d97706">Integ.</text>
-        <text x="242" y="77" textAnchor="middle" fontSize="8" fontFamily={F} fill="#d97706aa">Euler steps</text>
+            {/* Flow integration */}
+            <rect x="211" y="12" width="62" height="56" rx="4" fill="#fffbeb" stroke="#d97706" strokeWidth="1.4" />
+            <text x="242" y="36" textAnchor="middle" fontSize="10" fontWeight="700" fontFamily={F} fill="#d97706">Flow</text>
+            <text x="242" y="49" textAnchor="middle" fontSize="10" fontWeight="700" fontFamily={F} fill="#d97706">Integ.</text>
+            <text x="242" y="77" textAnchor="middle" fontSize="8" fontFamily={F} fill="#d97706aa">Euler steps</text>
 
-        <Arr x1={275} y1={40} x2={287} y2={40} color="#9ca3af" />
+            <Arr x1={275} y1={40} x2={287} y2={40} color="#9ca3af" />
 
-        {/* Peak clustering */}
-        <rect x="288" y="12" width="68" height="56" rx="4" fill="#f0fdf4" stroke="#15803d" strokeWidth="1.4" />
-        <text x="322" y="33" textAnchor="middle" fontSize="10" fontWeight="700" fontFamily={F} fill="#15803d">Peak</text>
-        <text x="322" y="46" textAnchor="middle" fontSize="10" fontWeight="700" fontFamily={F} fill="#15803d">Clust.</text>
-        <text x="322" y="59" textAnchor="middle" fontSize="8" fontFamily={F} fill="#15803daa">assign voxels</text>
-        <text x="322" y="77" textAnchor="middle" fontSize="8" fontFamily={F} fill="#15803d">instance IDs</text>
-      </svg>);
+            {/* Peak clustering */}
+            <rect x="288" y="12" width="68" height="56" rx="4" fill="#f0fdf4" stroke="#15803d" strokeWidth="1.4" />
+            <text x="322" y="33" textAnchor="middle" fontSize="10" fontWeight="700" fontFamily={F} fill="#15803d">Peak</text>
+            <text x="322" y="46" textAnchor="middle" fontSize="10" fontWeight="700" fontFamily={F} fill="#15803d">Clust.</text>
+            <text x="322" y="59" textAnchor="middle" fontSize="8" fontFamily={F} fill="#15803daa">assign voxels</text>
+            <text x="322" y="77" textAnchor="middle" fontSize="8" fontFamily={F} fill="#15803d">instance IDs</text>
+          </svg>);
 
-  }
+      }
 
-  return null;
-}
+      return null;
+    }
 
-/* ══════════ TAB 1: Pipeline Overview ══════════ */
-function PipelineOverview() {
-  const [open, setOpen] = useState(null);
+    /* ══════════ TAB 1: Pipeline Overview ══════════ */
+    function PipelineOverview() {
+      const [open, setOpen] = useState(null);
 
-  const stages = [
-  {
-    id: 'pre', label: 'STAGE 1', title: 'Self-Supervised Pretraining',
-    tag: 'MAE · 3D ViT', tagColor: 'var(--blue)', tagBg: 'var(--blue-lt)',
-    accent: 'var(--blue)', bg: '#eff6ff',
-    summary: 'Masked autoencoding on 20k unlabeled vesicle EM crops. Encoder learns vesicle texture, membrane context, 3D geometry — no labels required.',
-    details: ['Input: 40³ voxel crops · 8 nm/vox', 'ViT: depth 12 · dim 192 · 6 heads · MLP×4', 'Patch size 2 → 20³ tokens', '75% masking ratio · reconstructs raw EM signal', 'norm_pix_loss = false', 'Output: pretrained encoder checkpoint @ step 995k'],
-    diagram: 'pretrain'
-  },
-  {
-    id: 'seg', label: 'STAGE 2', title: 'Supervised Fine-Tuning',
-    tag: 'UNETR · Dual Head', tagColor: 'var(--green)', tagBg: 'var(--green-lt)',
-    accent: 'var(--green)', bg: '#f0fdf4',
-    summary: 'MAE encoder + UNETR decoder trained on annotated vesicle crops. Predicts semantic foreground AND a 3D flow field toward instance centers.',
-    details: ['Freeze-then-unfreeze encoder schedule', 'Skip features extracted @ transformer layers 3, 6, 9, 12', 'CNN stem fused at output resolution', 'Input 40³ padded; supervise on inner 30³ crop', 'Outer ring zeroed (prevent unlabeled border leakage)', 'Loss: 1.0·BCE + 1.0·Dice + 5.0·Flow MSE (fg-masked)'],
-    diagram: 'finetune'
-  },
-  {
-    id: 'inf', label: 'STAGE 3', title: 'Inference & Postprocessing',
-    tag: 'Flow Integration', tagColor: 'var(--amber)', tagBg: 'var(--amber-lt)',
-    accent: 'var(--amber)', bg: '#fffbeb',
-    summary: 'Tiled inference over full EM volume. Flow field integrated to find instance centers; voxels assigned by nearest-peak clustering.',
-    details: ['Sliding-window tiled inference', 'Threshold semantic foreground probability', 'Euler-step integration per foreground voxel', 'Collect endpoints → estimate density', 'Detect density peaks → instance centers', 'Assign voxels to nearest peak · filter tiny instances'],
-    diagram: 'infer'
-  }];
+      const stages = [
+        {
+          id: 'pre', label: 'STAGE 1', title: 'Self-Supervised Pretraining',
+          tag: 'MAE · 3D ViT', tagColor: 'var(--blue)', tagBg: 'var(--blue-lt)',
+          accent: 'var(--blue)', bg: '#eff6ff',
+          summary: 'Masked autoencoding on 20k unlabeled vesicle EM crops. Encoder learns vesicle texture, membrane context, 3D geometry — no labels required.',
+          details: ['Input: 40³ voxel crops · 8 nm/vox', 'ViT: depth 12 · dim 192 · 6 heads · MLP×4', 'Patch size 2 → 20³ tokens', '75% masking ratio · reconstructs raw EM signal', 'norm_pix_loss = false', 'Output: pretrained encoder checkpoint @ step 995k'],
+          diagram: 'pretrain'
+        },
+        {
+          id: 'seg', label: 'STAGE 2', title: 'Supervised Fine-Tuning',
+          tag: 'UNETR · Dual Head', tagColor: 'var(--green)', tagBg: 'var(--green-lt)',
+          accent: 'var(--green)', bg: '#f0fdf4',
+          summary: 'MAE encoder + UNETR decoder trained on annotated vesicle crops. Predicts semantic foreground AND a 3D flow field toward instance centers.',
+          details: ['Freeze-then-unfreeze encoder schedule', 'Skip features extracted @ transformer layers 3, 6, 9, 12', 'CNN stem fused at output resolution', 'Input 40³ padded; supervise on inner 30³ crop', 'Outer ring zeroed (prevent unlabeled border leakage)', 'Loss: 1.0·BCE + 1.0·Dice + 5.0·Flow MSE (fg-masked)'],
+          diagram: 'finetune'
+        },
+        {
+          id: 'inf', label: 'STAGE 3', title: 'Inference & Postprocessing',
+          tag: 'Flow Integration', tagColor: 'var(--amber)', tagBg: 'var(--amber-lt)',
+          accent: 'var(--amber)', bg: '#fffbeb',
+          summary: 'Tiled inference over full EM volume. Flow field integrated to find instance centers; voxels assigned by nearest-peak clustering.',
+          details: ['Sliding-window tiled inference', 'Threshold semantic foreground probability', 'Euler-step integration per foreground voxel', 'Collect endpoints → estimate density', 'Detect density peaks → instance centers', 'Assign voxels to nearest peak · filter tiny instances'],
+          diagram: 'infer'
+        }];
 
 
-  return (
-    <div style={{ padding: '20px 24px' }}>
-      {/* Data sources */}
-      <div style={{ display: 'flex', gap: 12, marginBottom: 16 }}>
-        {[
-        { title: 'Unlabeled EM Crops', sub: '20k × 40³ voxels · vesicle-centered', note: 'Stage 1 only' },
-        { title: 'WEBKNOSSOS Instance Labels', sub: 'Veronika 8 nm + 6 nm · TN boxes · cached to HDF5', note: 'Stage 2 only' },
-        { title: 'Full EM Volume', sub: 'Tiled at inference time', note: 'Stage 3 only' }].
-        map((d, i) =>
-        <div key={i} className="card" style={{ flex: 1, padding: '10px 14px' }}>
-            <div style={{ fontSize: 11, color: '#9ca3af', fontWeight: 500, marginBottom: 2, textTransform: 'uppercase', letterSpacing: '0.05em' }}>{d.note}</div>
-            <div style={{ fontWeight: 600, fontSize: 13, marginBottom: 2 }}>{d.title}</div>
-            <div style={{ fontSize: 12, color: '#6b7280' }}>{d.sub}</div>
+      return (
+        <div style={{ padding: '20px 24px' }}>
+          {/* Data sources */}
+          <div style={{ display: 'flex', gap: 12, marginBottom: 16 }}>
+            {[
+              { title: 'Unlabeled EM Crops', sub: '20k × 40³ voxels · vesicle-centered', note: 'Stage 1 only' },
+              { title: 'WEBKNOSSOS Instance Labels', sub: 'Annot1 8 nm + 6 nm · TN boxes · cached to HDF5', note: 'Stage 2 only' },
+              { title: 'Full EM Volume', sub: 'Tiled at inference time', note: 'Stage 3 only' }].
+              map((d, i) =>
+                <div key={i} className="card" style={{ flex: 1, padding: '10px 14px' }}>
+                  <div style={{ fontSize: 11, color: '#9ca3af', fontWeight: 500, marginBottom: 2, textTransform: 'uppercase', letterSpacing: '0.05em' }}>{d.note}</div>
+                  <div style={{ fontWeight: 600, fontSize: 13, marginBottom: 2 }}>{d.title}</div>
+                  <div style={{ fontSize: 12, color: '#6b7280' }}>{d.sub}</div>
+                </div>
+              )}
           </div>
-        )}
-      </div>
 
-      {/* Stage cards */}
-      <div style={{ display: 'flex', alignItems: 'flex-start', gap: 8 }}>
-        {stages.map((s, i) =>
-        <React.Fragment key={s.id}>
-            <div
-            className="card"
-            onClick={() => setOpen(open === s.id ? null : s.id)}
-            style={{ flex: 1, background: open === s.id ? s.bg : '#fff', borderColor: open === s.id ? s.accent : 'var(--border)', cursor: 'pointer', transition: 'all .15s', userSelect: 'none' }}>
-            
-              <div style={{ borderBottom: `1px solid ${open === s.id ? s.accent + '30' : 'var(--border)'}`, padding: '12px 14px' }}>
-                <div style={{ fontSize: 10, fontWeight: 700, color: s.accent, letterSpacing: '0.08em', marginBottom: 4, textTransform: 'uppercase' }}>{s.label}</div>
-                <div style={{ fontWeight: 700, fontSize: 15, marginBottom: 6 }}>{s.title}</div>
-                <Tag color={s.accent} bg={s.tagBg}>{s.tag}</Tag>
+          {/* Stage cards */}
+          <div style={{ display: 'flex', alignItems: 'flex-start', gap: 8 }}>
+            {stages.map((s, i) =>
+              <React.Fragment key={s.id}>
+                <div
+                  className="card"
+                  onClick={() => setOpen(open === s.id ? null : s.id)}
+                  style={{ flex: 1, background: open === s.id ? s.bg : '#fff', borderColor: open === s.id ? s.accent : 'var(--border)', cursor: 'pointer', transition: 'all .15s', userSelect: 'none' }}>
+
+                  <div style={{ borderBottom: `1px solid ${open === s.id ? s.accent + '30' : 'var(--border)'}`, padding: '12px 14px' }}>
+                    <div style={{ fontSize: 10, fontWeight: 700, color: s.accent, letterSpacing: '0.08em', marginBottom: 4, textTransform: 'uppercase' }}>{s.label}</div>
+                    <div style={{ fontWeight: 700, fontSize: 15, marginBottom: 6 }}>{s.title}</div>
+                    <Tag color={s.accent} bg={s.tagBg}>{s.tag}</Tag>
+                  </div>
+                  <div style={{ padding: '10px 14px' }}>
+                    <StageDiagram type={s.diagram} accent={s.accent} />
+                    <p style={{ fontSize: 12, color: '#6b7280', lineHeight: 1.5, marginBottom: open === s.id ? 10 : 0, marginTop: 10 }}>{s.summary}</p>
+                    {open === s.id &&
+                      <ul style={{ listStyle: 'none', marginTop: 4 }}>
+                        {s.details.map((d, j) =>
+                          <li key={j} style={{ fontSize: 12, color: '#374151', padding: '3px 0', borderTop: '1px solid #f3f4f6', display: 'flex', gap: 6, alignItems: 'flex-start' }}>
+                            <span style={{ color: s.accent, fontWeight: 700, flexShrink: 0 }}>→</span> {d}
+                          </li>
+                        )}
+                      </ul>
+                    }
+                  </div>
+                  <div style={{ padding: '0 14px 8px', textAlign: 'right', fontSize: 11, color: '#9ca3af' }}>
+                    {open === s.id ? '▲ collapse' : '▼ expand'}
+                  </div>
+                </div>
+                {i < stages.length - 1 &&
+                  <div style={{ paddingTop: 50, flexShrink: 0 }}><SArrow /></div>
+                }
+              </React.Fragment>
+            )}
+          </div>
+
+          {/* Loss equation */}
+          <div className="card" style={{ marginTop: 16, padding: '10px 18px', display: 'flex', alignItems: 'center', gap: 20, flexWrap: 'wrap' }}>
+            <span style={{ fontSize: 11, color: '#9ca3af', textTransform: 'uppercase', letterSpacing: '0.05em', fontWeight: 600 }}>Training loss</span>
+            <span style={{ fontSize: 16, fontWeight: 500 }}>
+              <em>L</em> = 1.0 · <em>L</em><sub>BCE</sub>
+              &nbsp;+&nbsp;1.0 · <em>L</em><sub>Dice</sub>
+              &nbsp;+&nbsp;<strong style={{ color: 'var(--green)' }}>5.0</strong> · <em>L</em><sub>flow</sub>
+            </span>
+            <span style={{ fontSize: 12, color: '#6b7280' }}>Flow loss evaluated on foreground voxels only</span>
+          </div>
+        </div>);
+
+    }
+
+    /* ══════════ TAB 2: Architecture ══════════ */
+    function Architecture() {
+      // Paper-style diagram using SVG + HTML
+      // Layout: horizontal flow — Input → Encoder blocks → Decoder blocks → Output
+      const BLK_W = 54;
+      const BLK_H = 42;
+      const ENC_H = [70, 90, 110, 130, 130, 130, 110, 90, 70, 60, 52, 46]; // heights of 12 blocks (tapered)
+      const SKIP_IDX = [2, 5, 8, 11]; // 0-indexed blocks 3,6,9,12
+
+      // Colors
+      const C = {
+        enc: { fill: '#bfdbfe', stroke: '#2563a8', text: '#1e3a5f' },
+        dec: { fill: '#bbf7d0', stroke: '#15803d', text: '#14532d' },
+        cnn: { fill: '#fde68a', stroke: '#d97706', text: '#78350f' },
+        skip: { fill: '#fce7f3', stroke: '#db2777', text: '#831843' },
+        out_sem: { fill: '#dcfce7', stroke: '#16a34a', text: '#14532d' },
+        out_flow: { fill: '#fee2e2', stroke: '#dc2626', text: '#7f1d1d' },
+        patch: { fill: '#e0e7ff', stroke: '#4f46e5', text: '#1e1b4b' },
+        input: { fill: '#f3f4f6', stroke: '#6b7280', text: '#374151' }
+      };
+
+      function Block({ label, sub, c, w = BLK_W, h = BLK_H, style = {} }) {
+        return (
+          <div style={{
+            width: w, minHeight: h, background: c.fill, border: `1.5px solid ${c.stroke}`,
+            borderRadius: 4, display: 'flex', flexDirection: 'column', alignItems: 'center',
+            justifyContent: 'center', padding: '4px 6px', textAlign: 'center', flexShrink: 0,
+            ...style
+          }}>
+            <span style={{ fontSize: 10, fontWeight: 700, color: c.text, lineHeight: 1.3, display: 'block' }}>{label}</span>
+            {sub && <span style={{ fontSize: 9, color: c.text + 'bb', lineHeight: 1.2, display: 'block', marginTop: 1 }}>{sub}</span>}
+          </div>);
+
+      }
+
+      function HArr({ w = 18, color = '#9ca3af', dashed = false }) {
+        return (
+          <svg width={w + 8} height="12" style={{ flexShrink: 0 }}>
+            <line x1="0" y1="6" x2={w} y2="6" stroke={color} strokeWidth="1.5" strokeDasharray={dashed ? '3 2' : 'none'} />
+            <polygon points={`${w + 8},6 ${w},2 ${w},10`} fill={color} />
+          </svg>);
+
+      }
+
+      function VArr({ h = 22, color = '#9ca3af', dashed = false }) {
+        return (
+          <svg width="12" height={h + 8} style={{ display: 'block' }}>
+            <line x1="6" y1="0" x2="6" y2={h} stroke={color} strokeWidth="1.5" strokeDasharray={dashed ? '3 2' : 'none'} />
+            <polygon points={`6,${h + 8} 2,${h} 10,${h}`} fill={color} />
+          </svg>);
+
+      }
+
+      const encBlocks = ['Blk 1', 'Blk 2', 'Blk 3', 'Blk 4', 'Blk 5', 'Blk 6', 'Blk 7', 'Blk 8', 'Blk 9', 'Blk 10', 'Blk 11', 'Blk 12'];
+
+      return (
+        <div style={{ padding: '20px 24px', overflowX: 'auto' }}>
+          <div style={{ fontSize: 13, fontWeight: 600, color: '#374151', marginBottom: 4 }}>Model Architecture</div>
+          <div style={{ fontSize: 12, color: '#6b7280', marginBottom: 18 }}>
+            3D MAE encoder (ViT-S) + UNETR-style convolutional decoder. Skip connections at transformer layers 3, 6, 9, 12.
+          </div>
+
+          {/* Main diagram */}
+          <div style={{ display: 'flex', alignItems: 'center', gap: 0, minWidth: 1100 }}>
+
+            {/* INPUT */}
+            <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 3 }}>
+              {/* 3D cube suggestive shape */}
+              <svg width="56" height="56" viewBox="0 0 56 56">
+                <polygon points="28,4 52,18 52,38 28,52 4,38 4,18" fill="#e5e7eb" stroke="#6b7280" strokeWidth="1.5" />
+                <polygon points="28,4 52,18 28,32 4,18" fill="#d1d5db" stroke="#6b7280" strokeWidth="1" />
+                <polygon points="4,18 28,32 28,52 4,38" fill="#9ca3af" stroke="#6b7280" strokeWidth="1" />
+                <polygon points="52,18 28,32 28,52 52,38" fill="#c4c4c4" stroke="#6b7280" strokeWidth="1" />
+                <text x="28" y="26" textAnchor="middle" fontSize="8" fontFamily="Inter" fontWeight="700" fill="#374151">40³</text>
+                <text x="28" y="36" textAnchor="middle" fontSize="7" fontFamily="Inter" fill="#6b7280">raw EM</text>
+              </svg>
+              <div style={{ fontSize: 10, color: '#6b7280', textAlign: 'center', fontWeight: 500 }}>Input</div>
+            </div>
+
+            <HArr w={12} />
+
+            {/* PATCH EMBED */}
+            <Block label="Patch Embed" sub="2³ patches → 20³ tokens · d=192" c={C.patch} w={74} h={56} />
+
+            <HArr w={12} />
+
+            {/* ENCODER BLOCKS */}
+            <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 0 }}>
+              <div style={{ fontSize: 10, fontWeight: 700, color: C.enc.text, marginBottom: 4, textTransform: 'uppercase', letterSpacing: '0.05em' }}>
+                Transformer Encoder
               </div>
-              <div style={{ padding: '10px 14px' }}>
-                <StageDiagram type={s.diagram} accent={s.accent} />
-                <p style={{ fontSize: 12, color: '#6b7280', lineHeight: 1.5, marginBottom: open === s.id ? 10 : 0, marginTop: 10 }}>{s.summary}</p>
-                {open === s.id &&
-              <ul style={{ listStyle: 'none', marginTop: 4 }}>
-                    {s.details.map((d, j) =>
-                <li key={j} style={{ fontSize: 12, color: '#374151', padding: '3px 0', borderTop: '1px solid #f3f4f6', display: 'flex', gap: 6, alignItems: 'flex-start' }}>
-                        <span style={{ color: s.accent, fontWeight: 700, flexShrink: 0 }}>→</span> {d}
-                      </li>
+              <div style={{ position: 'relative', display: 'flex', flexDirection: 'column', gap: 2 }}>
+                {encBlocks.map((b, i) =>
+                  <div key={i} style={{ display: 'flex', alignItems: 'center', gap: 0 }}>
+                    <div style={{
+                      width: 68, height: 26 - Math.max(0, i - 5) * 1,
+                      background: SKIP_IDX.includes(i) ? C.enc.fill : C.enc.fill + 'cc',
+                      border: `1.5px solid ${SKIP_IDX.includes(i) ? C.enc.stroke : C.enc.stroke + '88'}`,
+                      borderRadius: 3,
+                      display: 'flex', alignItems: 'center', justifyContent: 'space-between',
+                      padding: '0 6px',
+                      flexShrink: 0
+                    }}>
+                      <span style={{ fontSize: 9.5, fontWeight: SKIP_IDX.includes(i) ? 700 : 500, color: C.enc.text }}>{b}</span>
+                      {SKIP_IDX.includes(i) &&
+                        <span style={{ fontSize: 8, fontWeight: 700, color: '#db2777', background: '#fce7f3', border: '1px solid #db277744', borderRadius: 2, padding: '0 3px' }}>skip</span>
+                      }
+                    </div>
+                  </div>
                 )}
-                  </ul>
-              }
-              </div>
-              <div style={{ padding: '0 14px 8px', textAlign: 'right', fontSize: 11, color: '#9ca3af' }}>
-                {open === s.id ? '▲ collapse' : '▼ expand'}
+                <div style={{ marginTop: 4, fontSize: 9, color: '#6b7280', textAlign: 'center' }}>depth=12 · 6 heads</div>
               </div>
             </div>
-            {i < stages.length - 1 &&
-          <div style={{ paddingTop: 50, flexShrink: 0 }}><SArrow /></div>
-          }
-          </React.Fragment>
-        )}
-      </div>
 
-      {/* Loss equation */}
-      <div className="card" style={{ marginTop: 16, padding: '10px 18px', display: 'flex', alignItems: 'center', gap: 20, flexWrap: 'wrap' }}>
-        <span style={{ fontSize: 11, color: '#9ca3af', textTransform: 'uppercase', letterSpacing: '0.05em', fontWeight: 600 }}>Training loss</span>
-        <span style={{ fontSize: 16, fontWeight: 500 }}>
-          <em>L</em> = 1.0 · <em>L</em><sub>BCE</sub>
-          &nbsp;+&nbsp;1.0 · <em>L</em><sub>Dice</sub>
-          &nbsp;+&nbsp;<strong style={{ color: 'var(--green)' }}>5.0</strong> · <em>L</em><sub>flow</sub>
-        </span>
-        <span style={{ fontSize: 12, color: '#6b7280' }}>Flow loss evaluated on foreground voxels only</span>
-      </div>
-    </div>);
+            <HArr w={18} />
 
-}
+            {/* SKIP CONNECTION COLLECTOR + DECODER */}
+            <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 0 }}>
+              <div style={{ fontSize: 10, fontWeight: 700, color: C.dec.text, marginBottom: 4, textTransform: 'uppercase', letterSpacing: '0.05em' }}>
+                UNETR Decoder
+              </div>
+              <div style={{ display: 'flex', alignItems: 'stretch', gap: 10 }}>
+                {/* Skip projections column */}
+                <div style={{ display: 'flex', flexDirection: 'column', gap: 6, justifyContent: 'space-around', paddingTop: 8 }}>
+                  {['L3 →', 'L6 →', 'L9 →', 'L12 →'].map((l) =>
+                    <div key={l} style={{ display: 'flex', alignItems: 'center', gap: 4 }}>
+                      <div style={{
+                        fontSize: 9, fontWeight: 700, color: '#db2777',
+                        background: '#fce7f3', border: '1px solid #db277766',
+                        borderRadius: 3, padding: '2px 5px', whiteSpace: 'nowrap'
+                      }}>{l}</div>
+                      <Block label="1×1 proj" sub="reshape→3D" c={{ fill: '#fce7f3', stroke: '#db2777', text: '#831843' }} w={62} h={24} />
+                    </div>
+                  )}
+                </div>
 
-/* ══════════ TAB 2: Architecture ══════════ */
-function Architecture() {
-  // Paper-style diagram using SVG + HTML
-  // Layout: horizontal flow — Input → Encoder blocks → Decoder blocks → Output
-  const BLK_W = 54;
-  const BLK_H = 42;
-  const ENC_H = [70, 90, 110, 130, 130, 130, 110, 90, 70, 60, 52, 46]; // heights of 12 blocks (tapered)
-  const SKIP_IDX = [2, 5, 8, 11]; // 0-indexed blocks 3,6,9,12
-
-  // Colors
-  const C = {
-    enc: { fill: '#bfdbfe', stroke: '#2563a8', text: '#1e3a5f' },
-    dec: { fill: '#bbf7d0', stroke: '#15803d', text: '#14532d' },
-    cnn: { fill: '#fde68a', stroke: '#d97706', text: '#78350f' },
-    skip: { fill: '#fce7f3', stroke: '#db2777', text: '#831843' },
-    out_sem: { fill: '#dcfce7', stroke: '#16a34a', text: '#14532d' },
-    out_flow: { fill: '#fee2e2', stroke: '#dc2626', text: '#7f1d1d' },
-    patch: { fill: '#e0e7ff', stroke: '#4f46e5', text: '#1e1b4b' },
-    input: { fill: '#f3f4f6', stroke: '#6b7280', text: '#374151' }
-  };
-
-  function Block({ label, sub, c, w = BLK_W, h = BLK_H, style = {} }) {
-    return (
-      <div style={{
-        width: w, minHeight: h, background: c.fill, border: `1.5px solid ${c.stroke}`,
-        borderRadius: 4, display: 'flex', flexDirection: 'column', alignItems: 'center',
-        justifyContent: 'center', padding: '4px 6px', textAlign: 'center', flexShrink: 0,
-        ...style
-      }}>
-        <span style={{ fontSize: 10, fontWeight: 700, color: c.text, lineHeight: 1.3, display: 'block' }}>{label}</span>
-        {sub && <span style={{ fontSize: 9, color: c.text + 'bb', lineHeight: 1.2, display: 'block', marginTop: 1 }}>{sub}</span>}
-      </div>);
-
-  }
-
-  function HArr({ w = 18, color = '#9ca3af', dashed = false }) {
-    return (
-      <svg width={w + 8} height="12" style={{ flexShrink: 0 }}>
-        <line x1="0" y1="6" x2={w} y2="6" stroke={color} strokeWidth="1.5" strokeDasharray={dashed ? '3 2' : 'none'} />
-        <polygon points={`${w + 8},6 ${w},2 ${w},10`} fill={color} />
-      </svg>);
-
-  }
-
-  function VArr({ h = 22, color = '#9ca3af', dashed = false }) {
-    return (
-      <svg width="12" height={h + 8} style={{ display: 'block' }}>
-        <line x1="6" y1="0" x2="6" y2={h} stroke={color} strokeWidth="1.5" strokeDasharray={dashed ? '3 2' : 'none'} />
-        <polygon points={`6,${h + 8} 2,${h} 10,${h}`} fill={color} />
-      </svg>);
-
-  }
-
-  const encBlocks = ['Blk 1', 'Blk 2', 'Blk 3', 'Blk 4', 'Blk 5', 'Blk 6', 'Blk 7', 'Blk 8', 'Blk 9', 'Blk 10', 'Blk 11', 'Blk 12'];
-
-  return (
-    <div style={{ padding: '20px 24px', overflowX: 'auto' }}>
-      <div style={{ fontSize: 13, fontWeight: 600, color: '#374151', marginBottom: 4 }}>Model Architecture</div>
-      <div style={{ fontSize: 12, color: '#6b7280', marginBottom: 18 }}>
-        3D MAE encoder (ViT-S) + UNETR-style convolutional decoder. Skip connections at transformer layers 3, 6, 9, 12.
-      </div>
-
-      {/* Main diagram */}
-      <div style={{ display: 'flex', alignItems: 'center', gap: 0, minWidth: 1100 }}>
-
-        {/* INPUT */}
-        <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 3 }}>
-          {/* 3D cube suggestive shape */}
-          <svg width="56" height="56" viewBox="0 0 56 56">
-            <polygon points="28,4 52,18 52,38 28,52 4,38 4,18" fill="#e5e7eb" stroke="#6b7280" strokeWidth="1.5" />
-            <polygon points="28,4 52,18 28,32 4,18" fill="#d1d5db" stroke="#6b7280" strokeWidth="1" />
-            <polygon points="4,18 28,32 28,52 4,38" fill="#9ca3af" stroke="#6b7280" strokeWidth="1" />
-            <polygon points="52,18 28,32 28,52 52,38" fill="#c4c4c4" stroke="#6b7280" strokeWidth="1" />
-            <text x="28" y="26" textAnchor="middle" fontSize="8" fontFamily="Inter" fontWeight="700" fill="#374151">40³</text>
-            <text x="28" y="36" textAnchor="middle" fontSize="7" fontFamily="Inter" fill="#6b7280">raw EM</text>
-          </svg>
-          <div style={{ fontSize: 10, color: '#6b7280', textAlign: 'center', fontWeight: 500 }}>Input</div>
-        </div>
-
-        <HArr w={12} />
-
-        {/* PATCH EMBED */}
-        <Block label="Patch Embed" sub="2³ patches → 20³ tokens · d=192" c={C.patch} w={74} h={56} />
-
-        <HArr w={12} />
-
-        {/* ENCODER BLOCKS */}
-        <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 0 }}>
-          <div style={{ fontSize: 10, fontWeight: 700, color: C.enc.text, marginBottom: 4, textTransform: 'uppercase', letterSpacing: '0.05em' }}>
-            Transformer Encoder
-          </div>
-          <div style={{ position: 'relative', display: 'flex', flexDirection: 'column', gap: 2 }}>
-            {encBlocks.map((b, i) =>
-            <div key={i} style={{ display: 'flex', alignItems: 'center', gap: 0 }}>
-                <div style={{
-                width: 68, height: 26 - Math.max(0, i - 5) * 1,
-                background: SKIP_IDX.includes(i) ? C.enc.fill : C.enc.fill + 'cc',
-                border: `1.5px solid ${SKIP_IDX.includes(i) ? C.enc.stroke : C.enc.stroke + '88'}`,
-                borderRadius: 3,
-                display: 'flex', alignItems: 'center', justifyContent: 'space-between',
-                padding: '0 6px',
-                flexShrink: 0
-              }}>
-                  <span style={{ fontSize: 9.5, fontWeight: SKIP_IDX.includes(i) ? 700 : 500, color: C.enc.text }}>{b}</span>
-                  {SKIP_IDX.includes(i) &&
-                <span style={{ fontSize: 8, fontWeight: 700, color: '#db2777', background: '#fce7f3', border: '1px solid #db277744', borderRadius: 2, padding: '0 3px' }}>skip</span>
-                }
+                {/* Decoder blocks column */}
+                <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 2 }}>
+                  <Block label="Top Fusion" sub="transformer + CNN" c={C.dec} w={82} h={32} />
+                  <VArr h={10} color={C.dec.stroke} />
+                  <Block label="Upsample ×2" sub="deconv + skip" c={C.dec} w={82} h={28} />
+                  <VArr h={10} color={C.dec.stroke} />
+                  <Block label="Upsample ×2" sub="deconv + skip" c={C.dec} w={82} h={28} />
+                  <VArr h={10} color={C.dec.stroke} />
+                  <Block label="Fuse CNN Stem" sub="concat at 40³ res" c={{ fill: '#fef9c3', stroke: '#ca8a04', text: '#713f12' }} w={82} h={28} />
+                  <VArr h={10} color="#ca8a04" />
+                  <Block label="Center crop → 30³" sub="drop padded border" c={C.dec} w={82} h={26} />
                 </div>
               </div>
+            </div>
+
+            <HArr w={14} />
+
+            {/* DUAL OUTPUT HEADS */}
+            <div style={{ display: 'flex', flexDirection: 'column', gap: 14 }}>
+              <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 3 }}>
+                <Block label="head_sem" sub="foreground logits" c={C.out_sem} w={82} h={40} />
+                <div style={{ fontSize: 9, color: C.out_sem.text, fontWeight: 600, textAlign: 'center' }}>BCE + Dice</div>
+              </div>
+              <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 3 }}>
+                <Block label="head_flow" sub="3-ch flow field" c={C.out_flow} w={82} h={40} />
+                <div style={{ fontSize: 9, color: C.out_flow.text, fontWeight: 600, textAlign: 'center' }}>MSE (fg-masked)</div>
+              </div>
+            </div>
+
+          </div>
+
+          {/* CNN stem annotation */}
+          <div style={{ marginTop: 14, display: 'flex', gap: 8, alignItems: 'center' }}>
+            <svg width="14" height="14"><line x1="7" y1="0" x2="7" y2="14" stroke="#d97706" strokeWidth="1.5" strokeDasharray="3 2" /></svg>
+            <Block label="CNN Stem" sub="shallow conv on raw input" c={C.cnn} w={100} h={26} />
+            <span style={{ fontSize: 11, color: '#6b7280', fontStyle: 'italic' }}>parallel path; output fused near decoder resolution</span>
+          </div>
+
+          {/* Legend */}
+          <div className="card" style={{ marginTop: 18, padding: '10px 16px', display: 'flex', gap: 20, flexWrap: 'wrap', alignItems: 'center' }}>
+            <span style={{ fontSize: 11, color: '#9ca3af', fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.05em' }}>Legend</span>
+            {[
+              { label: 'Encoder block', c: C.enc },
+              { label: 'Skip connection', c: { fill: '#fce7f3', stroke: '#db2777', text: '#831843' } },
+              { label: 'Decoder block', c: C.dec },
+              { label: 'CNN', c: C.cnn },
+              { label: 'Semantic head', c: C.out_sem },
+              { label: 'Flow head', c: C.out_flow }].
+              map(({ label, c }) =>
+                <div key={label} style={{ display: 'flex', alignItems: 'center', gap: 5 }}>
+                  <div style={{ width: 14, height: 14, background: c.fill, border: `1.5px solid ${c.stroke}`, borderRadius: 2, flexShrink: 0 }} />
+                  <span style={{ fontSize: 11, color: '#374151' }}>{label}</span>
+                </div>
+              )}
+          </div>
+
+          {/* Specs table */}
+          <div className="card" style={{ marginTop: 10, padding: '10px 16px' }}>
+            <div style={{ fontSize: 11, fontWeight: 600, color: '#9ca3af', textTransform: 'uppercase', letterSpacing: '0.05em', marginBottom: 8 }}>Encoder specs</div>
+            <div style={{ display: 'flex', gap: 24, flexWrap: 'wrap' }}>
+              {[['Input size', '40³'], ['Patch size', '2³'], ['Channels', '1'], ['Embed dim', '192'], ['Depth', '12'], ['Heads', '6'], ['MLP ratio', '4.0'], ['Skip @ layers', '3, 6, 9, 12']].map(([k, v]) =>
+                <div key={k}>
+                  <div style={{ fontSize: 11, color: '#9ca3af' }}>{k}</div>
+                  <div style={{ fontSize: 13, fontWeight: 600, color: '#111' }}>{v}</div>
+                </div>
+              )}
+            </div>
+          </div>
+        </div>);
+
+    }
+
+    /* ══════════ TAB 3: Data Versions ══════════ */
+    function DataVersions() {
+      const [activeV, setActiveV] = useState('D');
+
+      const versions = [
+        {
+          id: 'A', label: 'Version A', subtitle: 'All annotators',
+          color: 'var(--red)', bg: '#fef2f2',
+          added: ['All available annotations', 'Annot1 + Cora data'],
+          notes: ['Cora annotations: many merged vesicle instances', 'Merged labels corrupt flow field targets directly', 'Model learned wrong instance topology'],
+          outcome: { icon: '⚠', text: 'Poor instance separation due to merged-annotation supervision' }
+        },
+        {
+          id: 'B', label: 'Version B', subtitle: 'Annot1 only',
+          color: 'var(--blue)', bg: '#eff6ff',
+          added: ['Annot1 8 nm positives only'],
+          notes: ['Cora data removed', 'Same architecture + MAE init', 'No model changes — data quality change only'],
+          outcome: { icon: '✓', text: 'Cleaner flow targets; better instance topology supervision' }
+        },
+        {
+          id: 'C', label: 'Version C', subtitle: '+ 6 nm data',
+          color: 'var(--amber)', bg: '#fffbeb',
+          added: ['Annot1 8 nm positives', 'Annot1 6 nm → downsampled to 8 nm'],
+          notes: ['6 nm samples resampled to match 8 nm voxel size', 'Validation restricted to 8 nm only (metric integrity)'],
+          outcome: { icon: '✓', text: 'More positive training samples via cross-resolution augmentation' }
+        },
+        {
+          id: 'D', label: 'Version D', subtitle: '+ True Negatives',
+          color: 'var(--green)', bg: '#f0fdf4',
+          added: ['Annot1 8 nm positives', 'Annot1 6 nm → resampled to 8 nm', 'Limited 8 nm TN boxes', 'Limited 6 nm TN boxes (resampled)'],
+          notes: ['TNs supervise semantic absence only (no flow targets)', 'Controlled count — avoids overwhelming positives', 'Validation: 8 nm only'],
+          outcome: { icon: '★', text: 'Best: clean labels + more data + semantic specificity via TNs' }
+        }];
+
+
+      const v = versions.find((x) => x.id === activeV);
+
+      return (
+        <div style={{ padding: '20px 24px' }}>
+          {/* Timeline */}
+          <div style={{ display: 'flex', alignItems: 'center', gap: 0, marginBottom: 20 }}>
+            {versions.map((ver, i) =>
+              <React.Fragment key={ver.id}>
+                <div
+                  className="card"
+                  onClick={() => setActiveV(ver.id)}
+                  style={{ padding: '10px 18px', cursor: 'pointer', background: activeV === ver.id ? ver.bg : '#fff', borderColor: activeV === ver.id ? ver.color : 'var(--border)', transition: 'all .15s', minWidth: 120, textAlign: 'center' }}>
+
+                  <div style={{ fontSize: 15, fontWeight: 700, color: ver.color }}>{ver.label}</div>
+                  <div style={{ fontSize: 11, color: '#6b7280', marginTop: 1 }}>{ver.subtitle}</div>
+                </div>
+                {i < versions.length - 1 && <SArrow />}
+              </React.Fragment>
             )}
-            <div style={{ marginTop: 4, fontSize: 9, color: '#6b7280', textAlign: 'center' }}>depth=12 · 6 heads</div>
           </div>
-        </div>
 
-        <HArr w={18} />
-
-        {/* SKIP CONNECTION COLLECTOR + DECODER */}
-        <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 0 }}>
-          <div style={{ fontSize: 10, fontWeight: 700, color: C.dec.text, marginBottom: 4, textTransform: 'uppercase', letterSpacing: '0.05em' }}>
-            UNETR Decoder
-          </div>
-          <div style={{ display: 'flex', alignItems: 'stretch', gap: 10 }}>
-            {/* Skip projections column */}
-            <div style={{ display: 'flex', flexDirection: 'column', gap: 6, justifyContent: 'space-around', paddingTop: 8 }}>
-              {['L3 →', 'L6 →', 'L9 →', 'L12 →'].map((l) =>
-              <div key={l} style={{ display: 'flex', alignItems: 'center', gap: 4 }}>
-                  <div style={{
-                  fontSize: 9, fontWeight: 700, color: '#db2777',
-                  background: '#fce7f3', border: '1px solid #db277766',
-                  borderRadius: 3, padding: '2px 5px', whiteSpace: 'nowrap'
-                }}>{l}</div>
-                  <Block label="1×1 proj" sub="reshape→3D" c={{ fill: '#fce7f3', stroke: '#db2777', text: '#831843' }} w={62} h={24} />
+          {/* Detail */}
+          <div style={{ display: 'flex', gap: 14 }}>
+            <div className="card" style={{ flex: 1, padding: '14px 16px', background: v.bg, borderColor: v.color }}>
+              <div style={{ fontSize: 11, fontWeight: 700, color: v.color, textTransform: 'uppercase', letterSpacing: '0.05em', marginBottom: 8 }}>Training set</div>
+              {v.added.map((a, i) =>
+                <div key={i} style={{ display: 'flex', gap: 6, marginBottom: 5, fontSize: 13 }}>
+                  <span style={{ color: v.color, fontWeight: 700 }}>+</span> {a}
                 </div>
               )}
             </div>
 
-            {/* Decoder blocks column */}
-            <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 2 }}>
-              <Block label="Top Fusion" sub="transformer + CNN" c={C.dec} w={82} h={32} />
-              <VArr h={10} color={C.dec.stroke} />
-              <Block label="Upsample ×2" sub="deconv + skip" c={C.dec} w={82} h={28} />
-              <VArr h={10} color={C.dec.stroke} />
-              <Block label="Upsample ×2" sub="deconv + skip" c={C.dec} w={82} h={28} />
-              <VArr h={10} color={C.dec.stroke} />
-              <Block label="Fuse CNN Stem" sub="concat at 40³ res" c={{ fill: '#fef9c3', stroke: '#ca8a04', text: '#713f12' }} w={82} h={28} />
-              <VArr h={10} color="#ca8a04" />
-              <Block label="Center crop → 30³" sub="drop padded border" c={C.dec} w={82} h={26} />
+            <div className="card" style={{ flex: 1, padding: '14px 16px' }}>
+              <div style={{ fontSize: 11, fontWeight: 700, color: '#9ca3af', textTransform: 'uppercase', letterSpacing: '0.05em', marginBottom: 8 }}>Notes</div>
+              {v.notes.map((n, i) =>
+                <div key={i} style={{ display: 'flex', gap: 6, marginBottom: 5, fontSize: 13, color: '#374151' }}>
+                  <span style={{ color: '#9ca3af' }}>—</span> {n}
+                </div>
+              )}
+            </div>
+
+            <div className="card" style={{ flex: 1.1, padding: '14px 16px', background: v.bg, borderColor: v.color, display: 'flex', flexDirection: 'column', justifyContent: 'space-between' }}>
+              <div>
+                <div style={{ fontSize: 11, fontWeight: 700, color: v.color, textTransform: 'uppercase', letterSpacing: '0.05em', marginBottom: 8 }}>Outcome</div>
+                <div style={{ fontSize: 14, lineHeight: 1.5 }}><strong>{v.outcome.icon}</strong> {v.outcome.text}</div>
+              </div>
+              <div style={{ marginTop: 12, paddingTop: 10, borderTop: '1px solid #e5e7eb', fontSize: 11, color: '#9ca3af' }}>
+                Validation set: <strong style={{ color: '#374151' }}>8 nm only</strong> across all versions
+              </div>
             </div>
           </div>
-        </div>
 
-        <HArr w={14} />
-
-        {/* DUAL OUTPUT HEADS */}
-        <div style={{ display: 'flex', flexDirection: 'column', gap: 14 }}>
-          <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 3 }}>
-            <Block label="head_sem" sub="foreground logits" c={C.out_sem} w={82} h={40} />
-            <div style={{ fontSize: 9, color: C.out_sem.text, fontWeight: 600, textAlign: 'center' }}>BCE + Dice</div>
-          </div>
-          <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 3 }}>
-            <Block label="head_flow" sub="3-ch flow field" c={C.out_flow} w={82} h={40} />
-            <div style={{ fontSize: 9, color: C.out_flow.text, fontWeight: 600, textAlign: 'center' }}>MSE (fg-masked)</div>
-          </div>
-        </div>
-
-      </div>
-
-      {/* CNN stem annotation */}
-      <div style={{ marginTop: 14, display: 'flex', gap: 8, alignItems: 'center' }}>
-        <svg width="14" height="14"><line x1="7" y1="0" x2="7" y2="14" stroke="#d97706" strokeWidth="1.5" strokeDasharray="3 2" /></svg>
-        <Block label="CNN Stem" sub="shallow conv on raw input" c={C.cnn} w={100} h={26} />
-        <span style={{ fontSize: 11, color: '#6b7280', fontStyle: 'italic' }}>parallel path; output fused near decoder resolution</span>
-      </div>
-
-      {/* Legend */}
-      <div className="card" style={{ marginTop: 18, padding: '10px 16px', display: 'flex', gap: 20, flexWrap: 'wrap', alignItems: 'center' }}>
-        <span style={{ fontSize: 11, color: '#9ca3af', fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.05em' }}>Legend</span>
-        {[
-        { label: 'Encoder block', c: C.enc },
-        { label: 'Skip connection', c: { fill: '#fce7f3', stroke: '#db2777', text: '#831843' } },
-        { label: 'Decoder block', c: C.dec },
-        { label: 'CNN', c: C.cnn },
-        { label: 'Semantic head', c: C.out_sem },
-        { label: 'Flow head', c: C.out_flow }].
-        map(({ label, c }) =>
-        <div key={label} style={{ display: 'flex', alignItems: 'center', gap: 5 }}>
-            <div style={{ width: 14, height: 14, background: c.fill, border: `1.5px solid ${c.stroke}`, borderRadius: 2, flexShrink: 0 }} />
-            <span style={{ fontSize: 11, color: '#374151' }}>{label}</span>
-          </div>
-        )}
-      </div>
-
-      {/* Specs table */}
-      <div className="card" style={{ marginTop: 10, padding: '10px 16px' }}>
-        <div style={{ fontSize: 11, fontWeight: 600, color: '#9ca3af', textTransform: 'uppercase', letterSpacing: '0.05em', marginBottom: 8 }}>Encoder specs</div>
-        <div style={{ display: 'flex', gap: 24, flexWrap: 'wrap' }}>
-          {[['Input size', '40³'], ['Patch size', '2³'], ['Channels', '1'], ['Embed dim', '192'], ['Depth', '12'], ['Heads', '6'], ['MLP ratio', '4.0'], ['Skip @ layers', '3, 6, 9, 12']].map(([k, v]) =>
-          <div key={k}>
-              <div style={{ fontSize: 11, color: '#9ca3af' }}>{k}</div>
-              <div style={{ fontSize: 13, fontWeight: 600, color: '#111' }}>{v}</div>
+          {/* Augmentation */}
+          <div className="card" style={{ marginTop: 14, padding: '12px 16px' }}>
+            <div style={{ fontSize: 11, fontWeight: 700, color: '#9ca3af', textTransform: 'uppercase', letterSpacing: '0.05em', marginBottom: 8 }}>Augmentation stack (all versions)</div>
+            <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap' }}>
+              {['3D flow-consistent flips + rotations', 'Brightness / contrast', 'Noise + gamma', 'Random crop shift', 'Cutout occlusion', 'Freeze → unfreeze encoder', 'AMP', 'Gradient clipping'].map((a) =>
+                <span key={a} style={{ fontSize: 11, background: '#f3f4f6', border: '1px solid #e5e7eb', borderRadius: 4, padding: '3px 8px', color: '#374151' }}>{a}</span>
+              )}
             </div>
-          )}
-        </div>
-      </div>
-    </div>);
-
-}
-
-/* ══════════ TAB 3: Data Versions ══════════ */
-function DataVersions() {
-  const [activeV, setActiveV] = useState('D');
-
-  const versions = [
-  {
-    id: 'A', label: 'Version A', subtitle: 'All annotators',
-    color: 'var(--red)', bg: '#fef2f2',
-    added: ['All available annotations', 'Veronika + Cora data'],
-    notes: ['Cora annotations: many merged vesicle instances', 'Merged labels corrupt flow field targets directly', 'Model learned wrong instance topology'],
-    outcome: { icon: '⚠', text: 'Poor instance separation due to merged-annotation supervision' }
-  },
-  {
-    id: 'B', label: 'Version B', subtitle: 'Veronika only',
-    color: 'var(--blue)', bg: '#eff6ff',
-    added: ['Veronika 8 nm positives only'],
-    notes: ['Cora data removed', 'Same architecture + MAE init', 'No model changes — data quality change only'],
-    outcome: { icon: '✓', text: 'Cleaner flow targets; better instance topology supervision' }
-  },
-  {
-    id: 'C', label: 'Version C', subtitle: '+ 6 nm data',
-    color: 'var(--amber)', bg: '#fffbeb',
-    added: ['Veronika 8 nm positives', 'Veronika 6 nm → downsampled to 8 nm'],
-    notes: ['6 nm samples resampled to match 8 nm voxel size', 'Validation restricted to 8 nm only (metric integrity)'],
-    outcome: { icon: '✓', text: 'More positive training samples via cross-resolution augmentation' }
-  },
-  {
-    id: 'D', label: 'Version D', subtitle: '+ True Negatives',
-    color: 'var(--green)', bg: '#f0fdf4',
-    added: ['Veronika 8 nm positives', 'Veronika 6 nm → resampled to 8 nm', 'Limited 8 nm TN boxes', 'Limited 6 nm TN boxes (resampled)'],
-    notes: ['TNs supervise semantic absence only (no flow targets)', 'Controlled count — avoids overwhelming positives', 'Validation: 8 nm only'],
-    outcome: { icon: '★', text: 'Best: clean labels + more data + semantic specificity via TNs' }
-  }];
-
-
-  const v = versions.find((x) => x.id === activeV);
-
-  return (
-    <div style={{ padding: '20px 24px' }}>
-      {/* Timeline */}
-      <div style={{ display: 'flex', alignItems: 'center', gap: 0, marginBottom: 20 }}>
-        {versions.map((ver, i) =>
-        <React.Fragment key={ver.id}>
-            <div
-            className="card"
-            onClick={() => setActiveV(ver.id)}
-            style={{ padding: '10px 18px', cursor: 'pointer', background: activeV === ver.id ? ver.bg : '#fff', borderColor: activeV === ver.id ? ver.color : 'var(--border)', transition: 'all .15s', minWidth: 120, textAlign: 'center' }}>
-            
-              <div style={{ fontSize: 15, fontWeight: 700, color: ver.color }}>{ver.label}</div>
-              <div style={{ fontSize: 11, color: '#6b7280', marginTop: 1 }}>{ver.subtitle}</div>
-            </div>
-            {i < versions.length - 1 && <SArrow />}
-          </React.Fragment>
-        )}
-      </div>
-
-      {/* Detail */}
-      <div style={{ display: 'flex', gap: 14 }}>
-        <div className="card" style={{ flex: 1, padding: '14px 16px', background: v.bg, borderColor: v.color }}>
-          <div style={{ fontSize: 11, fontWeight: 700, color: v.color, textTransform: 'uppercase', letterSpacing: '0.05em', marginBottom: 8 }}>Training set</div>
-          {v.added.map((a, i) =>
-          <div key={i} style={{ display: 'flex', gap: 6, marginBottom: 5, fontSize: 13 }}>
-              <span style={{ color: v.color, fontWeight: 700 }}>+</span> {a}
-            </div>
-          )}
-        </div>
-
-        <div className="card" style={{ flex: 1, padding: '14px 16px' }}>
-          <div style={{ fontSize: 11, fontWeight: 700, color: '#9ca3af', textTransform: 'uppercase', letterSpacing: '0.05em', marginBottom: 8 }}>Notes</div>
-          {v.notes.map((n, i) =>
-          <div key={i} style={{ display: 'flex', gap: 6, marginBottom: 5, fontSize: 13, color: '#374151' }}>
-              <span style={{ color: '#9ca3af' }}>—</span> {n}
-            </div>
-          )}
-        </div>
-
-        <div className="card" style={{ flex: 1.1, padding: '14px 16px', background: v.bg, borderColor: v.color, display: 'flex', flexDirection: 'column', justifyContent: 'space-between' }}>
-          <div>
-            <div style={{ fontSize: 11, fontWeight: 700, color: v.color, textTransform: 'uppercase', letterSpacing: '0.05em', marginBottom: 8 }}>Outcome</div>
-            <div style={{ fontSize: 14, lineHeight: 1.5 }}><strong>{v.outcome.icon}</strong> {v.outcome.text}</div>
           </div>
-          <div style={{ marginTop: 12, paddingTop: 10, borderTop: '1px solid #e5e7eb', fontSize: 11, color: '#9ca3af' }}>
-            Validation set: <strong style={{ color: '#374151' }}>8 nm only</strong> across all versions
+        </div>);
+
+    }
+
+    /* ══════════ TAB 4: Inference ══════════ */
+    function Inference() {
+      const steps = [
+        { num: '1', label: 'Tiled inference', sub: 'Sliding window over full volume', color: 'var(--blue)', bg: '#eff6ff' },
+        { num: '2', label: 'Threshold semantic', sub: 'Probability → binary foreground', color: 'var(--blue)', bg: '#eff6ff' },
+        { num: '3', label: 'Flow integration', sub: 'Euler steps per foreground voxel', color: 'var(--amber)', bg: '#fffbeb' },
+        { num: '4', label: 'Endpoint density', sub: 'Collect trajectory endpoints', color: 'var(--amber)', bg: '#fffbeb' },
+        { num: '5', label: 'Peak detection', sub: 'Density maxima = instance centers', color: 'var(--green)', bg: '#f0fdf4' },
+        { num: '6', label: 'Voxel assignment', sub: 'Each voxel → nearest peak', color: 'var(--green)', bg: '#f0fdf4' },
+        { num: '7', label: 'Filter', sub: 'Remove tiny instances', color: 'var(--green)', bg: '#f0fdf4' }];
+
+
+      return (
+        <div style={{ padding: '20px 24px' }}>
+          {/* Step pipeline */}
+          <div style={{ display: 'flex', alignItems: 'center', flexWrap: 'wrap', gap: 0, marginBottom: 20 }}>
+            {steps.map((s, i) =>
+              <React.Fragment key={s.num}>
+                <div className="card" style={{ padding: '10px 13px', background: s.bg, borderColor: s.color, minWidth: 110 }}>
+                  <div style={{ fontSize: 18, fontWeight: 700, color: s.color + '55', lineHeight: 1 }}>{s.num}</div>
+                  <div style={{ fontSize: 13, fontWeight: 600, lineHeight: 1.3, marginTop: 2 }}>{s.label}</div>
+                  <div style={{ fontSize: 11, color: '#6b7280', marginTop: 2, lineHeight: 1.3 }}>{s.sub}</div>
+                </div>
+                {i < steps.length - 1 && <SArrow />}
+              </React.Fragment>
+            )}
           </div>
-        </div>
-      </div>
 
-      {/* Augmentation */}
-      <div className="card" style={{ marginTop: 14, padding: '12px 16px' }}>
-        <div style={{ fontSize: 11, fontWeight: 700, color: '#9ca3af', textTransform: 'uppercase', letterSpacing: '0.05em', marginBottom: 8 }}>Augmentation stack (all versions)</div>
-        <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap' }}>
-          {['3D flow-consistent flips + rotations', 'Brightness / contrast', 'Noise + gamma', 'Random crop shift', 'Cutout occlusion', 'Freeze → unfreeze encoder', 'AMP', 'Gradient clipping'].map((a) =>
-          <span key={a} style={{ fontSize: 11, background: '#f3f4f6', border: '1px solid #e5e7eb', borderRadius: 4, padding: '3px 8px', color: '#374151' }}>{a}</span>
-          )}
-        </div>
-      </div>
-    </div>);
-
-}
-
-/* ══════════ TAB 4: Inference ══════════ */
-function Inference() {
-  const steps = [
-  { num: '1', label: 'Tiled inference', sub: 'Sliding window over full volume', color: 'var(--blue)', bg: '#eff6ff' },
-  { num: '2', label: 'Threshold semantic', sub: 'Probability → binary foreground', color: 'var(--blue)', bg: '#eff6ff' },
-  { num: '3', label: 'Flow integration', sub: 'Euler steps per foreground voxel', color: 'var(--amber)', bg: '#fffbeb' },
-  { num: '4', label: 'Endpoint density', sub: 'Collect trajectory endpoints', color: 'var(--amber)', bg: '#fffbeb' },
-  { num: '5', label: 'Peak detection', sub: 'Density maxima = instance centers', color: 'var(--green)', bg: '#f0fdf4' },
-  { num: '6', label: 'Voxel assignment', sub: 'Each voxel → nearest peak', color: 'var(--green)', bg: '#f0fdf4' },
-  { num: '7', label: 'Filter', sub: 'Remove tiny instances', color: 'var(--green)', bg: '#f0fdf4' }];
-
-
-  return (
-    <div style={{ padding: '20px 24px' }}>
-      {/* Step pipeline */}
-      <div style={{ display: 'flex', alignItems: 'center', flexWrap: 'wrap', gap: 0, marginBottom: 20 }}>
-        {steps.map((s, i) =>
-        <React.Fragment key={s.num}>
-            <div className="card" style={{ padding: '10px 13px', background: s.bg, borderColor: s.color, minWidth: 110 }}>
-              <div style={{ fontSize: 18, fontWeight: 700, color: s.color + '55', lineHeight: 1 }}>{s.num}</div>
-              <div style={{ fontSize: 13, fontWeight: 600, lineHeight: 1.3, marginTop: 2 }}>{s.label}</div>
-              <div style={{ fontSize: 11, color: '#6b7280', marginTop: 2, lineHeight: 1.3 }}>{s.sub}</div>
+          <div style={{ display: 'flex', gap: 14 }}>
+            <div className="card" style={{ flex: 1, padding: '14px 16px' }}>
+              <div style={{ fontSize: 12, fontWeight: 600, marginBottom: 8 }}>Flow field geometry (EDT-based)</div>
+              <div style={{ fontSize: 12, color: '#374151', lineHeight: 1.7 }}>
+                Per instance: EDT → smooth → spatial gradient → normalize<br />
+                <span style={{ color: 'var(--amber)' }}>Near boundary:</span> flow magnitude large, points inward<br />
+                <span style={{ color: 'var(--green)' }}>Near center:</span> flow magnitude → 0<br />
+                <em style={{ color: '#6b7280' }}>Stable attractor basin per instance</em>
+              </div>
             </div>
-            {i < steps.length - 1 && <SArrow />}
-          </React.Fragment>
-        )}
-      </div>
-
-      <div style={{ display: 'flex', gap: 14 }}>
-        <div className="card" style={{ flex: 1, padding: '14px 16px' }}>
-          <div style={{ fontSize: 12, fontWeight: 600, marginBottom: 8 }}>Flow field geometry (EDT-based)</div>
-          <div style={{ fontSize: 12, color: '#374151', lineHeight: 1.7 }}>
-            Per instance: EDT → smooth → spatial gradient → normalize<br />
-            <span style={{ color: 'var(--amber)' }}>Near boundary:</span> flow magnitude large, points inward<br />
-            <span style={{ color: 'var(--green)' }}>Near center:</span> flow magnitude → 0<br />
-            <em style={{ color: '#6b7280' }}>Stable attractor basin per instance</em>
+            <div className="card" style={{ flex: 1, padding: '14px 16px' }}>
+              <div style={{ fontSize: 12, fontWeight: 600, marginBottom: 8 }}>Why not connected components?</div>
+              <div style={{ fontSize: 12, color: '#374151', lineHeight: 1.7 }}>
+                Dense synaptic vesicles are physically touching.<br />
+                CC merges them into one object.<br />
+                Flow field provides <strong>topological separation</strong> — each vesicle has its own attractor center before any thresholding.
+              </div>
+            </div>
+            <div className="card" style={{ flex: 1, padding: '14px 16px', background: '#f9fafb' }}>
+              <div style={{ fontSize: 12, fontWeight: 600, marginBottom: 8 }}>Key source files</div>
+              {['infer.py', 'postprocess.py', 'flows.py', 'losses.py', 'decoder.py', 'mae_encoder.py'].map((f) =>
+                <div key={f} style={{ fontSize: 11, fontFamily: 'ui-monospace, monospace', color: '#374151', padding: '3px 0', borderBottom: '1px solid #f3f4f6' }}>{f}</div>
+              )}
+            </div>
           </div>
-        </div>
-        <div className="card" style={{ flex: 1, padding: '14px 16px' }}>
-          <div style={{ fontSize: 12, fontWeight: 600, marginBottom: 8 }}>Why not connected components?</div>
-          <div style={{ fontSize: 12, color: '#374151', lineHeight: 1.7 }}>
-            Dense synaptic vesicles are physically touching.<br />
-            CC merges them into one object.<br />
-            Flow field provides <strong>topological separation</strong> — each vesicle has its own attractor center before any thresholding.
+        </div>);
+
+    }
+
+    /* ══════════ Root ══════════ */
+    function App() {
+      const [tab, setTab] = useState(() => localStorage.getItem('vseg_tab2') || 'Pipeline Overview');
+      const set = (t) => { setTab(t); localStorage.setItem('vseg_tab2', t); };
+
+      return (
+        <div style={{ minHeight: '100vh', display: 'flex', flexDirection: 'column' }}>
+          <TabBar active={tab} setActive={set} />
+          <div style={{ flex: 1 }}>
+            {tab === 'Pipeline Overview' && <PipelineOverview />}
+            {tab === 'Architecture' && <Architecture />}
+            {tab === 'Data Versions' && <DataVersions />}
+            {tab === 'Inference' && <Inference />}
           </div>
-        </div>
-        <div className="card" style={{ flex: 1, padding: '14px 16px', background: '#f9fafb' }}>
-          <div style={{ fontSize: 12, fontWeight: 600, marginBottom: 8 }}>Key source files</div>
-          {['infer.py', 'postprocess.py', 'flows.py', 'losses.py', 'decoder.py', 'mae_encoder.py'].map((f) =>
-          <div key={f} style={{ fontSize: 11, fontFamily: 'ui-monospace, monospace', color: '#374151', padding: '3px 0', borderBottom: '1px solid #f3f4f6' }}>{f}</div>
-          )}
-        </div>
-      </div>
-    </div>);
+        </div>);
 
-}
+    }
 
-/* ══════════ Root ══════════ */
-function App() {
-  const [tab, setTab] = useState(() => localStorage.getItem('vseg_tab2') || 'Pipeline Overview');
-  const set = (t) => {setTab(t);localStorage.setItem('vseg_tab2', t);};
-
-  return (
-    <div style={{ minHeight: '100vh', display: 'flex', flexDirection: 'column' }}>
-      <TabBar active={tab} setActive={set} />
-      <div style={{ flex: 1 }}>
-        {tab === 'Pipeline Overview' && <PipelineOverview />}
-        {tab === 'Architecture' && <Architecture />}
-        {tab === 'Data Versions' && <DataVersions />}
-        {tab === 'Inference' && <Inference />}
-      </div>
-    </div>);
-
-}
-
-ReactDOM.createRoot(document.getElementById('root')).render(<App />);
-</script>
-<div id="root"></div>
+    ReactDOM.createRoot(document.getElementById('root')).render(<App />);
+  </script>
+  <div id="root"></div>
 </body>
+
 </html>
