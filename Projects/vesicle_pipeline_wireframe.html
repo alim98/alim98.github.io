@@ -650,15 +650,15 @@
         {
           id: 'A', label: 'Version A', subtitle: 'All annotators',
           color: 'var(--red)', bg: '#fef2f2',
-          added: ['All available annotations', 'Annot1 + Cora data'],
-          notes: ['Cora annotations: many merged vesicle instances', 'Merged labels corrupt flow field targets directly', 'Model learned wrong instance topology'],
+          added: ['All available annotations', 'Annot1 + Annot2 data'],
+          notes: ['Annot2 annotations: many merged vesicle instances', 'Merged labels corrupt flow field targets directly', 'Model learned wrong instance topology'],
           outcome: { icon: '⚠', text: 'Poor instance separation due to merged-annotation supervision' }
         },
         {
           id: 'B', label: 'Version B', subtitle: 'Annot1 only',
           color: 'var(--blue)', bg: '#eff6ff',
           added: ['Annot1 8 nm positives only'],
-          notes: ['Cora data removed', 'Same architecture + MAE init', 'No model changes — data quality change only'],
+          notes: ['Annot2 data removed', 'Same architecture + MAE init', 'No model changes — data quality change only'],
           outcome: { icon: '✓', text: 'Cleaner flow targets; better instance topology supervision' }
         },
         {
