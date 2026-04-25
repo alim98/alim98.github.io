@@ -338,6 +338,10 @@
   </div>
   <div class="topbar-right">
     <span class="topbar-meta">Neil Lawrence · MLSS 2015 · Tübingen</span>
+    <button id="resumeStudyBtn" class="download-notes-btn" style="display:none; color: var(--accent); border-color: var(--accent-bd);" title="Resume from where you left off">
+      <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="margin-right:2px"><path d="M5 12l14 0"/><path d="M12 5l7 7-7 7"/></svg>
+      Resume
+    </button>
     <button id="downloadNotesBtn" class="download-notes-btn" title="Download all your notes as a Markdown file">
       <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
       Notes
@@ -2811,18 +2815,79 @@
   });
 </script>
 
-<!-- ── TOC highlight ── -->
+<!-- ── TOC highlight & Resume Study ── -->
 <script>
   const tocLinks = document.querySelectorAll('.toc-list a');
   const sections = document.querySelectorAll('.note-row[id]');
+  
+  // -- RESUME STUDY LOGIC --
+  const RESUME_KEY = 'gp_last_read_section';
+  const resumeBtn = document.getElementById('resumeStudyBtn');
+  let userScrolling = false;
+  let scrollTimeout;
+
+  // Listen for user scroll to update progress smoothly
+  window.addEventListener('scroll', () => {
+    userScrolling = true;
+    clearTimeout(scrollTimeout);
+    scrollTimeout = setTimeout(() => { userScrolling = false; }, 200);
+  });
+
+  // Initialize Resume Button & Indicator
+  const lastReadId = localStorage.getItem(RESUME_KEY);
+  if (lastReadId && document.getElementById(lastReadId)) {
+    if (resumeBtn) {
+      resumeBtn.style.display = 'inline-flex';
+      resumeBtn.addEventListener('click', () => {
+        const targetId = localStorage.getItem(RESUME_KEY);
+        const targetEl = document.getElementById(targetId);
+        if (targetEl) {
+          targetEl.scrollIntoView({ behavior: 'smooth' });
+        }
+      });
+    }
+    
+    // Show a subtle dot next to the last read section in TOC
+    const lastReadLink = document.querySelector(`.toc-list a[href="#${lastReadId}"]`);
+    if (lastReadLink) {
+        const dot = document.createElement('span');
+        dot.innerHTML = ' &bull;';
+        dot.style.color = 'var(--accent)';
+        dot.style.fontSize = '0.9em';
+        dot.title = 'Where you left off';
+        dot.className = 'last-read-dot';
+        lastReadLink.appendChild(dot);
+    }
+  }
+
   const obs = new IntersectionObserver(entries => {
+    let intersectingEntry = null;
     entries.forEach(e => {
       if (e.isIntersecting) {
         tocLinks.forEach(l => l.classList.remove('active'));
         const a = document.querySelector(`.toc-list a[href="#${e.target.id}"]`);
         if (a) a.classList.add('active');
+        
+        intersectingEntry = e;
       }
     });
+
+    if (intersectingEntry && userScrolling) {
+      localStorage.setItem(RESUME_KEY, intersectingEntry.target.id);
+      
+      // Update dot position in TOC
+      document.querySelectorAll('.last-read-dot').forEach(d => d.remove());
+      const a = document.querySelector(`.toc-list a[href="#${intersectingEntry.target.id}"]`);
+      if (a) {
+        const dot = document.createElement('span');
+        dot.innerHTML = ' &bull;';
+        dot.style.color = 'var(--accent)';
+        dot.style.fontSize = '0.9em';
+        dot.title = 'Where you left off';
+        dot.className = 'last-read-dot';
+        a.appendChild(dot);
+      }
+    }
   }, { rootMargin: '-20% 0px -70% 0px' });
   sections.forEach(s => obs.observe(s));
 </script>
