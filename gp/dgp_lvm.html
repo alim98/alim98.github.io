@@ -1,0 +1,1156 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>DGP-LVM Deep Dive (0 to 100) — Ali Mikaeili</title>
+  <meta name="description" content="A comprehensive 0 to 100 deep dive into Derivative Gaussian Process Latent Variable Models (DGP-LVMs)." />
+
+  <!-- KaTeX for Math -->
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.8/dist/katex.min.css">
+  <script src="https://cdn.jsdelivr.net/npm/katex@0.16.8/dist/katex.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/katex@0.16.8/dist/contrib/auto-render.min.js"></script>
+  <script>
+    document.addEventListener("DOMContentLoaded", function () {
+      renderMathInElement(document.body, {
+        delimiters: [
+          { left: '$$', right: '$$', display: true },
+          { left: '$', right: '$', display: false },
+          { left: '\\(', right: '\\)', display: false },
+          { left: '\\[', right: '\\]', display: true },
+          { left: '\\begin{equation}', right: '\\end{equation}', display: true },
+          { left: '\\begin{align}', right: '\\end{align}', display: true }
+        ]
+      });
+    });
+  </script>
+
+  <style>
+    /* ── Design tokens ── */
+    :root {
+      --white:    #ffffff;
+      --off:      #f8f8f6;
+      --border:   #e8e8e4;
+      --border-h: #cecec8;
+      --ink:      #0f0f0e;
+      --ink-2:    #3a3a36;
+      --ink-3:    #7a7a74;
+      --ink-4:    #b8b8b0;
+      --accent:   #2563eb;
+      --accent-bg:#eff6ff;
+      --accent-bd:#bfdbfe;
+      --green:    #16a34a;
+      --green-bg: #f0fdf4;
+      --green-bd: #bbf7d0;
+      --purple:   #9333ea;
+      --purple-bg:#faf5ff;
+      --purple-bd:#e9d5ff;
+      --orange:   #ea580c;
+      --orange-bg:#fff7ed;
+      --orange-bd:#fed7aa;
+      --r:        8px;
+      --r-lg:     12px;
+    }
+
+    /* ── Reset ── */
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    html { font-size: 15px; -webkit-font-smoothing: antialiased; scroll-behavior: smooth; }
+    body {
+      font-family: 'Inter', system-ui, sans-serif;
+      background: var(--white);
+      color: var(--ink);
+      line-height: 1.7;
+    }
+    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;700&display=swap');
+
+    .math-font { font-family: 'JetBrains Mono', monospace; }
+
+    /* ── Progress bar ── */
+    .progress-bar {
+      position: fixed;
+      top: 0; left: 0;
+      height: 2px;
+      background: var(--accent);
+      width: 0%;
+      z-index: 200;
+      transition: width .1s linear;
+    }
+
+    /* ── Topbar ── */
+    .topbar {
+      position: sticky; top: 0; z-index: 100;
+      background: rgba(255,255,255,.92);
+      backdrop-filter: blur(12px);
+      border-bottom: 1px solid var(--border);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: .6rem 1.5rem;
+      gap: 1rem;
+    }
+    .topbar-left { display: flex; align-items: center; gap: .85rem; }
+    .back-link {
+      display: inline-flex; align-items: center; gap: .4rem;
+      font-size: .78rem; color: var(--ink-3);
+      padding: .3rem .6rem;
+      border-radius: var(--r); border: 1px solid var(--border);
+      transition: background .15s, color .15s, border-color .15s;
+      text-decoration: none;
+      font-weight: 500;
+    }
+    .back-link:hover { background: var(--off); color: var(--ink); border-color: var(--border-h); }
+    .topbar-divider { width: 1px; height: 16px; background: var(--border); }
+    .topbar-title { font-size: .85rem; font-weight: 600; color: var(--ink-2); }
+    .topbar-meta  { font-size: .73rem; color: var(--ink-4); white-space: nowrap; }
+
+    /* ── Page layout ── */
+    .page {
+      display: grid;
+      grid-template-columns: 220px 1fr;
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 2.5rem 1.5rem;
+      gap: 3.5rem;
+      align-items: start;
+    }
+
+    /* ── TOC ── */
+    .toc { position: sticky; top: 68px; max-height: calc(100vh - 88px); overflow-y: auto; padding-right: 1rem; }
+    .toc::-webkit-scrollbar { width: 3px; }
+    .toc::-webkit-scrollbar-thumb { background: var(--border); }
+    .toc-label {
+      font-size: .65rem; font-weight: 700; letter-spacing: .1em;
+      text-transform: uppercase; color: var(--ink-4); margin-bottom: .8rem;
+    }
+    .toc-list { list-style: none; display: flex; flex-direction: column; gap: .1rem; }
+    .toc-list a {
+      display: block; font-size: .78rem; color: var(--ink-3);
+      padding: .35rem .6rem; border-radius: 6px;
+      border-left: 2px solid transparent;
+      transition: color .15s, background .15s, border-color .15s;
+      text-decoration: none; line-height: 1.35;
+    }
+    .toc-list a:hover { color: var(--ink); background: var(--off); }
+    .toc-list a.active {
+      color: var(--accent); border-left-color: var(--accent);
+      background: var(--accent-bg); font-weight: 600;
+    }
+
+    /* ── Note rows (Cornell-style: cue | content) ── */
+    .note-row {
+      display: grid;
+      grid-template-columns: 1fr 2.5fr;
+      gap: 2.5rem;
+      border-bottom: 1px solid var(--border);
+      padding: 3rem 0;
+      scroll-margin-top: 68px;
+    }
+    .note-row:first-child { padding-top: 0; }
+    .note-row:last-child { border-bottom: none; }
+
+    /* ── Cue column ── */
+    .cue-column { color: var(--ink-2); }
+    .cue-column h2 { font-size: 1rem; font-weight: 700; color: var(--accent); margin-bottom: .8rem; line-height: 1.3; }
+    .cue-column ul { list-style: none; padding: 0; display: flex; flex-direction: column; gap: .4rem; }
+    .cue-column li { font-size: .8rem; color: var(--ink-4); display: flex; align-items: flex-start; gap: 0.4rem; }
+    .cue-column li::before { content: '•'; color: var(--border-h); font-weight: bold; }
+
+    /* ── Content column ── */
+    .content-column { color: var(--ink-2); line-height: 1.8; }
+    .content-column h3 { font-size: 1.25rem; font-weight: 700; letter-spacing: -.02em; margin-bottom: 1.2rem; color: var(--ink); }
+    .content-column h4 { font-size: 1rem; font-weight: 600; margin-bottom: .6rem; margin-top: 1.5rem; color: var(--ink); }
+    .content-column p  { font-size: .95rem; color: var(--ink-2); margin-bottom: 1rem; }
+    .content-column p:last-child { margin-bottom: 0; }
+    .content-column ul, .content-column ol { padding-left: 1.5rem; margin-bottom: 1rem; }
+    .content-column li { font-size: .95rem; color: var(--ink-2); line-height: 1.75; margin-bottom: .4rem; }
+    strong { color: var(--ink); font-weight: 600; }
+    em { font-style: italic; }
+
+    /* ── Math display blocks ── */
+    .math-block {
+      background: var(--off); border: 1px solid var(--border);
+      border-radius: var(--r); padding: 1.2rem 1.5rem;
+      margin: 1.2rem 0; overflow-x: auto; text-align: center;
+      font-size: 1.05rem;
+    }
+    
+    .math-block-left {
+        text-align: left;
+    }
+
+    /* Inline code */
+    .content-column code {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: .85em;
+      background: var(--off); border: 1px solid var(--border);
+      border-radius: 4px; padding: .15em .4em; color: var(--ink-2);
+    }
+
+    /* ── Callout boxes ── */
+    .callout {
+      border-radius: var(--r-lg); padding: 1.2rem 1.5rem;
+      margin: 1.5rem 0; border: 1px solid;
+    }
+    .callout h4 { font-size: .95rem; font-weight: 700; margin-bottom: .6rem; margin-top: 0; }
+    .callout p, .callout li { font-size: .9rem; margin-bottom: 0.5rem; }
+    .callout p:last-child { margin-bottom: 0; }
+
+    .callout-blue   { background: var(--accent-bg); border-color: var(--accent-bd); }
+    .callout-blue   h4 { color: #1d4ed8; }
+    .callout-indigo { background: var(--purple-bg); border-color: var(--purple-bd); }
+    .callout-indigo h4 { color: #7e22ce; }
+    .callout-orange { background: var(--orange-bg); border-color: var(--orange-bd); }
+    .callout-orange h4 { color: #c2410c; }
+
+    /* ── Interactive canvases & widgets ── */
+    .viz-wrap {
+      background: var(--white); border: 1px solid var(--border);
+      border-radius: var(--r-lg); padding: 1.5rem;
+      margin: 1.5rem 0;
+      box-shadow: 0 4px 12px rgba(0,0,0,.04);
+      transition: box-shadow 0.2s ease;
+    }
+    .viz-wrap:hover { box-shadow: 0 6px 16px rgba(0,0,0,.08); }
+    .viz-title { font-size: 1rem; font-weight: 700; text-align: center; margin-bottom: .5rem; color: var(--ink); }
+    .viz-hint  { font-size: .85rem; color: var(--ink-3); text-align: center; margin-bottom: 1.2rem; }
+
+    .interactive-canvas {
+      width: 100%; border-radius: var(--r);
+      background: var(--white); border: 1px solid var(--border);
+      display: block; margin-bottom: 1rem;
+    }
+
+    input[type=range] { 
+        accent-color: var(--accent); 
+        width: 100%; 
+        cursor: pointer;
+    }
+
+    .slider-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 1.5rem; margin-top: 1rem; }
+    .slider-group label { display: block; font-size: .85rem; font-weight: 600; color: var(--ink-2); margin-bottom: .4rem; }
+    .slider-group p { font-size: .75rem; color: var(--ink-4); margin-top: .4rem; line-height: 1.4; }
+
+    .viz-btn {
+      display: block; width: 100%; margin-top: 1.2rem;
+      padding: .6rem 1.2rem; background: var(--accent); color: #fff;
+      border: none; border-radius: var(--r);
+      font-size: .9rem; font-weight: 600; font-family: inherit;
+      cursor: pointer; transition: background .2s, transform .1s;
+    }
+    .viz-btn:hover { background: #1d4ed8; }
+    .viz-btn:active { transform: scale(0.98); }
+    
+    .proof-step {
+        padding: 1rem;
+        background: var(--white);
+        border: 1px solid var(--border);
+        border-radius: var(--r);
+        margin-bottom: 0.5rem;
+        cursor: pointer;
+        transition: all 0.2s;
+        display: flex;
+        flex-direction: column;
+    }
+    .proof-step:hover {
+        border-color: var(--accent-bd);
+        background: var(--off);
+    }
+    .proof-step.revealed {
+        background: var(--accent-bg);
+        border-color: var(--accent-bd);
+    }
+    .proof-header { font-weight: 600; font-size: 0.9rem; color: var(--ink); display: flex; justify-content: space-between; align-items: center; }
+    .proof-content { margin-top: 0.8rem; display: none; font-size: 0.95rem; border-top: 1px dashed var(--accent-bd); padding-top: 0.8rem; }
+    .proof-step.revealed .proof-content { display: block; }
+    .proof-icon { font-family: monospace; font-weight: bold; color: var(--accent); }
+
+    /* ── Responsive ── */
+    @media (max-width: 900px) {
+      .page { grid-template-columns: 1fr; padding: 1.5rem 1rem; }
+      .toc  { display: none; }
+      .note-row { grid-template-columns: 1fr; gap: 1.5rem; }
+      .slider-grid { grid-template-columns: 1fr; }
+    }
+  </style>
+</head>
+
+<body>
+
+<div class="progress-bar" id="progress"></div>
+
+<!-- ── Topbar ── -->
+<header class="topbar">
+  <div class="topbar-left">
+    <a href="../index.html" class="back-link">
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"/></svg>
+      Ali Mikaeili
+    </a>
+    <div class="topbar-divider"></div>
+    <span class="topbar-title">0 to 100: Derivative GPs & Latent Variables</span>
+  </div>
+  <div class="topbar-right">
+    <span class="topbar-meta">Deep Dive on <em>Mukherjee et al., 2024</em></span>
+  </div>
+</header>
+
+<div class="page">
+
+  <!-- ── TOC ── -->
+  <nav class="toc" aria-label="Table of contents">
+    <div class="toc-label">Table of Contents</div>
+    <ul class="toc-list">
+      <li><a href="#s1">1. The Biological Motivation</a></li>
+      <li><a href="#s1b">1b. Deep Dive: RNA Kinetics</a></li>
+      <li><a href="#s2">2. Standard GP Recap</a></li>
+      <li><a href="#s3">3. Derivative GPs (The Math)</a></li>
+      <li><a href="#s4">4. The Scale Problem</a></li>
+      <li><a href="#s5">5. Modified Covariances</a></li>
+      <li><a href="#s6">6. Multidimensional Outputs</a></li>
+      <li><a href="#s7">7. Latent Inputs (Pseudotime)</a></li>
+      <li><a href="#s8">8. The Full DGP-LVM Model</a></li>
+      <li><a href="#s9">9. Master Concept Quiz</a></li>
+    </ul>
+  </nav>
+
+  <!-- ── Article ── -->
+  <article>
+
+    <!-- ─ Row 1 ─ -->
+    <div class="note-row" id="s1">
+      <div class="cue-column">
+        <h2>1. The Biological Motivation</h2>
+        <ul>
+          <li>Cellular Progression & Fate</li>
+          <li>Single-cell RNA sequencing (scRNA-seq)</li>
+          <li>The destructive measurement problem</li>
+          <li>Pseudotime as a Latent Variable</li>
+          <li>RNA Velocity (Spliced vs. Unspliced)</li>
+        </ul>
+      </div>
+      <div class="content-column">
+        <h3>The Temporal Puzzle of Single Cells</h3>
+        <p>In developmental biology, researchers study <strong>cellular progression</strong>—how cells develop, differentiate, and change state over time. For example, how does a generic stem cell "decide" to become a neuron or a muscle cell? Or how do cells progress through the cell cycle?</p>
+        
+        <p>To answer these questions, biologists use <strong>single-cell RNA sequencing (scRNA-seq)</strong>. This technology counts the number of messenger-RNA (mRNA) molecules inside individual cells. Since mRNA is the "blueprint" actively being read to make proteins, counting these molecules gives us a high-resolution "snapshot" of what the cell is doing at that exact moment (its gene expression state).</p>
+
+        <div class="callout callout-orange">
+          <h4>The Destructive Measurement Problem</h4>
+          <p>Imagine trying to understand how a caterpillar turns into a butterfly, but every time you take a photograph, the camera flash instantly vaporizes the subject. You would be left with a pile of photographs of different stages, but no video linking them together.</p>
+          <p>This is exactly what happens in scRNA-seq. The sequencing process physically destroys the cell. You can never observe the same cell twice. You only get isolated, static snapshots.</p>
+        </div>
+
+        <h4>Pseudotime: Reconstructing the Timeline</h4>
+        <p>Because we lack the actual "video", researchers mathematically arrange these static snapshots along an inferred timeline based on how similar their gene expressions are. This inferred, unobserved temporal axis is called <strong>pseudotime</strong>. Because it is unobserved and must be estimated purely from the data, mathematically we treat pseudotime as a <strong>Latent Variable</strong>.</p>
+
+        <div class="callout callout-indigo">
+          <h4>The Game Changer: RNA Velocity</h4>
+          <p>Historically, algorithms only looked at static snapshots to guess the order. But recently, biologists unlocked a way to see a little "arrow" indicating which direction the cell is moving. This metric is called <strong>RNA velocity</strong>.</p>
+          <p><strong>How does it work?</strong> When a gene is transcribed from DNA, it first produces <em>unspliced</em> (immature) RNA. Shortly after, it is processed into <em>spliced</em> (mature) RNA. By looking at the ratio of unspliced to spliced RNA in our snapshot, we can determine if a gene is currently "turning on" (high unspliced) or "turning off" (low unspliced). </p>
+          <p>This ratio provides the rate of change of gene expression. In calculus terms, <strong>RNA velocity estimates the derivative of gene expression with respect to time</strong>.</p>
+        </div>
+        
+        <!-- Interactive Conceptual Visualization -->
+        <div class="viz-wrap">
+            <div class="viz-title">Concept: Splicing Kinetics as a Derivative</div>
+            <div class="viz-hint">Adjust the "Gene Transcription Rate" to see how unspliced RNA predicts future spliced RNA.</div>
+            
+            <div style="display: flex; gap: 1rem; align-items: center; margin: 1.5rem 0; padding: 1rem; background: var(--off); border-radius: var(--r); border: 1px solid var(--border);">
+                <div style="flex: 1; text-align: center;">
+                    <div style="font-size: 0.8rem; font-weight: 600; color: var(--ink-3); margin-bottom: 0.5rem;">Transcription (DNA)</div>
+                    <div id="dna-activity" style="height: 20px; width: 100%; background: var(--border-h); border-radius: 10px; position: relative; overflow: hidden;">
+                        <div id="dna-fill" style="height: 100%; width: 50%; background: var(--accent); transition: width 0.3s;"></div>
+                    </div>
+                </div>
+                <div style="font-weight: bold; color: var(--ink-4);">→</div>
+                <div style="flex: 1; text-align: center;">
+                    <div style="font-size: 0.8rem; font-weight: 600; color: var(--purple); margin-bottom: 0.5rem;">Unspliced RNA (New)</div>
+                    <div id="unspliced-bubble" style="height: 40px; width: 40px; background: var(--purple); border-radius: 50%; margin: 0 auto; display: flex; align-items: center; justify-content: center; color: white; font-weight: bold; transition: transform 0.3s;">U</div>
+                </div>
+                <div style="font-weight: bold; color: var(--ink-4);">→</div>
+                <div style="flex: 1; text-align: center;">
+                    <div style="font-size: 0.8rem; font-weight: 600; color: var(--green); margin-bottom: 0.5rem;">Spliced RNA (Mature)</div>
+                    <div id="spliced-bubble" style="height: 40px; width: 40px; background: var(--green); border-radius: 50%; margin: 0 auto; display: flex; align-items: center; justify-content: center; color: white; font-weight: bold; transition: transform 0.3s;">S</div>
+                </div>
+            </div>
+            
+            <div style="text-align: center; margin-bottom: 1rem;">
+                <div id="velocity-status" style="font-weight: 600; font-size: 1.1rem; color: var(--ink);">RNA Velocity: <span id="v-val" style="color: var(--accent);">Steady State (Derivative ≈ 0)</span></div>
+                <div id="velocity-desc" style="font-size: 0.85rem; color: var(--ink-3); margin-top: 0.3rem;">Unspliced and spliced RNA are in equilibrium.</div>
+            </div>
+            
+            <input type="range" id="transcription-slider" min="0" max="100" step="1" value="50">
+        </div>
+        
+        <script>
+            document.addEventListener('DOMContentLoaded', () => {
+                const slider = document.getElementById('transcription-slider');
+                const dnaFill = document.getElementById('dna-fill');
+                const uBubble = document.getElementById('unspliced-bubble');
+                const sBubble = document.getElementById('spliced-bubble');
+                const vVal = document.getElementById('v-val');
+                const vDesc = document.getElementById('velocity-desc');
+                
+                let currentSpliced = 50; // Slowly catches up
+                
+                slider.addEventListener('input', () => {
+                    const val = parseInt(slider.value);
+                    dnaFill.style.width = val + '%';
+                    
+                    // Unspliced reacts immediately to transcription
+                    const uSize = 0.5 + (val / 100);
+                    uBubble.style.transform = `scale(${uSize})`;
+                    
+                    // Calculate velocity (difference between Unspliced and current Spliced)
+                    const velocity = val - currentSpliced;
+                    
+                    if (velocity > 10) {
+                        vVal.style.color = 'var(--green)';
+                        vVal.innerText = 'Positive (Derivative > 0)';
+                        vDesc.innerText = 'Gene is turning ON. High unspliced RNA predicts future spliced RNA will increase.';
+                    } else if (velocity < -10) {
+                        vVal.style.color = 'var(--orange)';
+                        vVal.innerText = 'Negative (Derivative < 0)';
+                        vDesc.innerText = 'Gene is turning OFF. Low unspliced RNA predicts future spliced RNA will decrease.';
+                    } else {
+                        vVal.style.color = 'var(--accent)';
+                        vVal.innerText = 'Steady State (Derivative ≈ 0)';
+                        vDesc.innerText = 'Unspliced and spliced RNA are roughly in equilibrium.';
+                    }
+                });
+                
+                // Simulate splicing (spliced slowly catches up to unspliced)
+                setInterval(() => {
+                    const target = parseInt(slider.value);
+                    if (currentSpliced < target) currentSpliced += 2;
+                    if (currentSpliced > target) currentSpliced -= 2;
+                    
+                    const sSize = 0.5 + (currentSpliced / 100);
+                    sBubble.style.transform = `scale(${sSize})`;
+                    
+                    // Re-trigger event to update velocity status
+                    slider.dispatchEvent(new Event('input'));
+                }, 100);
+            });
+        </script>
+
+        <p>Our goal in the DGP-LVM paper is to build a single probabilistic framework that can take both the static positions (spliced gene expressions) and the directional arrows (RNA velocity derivatives) to perfectly estimate the unobserved timeline (pseudotime).</p>
+      </div>
+    </div>
+
+    <!-- ─ Row 1b ─ -->
+    <div class="note-row" id="s1b">
+      <div class="cue-column">
+        <h2>1b. Deep Dive: RNA Kinetics</h2>
+        <ul>
+          <li>The Kinetic Rate Equations</li>
+          <li>Splicing ($\beta$) & Degradation ($\gamma$)</li>
+          <li>The Cell Cycle Case Study</li>
+        </ul>
+      </div>
+      <div class="content-column">
+        <h3>The Differential Equation of Life</h3>
+        <p>If we want to be mathematically rigorous about the interactive visualization above, we can express RNA velocity using a system of Ordinary Differential Equations (ODEs). The change in spliced RNA ($s$) over time ($t$) is governed by two competing biological forces: the creation of new spliced RNA and the destruction of old spliced RNA.</p>
+        
+        <div class="math-block math-block-left">
+            <h4 style="margin-top:0;">The RNA Velocity Equation</h4>
+            $$ \frac{ds}{dt} = \beta u - \gamma s $$
+            <ul style="margin-top: 1rem; text-align: left; list-style-type: none;">
+                <li><strong>$s$</strong>: Amount of spliced (mature) RNA</li>
+                <li><strong>$u$</strong>: Amount of unspliced (immature) RNA</li>
+                <li><strong>$\beta$</strong>: The Splicing Rate (how fast $u$ turns into $s$)</li>
+                <li><strong>$\gamma$</strong>: The Degradation Rate (how fast $s$ decays and is destroyed)</li>
+            </ul>
+        </div>
+
+        <p>This equation is the biological bridge to Gaussian Processes. By measuring $u$ and $s$ via sequencing, and computationally estimating the rates $\beta$ and $\gamma$, we obtain a proportional estimate of the mathematical derivative $\frac{ds}{dt}$. This is the directional arrow ($y'$) that we feed into the Derivative GP!</p>
+
+        <!-- Phase Portrait Visualizer -->
+        <div class="viz-wrap" style="margin-top: 2rem;">
+            <div class="viz-title">Visualizing the Derivative: The Phase Portrait</div>
+            <div class="viz-hint">Press play to see how a gene's lifecycle plots out the RNA Velocity vector.</div>
+            
+            <div style="position: relative; width: 100%; max-width: 400px; height: 300px; margin: 0 auto; background: var(--off); border: 1px solid var(--border); border-radius: var(--r);">
+                <!-- Axes -->
+                <div style="position: absolute; bottom: 20px; left: 20px; right: 20px; height: 2px; background: var(--ink-3);"></div>
+                <div style="position: absolute; bottom: 20px; left: 20px; top: 20px; width: 2px; background: var(--ink-3);"></div>
+                <div style="position: absolute; bottom: 0; right: 20px; font-size: 0.75rem; color: var(--ink-3);">Spliced (s)</div>
+                <div style="position: absolute; top: 0; left: 25px; font-size: 0.75rem; color: var(--ink-3);">Unspliced (u)</div>
+                
+                <!-- The Almond Path SVG -->
+                <svg width="100%" height="100%" style="position: absolute; top: 0; left: 0;">
+                    <path d="M 30 280 C 30 100, 150 50, 350 50 C 350 200, 200 280, 30 280" fill="none" stroke="var(--border-h)" stroke-width="3" stroke-dasharray="5,5"/>
+                    <line id="velocity-vector" x1="30" y1="280" x2="30" y2="280" stroke="var(--accent)" stroke-width="3" marker-end="url(#arrowhead)" />
+                    <circle id="cell-point" cx="30" cy="280" r="6" fill="var(--purple)" />
+                    <defs>
+                        <marker id="arrowhead" markerWidth="10" markerHeight="7" refX="9" refY="3.5" orient="auto">
+                            <polygon points="0 0, 10 3.5, 0 7" fill="var(--accent)" />
+                        </marker>
+                    </defs>
+                </svg>
+            </div>
+            
+            <div style="text-align: center; margin-top: 1rem;">
+                <div id="phase-status" style="font-weight: 600; font-size: 1rem; color: var(--purple);">Phase: Inactive</div>
+                <button id="play-phase-btn" class="viz-btn" style="width: auto; display: inline-block; padding: 0.4rem 1.5rem; margin-top: 0.5rem;">Simulate Gene Lifecycle</button>
+            </div>
+        </div>
+
+        <script>
+            document.addEventListener('DOMContentLoaded', () => {
+                const btn = document.getElementById('play-phase-btn');
+                const cell = document.getElementById('cell-point');
+                const vector = document.getElementById('velocity-vector');
+                const status = document.getElementById('phase-status');
+                
+                function getAlmondPoint(t) {
+                    let x, y;
+                    if (t < 0.5) {
+                        const nt = t * 2;
+                        x = Math.pow(1-nt, 3)*30 + 3*Math.pow(1-nt, 2)*nt*30 + 3*(1-nt)*Math.pow(nt, 2)*150 + Math.pow(nt, 3)*350;
+                        y = Math.pow(1-nt, 3)*280 + 3*Math.pow(1-nt, 2)*nt*100 + 3*(1-nt)*Math.pow(nt, 2)*50 + Math.pow(nt, 3)*50;
+                    } else {
+                        const nt = (t - 0.5) * 2;
+                        x = Math.pow(1-nt, 3)*350 + 3*Math.pow(1-nt, 2)*nt*350 + 3*(1-nt)*Math.pow(nt, 2)*200 + Math.pow(nt, 3)*30;
+                        y = Math.pow(1-nt, 3)*50 + 3*Math.pow(1-nt, 2)*nt*200 + 3*(1-nt)*Math.pow(nt, 2)*280 + Math.pow(nt, 3)*280;
+                    }
+                    return {x, y};
+                }
+                
+                let playing = false;
+                btn.addEventListener('click', () => {
+                    if (playing) return;
+                    playing = true;
+                    btn.innerText = "Simulating...";
+                    btn.style.opacity = "0.5";
+                    
+                    let time = 0;
+                    const interval = setInterval(() => {
+                        time += 0.005;
+                        if (time >= 1) {
+                            clearInterval(interval);
+                            playing = false;
+                            btn.innerText = "Simulate Gene Lifecycle";
+                            btn.style.opacity = "1";
+                            cell.setAttribute('cx', 30);
+                            cell.setAttribute('cy', 280);
+                            vector.setAttribute('x1', 30);
+                            vector.setAttribute('y1', 280);
+                            vector.setAttribute('x2', 30);
+                            vector.setAttribute('y2', 280);
+                            status.innerText = "Phase: Inactive";
+                            status.style.color = "var(--ink-4)";
+                            return;
+                        }
+                        
+                        const current = getAlmondPoint(time);
+                        const next = getAlmondPoint(Math.min(1, time + 0.05));
+                        
+                        cell.setAttribute('cx', current.x);
+                        cell.setAttribute('cy', current.y);
+                        
+                        vector.setAttribute('x1', current.x);
+                        vector.setAttribute('y1', current.y);
+                        
+                        const dx = (next.x - current.x);
+                        const dy = (next.y - current.y);
+                        
+                        vector.setAttribute('x2', current.x + dx * 1.5);
+                        vector.setAttribute('y2', current.y + dy * 1.5);
+                        
+                        if (time < 0.1) {
+                            status.innerText = "Phase: Induction (Turning ON). Velocity points up.";
+                            status.style.color = "var(--purple)";
+                        } else if (time < 0.45) {
+                            status.innerText = "Phase: Induction (Turning ON). Velocity pushes towards steady state.";
+                        } else if (time < 0.55) {
+                            status.innerText = "Phase: Steady State. Velocity approaches zero.";
+                            status.style.color = "var(--accent)";
+                        } else if (time < 0.9) {
+                            status.innerText = "Phase: Repression (Turning OFF). Velocity points down/left.";
+                            status.style.color = "var(--orange)";
+                        } else {
+                            status.innerText = "Phase: Returning to Inactive.";
+                        }
+                        
+                    }, 30);
+                });
+            });
+        </script>
+
+        <div class="callout callout-blue">
+          <h4>The Case Study: The Cell Cycle</h4>
+          <p>In the paper, the authors apply DGP-LVM to real-world data from <em>Mahdessian et al. (2021)</em> focusing on the <strong>Cell Cycle</strong>. The cell cycle is the biological process a cell goes through to divide and replicate, moving through four distinct phases: <strong>G1 $\rightarrow$ S $\rightarrow$ G2 $\rightarrow$ M</strong>.</p>
+          <p>This is the perfect testing ground for Derivative GPs. Why? Because the cell cycle is a heavily regulated, oscillating biological clock. Genes necessary for DNA synthesis turn ON sharply in the S phase and turn OFF in the G2 phase. By looking at the RNA velocity (the derivative), the DGP-LVM can easily tell if a cell is entering or exiting a phase, allowing it to estimate a highly precise, cyclical pseudotime.</p>
+        </div>
+
+        <!-- Cell Cycle Visualizer -->
+        <div class="viz-wrap" style="margin-top: 2rem;">
+            <div class="viz-title">Intuition: Pseudotime and The Cell Cycle</div>
+            <div class="viz-hint">Drag the pseudotime slider to see how DGP-LVM uses the velocity arrows to correctly sequence the cell cycle.</div>
+            
+            <div style="position: relative; width: 100%; max-width: 300px; height: 300px; margin: 0 auto;">
+                <!-- Circle background -->
+                <div style="position: absolute; top: 20px; left: 20px; right: 20px; bottom: 20px; border: 2px dashed var(--border-h); border-radius: 50%;"></div>
+                
+                <!-- Phase labels -->
+                <div style="position: absolute; top: 0; left: 50%; transform: translateX(-50%); font-weight: bold; color: var(--ink-3); background: var(--white); padding: 0 4px;">M Phase</div>
+                <div style="position: absolute; bottom: 0; left: 50%; transform: translateX(-50%); font-weight: bold; color: var(--ink-3); background: var(--white); padding: 0 4px;">S Phase</div>
+                <div style="position: absolute; top: 50%; right: -25px; transform: translateY(-50%); font-weight: bold; color: var(--ink-3); background: var(--white); padding: 0 4px;">G1 Phase</div>
+                <div style="position: absolute; top: 50%; left: -25px; transform: translateY(-50%); font-weight: bold; color: var(--ink-3); background: var(--white); padding: 0 4px;">G2 Phase</div>
+                
+                <!-- The Cell -->
+                <div id="cycle-cell" style="position: absolute; width: 16px; height: 16px; background: var(--accent); border-radius: 50%; top: 20px; left: 150px; transform: translate(-50%, -50%); transition: all 0.1s; z-index: 2;"></div>
+                
+                <!-- SVG Arrow -->
+                <svg width="100%" height="100%" style="position: absolute; top: 0; left: 0; pointer-events: none; z-index: 3;">
+                    <line id="cycle-arrow" x1="150" y1="20" x2="180" y2="25" stroke="var(--ink)" stroke-width="2" marker-end="url(#arrowhead2)" style="transition: all 0.1s;" />
+                    <defs>
+                        <marker id="arrowhead2" markerWidth="10" markerHeight="7" refX="9" refY="3.5" orient="auto">
+                            <polygon points="0 0, 10 3.5, 0 7" fill="var(--ink)" />
+                        </marker>
+                    </defs>
+                </svg>
+            </div>
+            
+            <div style="margin-top: 1.5rem;">
+                <label style="font-size: 0.85rem; font-weight: 600; color: var(--ink-2); display: block; text-align: center; margin-bottom: 0.5rem;">Estimated Pseudotime (Latent Variable $x$)</label>
+                <input type="range" id="pseudotime-slider" min="0" max="360" step="1" value="0">
+            </div>
+        </div>
+        
+        <script>
+            document.addEventListener('DOMContentLoaded', () => {
+                const slider = document.getElementById('pseudotime-slider');
+                const cell = document.getElementById('cycle-cell');
+                const arrow = document.getElementById('cycle-arrow');
+                
+                const cx = 150;
+                const cy = 150;
+                const r = 130;
+                
+                function updateCycle() {
+                    const angleDeg = parseInt(slider.value) - 90;
+                    const angleRad = angleDeg * (Math.PI / 180);
+                    
+                    const x = cx + r * Math.cos(angleRad);
+                    const y = cy + r * Math.sin(angleRad);
+                    
+                    cell.style.left = x + 'px';
+                    cell.style.top = y + 'px';
+                    
+                    arrow.setAttribute('x1', x);
+                    arrow.setAttribute('y1', y);
+                    
+                    const tangentRad = angleRad + (Math.PI / 2);
+                    const arrowLen = 35;
+                    const ax = x + arrowLen * Math.cos(tangentRad);
+                    const ay = y + arrowLen * Math.sin(tangentRad);
+                    
+                    arrow.setAttribute('x2', ax);
+                    arrow.setAttribute('y2', ay);
+                }
+                
+                slider.addEventListener('input', updateCycle);
+                updateCycle();
+            });
+        </script>
+      </div>
+    </div>
+
+    <!-- ─ Row 2 ─ -->
+    <div class="note-row" id="s2">
+      <div class="cue-column">
+        <h2>2. Standard GP Recap</h2>
+        <ul>
+          <li>Distributions over functions</li>
+          <li>Mean and Covariance</li>
+          <li>Notation: $y = f(x) + \epsilon$</li>
+        </ul>
+      </div>
+      <div class="content-column">
+        <h3>A Quick Refresher on Gaussian Processes</h3>
+        <p>A Gaussian Process (GP) is a distribution over <em>functions</em>. Instead of searching for the exact parameters of a rigid equation (like $y = mx + c$), a GP places a probability distribution over an infinite number of possible smooth curves that could fit our data.</p>
+        
+        <p>A GP is fully specified by a <strong>mean function</strong> $m(x)$ and a <strong>covariance function</strong> (or kernel) $K(x, x^T)$.</p>
+        <div class="math-block">
+            $$ f(x) \sim \mathcal{GP}(m(x), K(x, x^T)) $$
+        </div>
+        
+        <p>For a univariate output variable $y$ with independent, identically distributed Gaussian noise, the model is written as:</p>
+        <div class="math-block">
+            $$ y_i = f(x_i) + \epsilon_i \quad \text{where} \quad \epsilon_i \sim \mathcal{N}(0, \sigma^2) $$
+            $$ \text{or equivalently, } \quad y_i \sim \mathcal{N}(f(x_i), \sigma^2) $$
+        </div>
+        
+        <p>The magic of the GP lies in the covariance function $K(x_i, x_j)$. It dictates that if two input points $x_i$ and $x_j$ are close together in time, their outputs $y_i$ and $y_j$ should be highly correlated. For $i \neq j$, $Cov(y_i, y_j) = K(x_i, x_j)$.</p>
+      </div>
+    </div>
+
+    <!-- ─ Row 3 ─ -->
+    <div class="note-row" id="s3">
+      <div class="cue-column">
+        <h2>3. Derivative GPs (The Math)</h2>
+        <ul>
+          <li>Differentiation is a Linear Operator</li>
+          <li>Joint Models: $f(x)$ and $f'(x)$</li>
+          <li>The Block Covariance Matrix</li>
+          <li>Step-by-Step Proof</li>
+        </ul>
+      </div>
+      <div class="content-column">
+        <h3>How to Differentiate a Gaussian Process</h3>
+        <p>Here is a beautiful mathematical fact: <strong>Differentiation is a linear operator.</strong> Because a Gaussian Process is defined entirely by linear combinations of Gaussian variables, applying a linear operator to a GP simply yields another GP!</p>
+        <p>This means if we have a GP modeling our output $f(x)$, its derivative $f'(x) = \frac{\partial f}{\partial x}$ is <em>also</em> a GP. Even better, they can be modeled jointly using a single, unified block covariance matrix.</p>
+
+        <div class="math-block">
+          $$ \begin{pmatrix} f(x) \\ f'(x) \end{pmatrix} \sim \mathcal{GP} \left( \begin{pmatrix} m_f \\ m_{f'} \end{pmatrix}, \begin{pmatrix} K & K' \\ K'^T & K'' \end{pmatrix} \right) $$
+        </div>
+
+        <p>What are these blocks?</p>
+        <ul>
+            <li><strong>$K$</strong>: The standard covariance between two regular outputs.</li>
+            <li><strong>$K'$</strong>: The cross-covariance between a regular output and a derivative output. It is the first derivative of $K$ with respect to $x$.</li>
+            <li><strong>$K'^T$</strong>: The first derivative of $K$ with respect to $x^T$.</li>
+            <li><strong>$K''$</strong>: The covariance between two derivative outputs. It is the second-order partial derivative of $K$ with respect to both $x$ and $x^T$.</li>
+        </ul>
+
+        <h4 style="margin-top: 2rem;">Interactive Proof: Deriving the Cross-Covariance</h4>
+        <p>Let's prove that the covariance between a point $y_i$ and a derivative point $v_j = \frac{\partial y_j}{\partial x_j}$ is exactly equal to the derivative of their covariance function. Click each step to reveal the math!</p>
+        
+        <div class="viz-wrap" style="padding: 1rem;">
+            <div class="proof-step" id="proof1" onclick="revealProof('proof1')">
+                <div class="proof-header"><span>Step 1: Start with the Definition of Covariance</span> <span class="proof-icon">+</span></div>
+                <div class="proof-content">
+                    $$ Cov(y_i, v_j) = E [ (y_i - E(y_i)) (v_j - E(v_j)) ] $$
+                    Substitute $v_j$ with its derivative definition $\frac{\partial y_j}{\partial x_j}$.
+                </div>
+            </div>
+            <div class="proof-step" id="proof2" onclick="revealProof('proof2')">
+                <div class="proof-header"><span>Step 2: Substitute the Derivative</span> <span class="proof-icon">+</span></div>
+                <div class="proof-content">
+                    $$ = E \left[ (y_i - E(y_i)) \left( \frac{\partial y_j}{\partial x_j} - E\left( \frac{\partial y_j}{\partial x_j} \right) \right) \right] $$
+                </div>
+            </div>
+            <div class="proof-step" id="proof3" onclick="revealProof('proof3')">
+                <div class="proof-header"><span>Step 3: Apply the Dominated Convergence Theorem (DCT)</span> <span class="proof-icon">+</span></div>
+                <div class="proof-content">
+                    Under DCT, we can swap the Expectation and the Derivative operators. $E\left( \frac{\partial y_j}{\partial x_j} \right)$ becomes $\frac{\partial}{\partial x_j} E(y_j)$.
+                    $$ = E \left[ (y_i - E(y_i)) \left( \frac{\partial y_j}{\partial x_j} - \frac{\partial}{\partial x_j} E(y_j) \right) \right] $$
+                </div>
+            </div>
+            <div class="proof-step" id="proof4" onclick="revealProof('proof4')">
+                <div class="proof-header"><span>Step 4: Factor out the Derivative</span> <span class="proof-icon">+</span></div>
+                <div class="proof-content">
+                    $$ = E \left[ (y_i - E(y_i)) \frac{\partial}{\partial x_j} (y_j - E(y_j)) \right] $$
+                    Since $y_i$ is a constant with respect to $x_j$, we can pull the derivative outside the entire expression inside the expectation.
+                </div>
+            </div>
+            <div class="proof-step" id="proof5" onclick="revealProof('proof5')">
+                <div class="proof-header"><span>Step 5: Final Result!</span> <span class="proof-icon">+</span></div>
+                <div class="proof-content">
+                    $$ = \frac{\partial}{\partial x_j} E [ (y_i - E(y_i)) (y_j - E(y_j)) ] $$
+                    $$ = \frac{\partial}{\partial x_j} Cov(y_i, y_j) $$
+                    <strong>Conclusion:</strong> The covariance between an output and a derivative is just the derivative of the original covariance!
+                </div>
+            </div>
+        </div>
+        
+        <script>
+            function revealProof(id) {
+                const el = document.getElementById(id);
+                el.classList.toggle('revealed');
+                const icon = el.querySelector('.proof-icon');
+                if(el.classList.contains('revealed')) {
+                    icon.textContent = '−';
+                } else {
+                    icon.textContent = '+';
+                }
+            }
+        </script>
+      </div>
+    </div>
+
+    <!-- ─ Row 4 ─ -->
+    <div class="note-row" id="s4">
+      <div class="cue-column">
+        <h2>4. The Scale Problem</h2>
+        <ul>
+          <li>Calculus vs. Biology</li>
+          <li>Proportional Estimates</li>
+          <li>Why Standard GPs Fail</li>
+        </ul>
+      </div>
+      <div class="content-column">
+        <h3>When Math Meets Reality</h3>
+        <p>If we had perfect, pure mathematical derivatives, the block covariance matrix above would work perfectly. But we are working with biology. <strong>RNA velocity is NOT an exact mathematical derivative.</strong></p>
+        
+        <div class="callout callout-orange">
+          <h4>The Core Issue</h4>
+          <p>RNA velocity is estimated based on the kinetic rates of RNA splicing and degradation. Because of this, it is usually only <em>proportional</em> to the true derivative. It might be 10x larger or 0.1x smaller than the strict mathematical derivative $\frac{\partial y}{\partial x}$.</p>
+          <p>If you feed a standard derivative GP an observation $y'$ that is on a completely different scale than $y$, the standard math breaks. The model attempts to force a single variance scale onto two completely different magnitudes of data, resulting in massive errors and destroying the latent pseudotime estimation.</p>
+        </div>
+
+        <p>To fix this, the authors introduce a brilliant modification: <strong>Decoupled Hyperparameters</strong>. Instead of using a single GP marginal standard deviation ($\alpha$) for both, they split it:</p>
+        <ul>
+            <li><strong>$\alpha$</strong>: The standard deviation scaling the original output $y$.</li>
+            <li><strong>$\alpha'$</strong>: The standard deviation scaling the derivative output $y'$.</li>
+        </ul>
+        <p>They similarly split the measurement noise into $\sigma$ and $\sigma'$. The length scale $\rho$, however, is shared, as it strictly dictates how fast the <em>inputs</em> (the timeline) change, which is invariant to output scaling.</p>
+        
+        <!-- Interactive Matrix Visualizer -->
+        <div class="viz-wrap">
+            <div class="viz-title">Interactive: The Scaled Block Matrix</div>
+            <div class="viz-hint">See how changing $\alpha$ and $\alpha'$ independently scales the different sections of the joint covariance matrix.</div>
+            
+            <div style="display: flex; justify-content: center; margin: 1.5rem 0;">
+                <div style="display: grid; grid-template-columns: 1fr 1fr; grid-template-rows: 1fr 1fr; gap: 4px; width: 250px; height: 250px; border: 2px solid var(--ink); padding: 4px; border-radius: 8px; background: var(--off);">
+                    <div id="block-K" style="background: var(--accent); opacity: 0.5; display: flex; align-items: center; justify-content: center; color: white; font-weight: bold; border-radius: 4px; transition: opacity 0.2s;">K</div>
+                    <div id="block-Kp" style="background: var(--purple); opacity: 0.5; display: flex; align-items: center; justify-content: center; color: white; font-weight: bold; border-radius: 4px; transition: opacity 0.2s;">K'</div>
+                    <div id="block-Kpt" style="background: var(--purple); opacity: 0.5; display: flex; align-items: center; justify-content: center; color: white; font-weight: bold; border-radius: 4px; transition: opacity 0.2s;">K'^T</div>
+                    <div id="block-Kpp" style="background: var(--orange); opacity: 0.5; display: flex; align-items: center; justify-content: center; color: white; font-weight: bold; border-radius: 4px; transition: opacity 0.2s;">K''</div>
+                </div>
+            </div>
+            
+            <div class="slider-grid">
+                <div class="slider-group">
+                  <label>Original Output Scale ($\alpha$): <span id="alphaVal">1.0</span></label>
+                  <input type="range" id="alphaSlider" min="0.1" max="2.0" step="0.1" value="1.0">
+                  <p>Controls the magnitude of the top-left (K) block. Affects cross-covariance (K') partially.</p>
+                </div>
+                <div class="slider-group">
+                  <label>Derivative Output Scale ($\alpha'$): <span id="alphaPVal">1.0</span></label>
+                  <input type="range" id="alphaPSlider" min="0.1" max="2.0" step="0.1" value="1.0">
+                  <p>Controls the magnitude of the bottom-right (K'') block. Affects cross-covariance (K') partially.</p>
+                </div>
+            </div>
+        </div>
+        
+        <script>
+            document.addEventListener('DOMContentLoaded', () => {
+                const aSlider = document.getElementById('alphaSlider');
+                const apSlider = document.getElementById('alphaPSlider');
+                const aVal = document.getElementById('alphaVal');
+                const apVal = document.getElementById('alphaPVal');
+                
+                const bK = document.getElementById('block-K');
+                const bKp = document.getElementById('block-Kp');
+                const bKpt = document.getElementById('block-Kpt');
+                const bKpp = document.getElementById('block-Kpp');
+                
+                function updateMatrix() {
+                    const a = parseFloat(aSlider.value);
+                    const ap = parseFloat(apSlider.value);
+                    
+                    aVal.innerText = a.toFixed(1);
+                    apVal.innerText = ap.toFixed(1);
+                    
+                    // Normalize opacity mapping (max 2.0 -> opacity 1.0)
+                    // Math logic: K scales with a^2. K'' scales with ap^2. K' scales with a*ap
+                    const baseOp = 0.25;
+                    bK.style.opacity = Math.min(1.0, (a * a) / 4 * 0.8 + 0.2);
+                    bKpp.style.opacity = Math.min(1.0, (ap * ap) / 4 * 0.8 + 0.2);
+                    
+                    const crossOp = Math.min(1.0, (a * ap) / 4 * 0.8 + 0.2);
+                    bKp.style.opacity = crossOp;
+                    bKpt.style.opacity = crossOp;
+                }
+                
+                aSlider.addEventListener('input', updateMatrix);
+                apSlider.addEventListener('input', updateMatrix);
+                updateMatrix();
+            });
+        </script>
+
+      </div>
+    </div>
+
+    <!-- ─ Row 5 ─ -->
+    <div class="note-row" id="s5">
+      <div class="cue-column">
+        <h2>5. Modified Covariances</h2>
+        <ul>
+          <li>The Equations</li>
+          <li>Squared Exponential (SE)</li>
+          <li>Matern Class (3/2 & 5/2)</li>
+        </ul>
+      </div>
+      <div class="content-column">
+        <h3>The Scaling Math in Action</h3>
+        <p>Let's look at exactly how the authors modified the famous <strong>Squared Exponential (SE)</strong> kernel to handle this scaling. Notice where $\alpha$ and $\alpha'$ are placed.</p>
+        
+        <div class="math-block math-block-left">
+            <h4 style="margin-top:0;">Modified Squared Exponential</h4>
+            <p><strong>1. Standard Covariance $K$ (Output to Output):</strong></p>
+            $$ K(x_i, x_j) = \color{#2563eb}{\alpha^2} \exp\left(-\frac{(x_i - x_j)^2}{2\rho^2}\right) $$
+            <p style="font-size: 0.85rem; color: var(--ink-4); margin-top:-0.5rem; margin-bottom:1rem;">* Uses only the original output variance $\alpha^2$.</p>
+            
+            <p><strong>2. Cross-Covariance $K'$ (Output to Derivative):</strong></p>
+            $$ K'(x_i, x_j) = \color{#9333ea}{\alpha \alpha'} \frac{(x_i - x_j)}{\rho^2} \exp\left(-\frac{(x_i - x_j)^2}{2\rho^2}\right) $$
+            <p style="font-size: 0.85rem; color: var(--ink-4); margin-top:-0.5rem; margin-bottom:1rem;">* Uses the product of both scales $\alpha \alpha'$. Notice the polynomial multiplier $\frac{(x_i - x_j)}{\rho^2}$ that popped out from the first derivative.</p>
+            
+            <p><strong>3. Derivative Covariance $K''$ (Derivative to Derivative):</strong></p>
+            $$ K''(x_i, x_j) = \color{#ea580c}{\alpha'^2} \frac{\rho^2 - (x_i - x_j)^2}{\rho^4} \exp\left(-\frac{(x_i - x_j)^2}{2\rho^2}\right) $$
+            <p style="font-size: 0.85rem; color: var(--ink-4); margin-top:-0.5rem; margin-bottom:0;">* Uses only the derivative variance $\alpha'^2$. This comes from differentiating twice.</p>
+        </div>
+
+        <p>The authors also derived these modifications for the less smooth, more realistic <strong>Matern 3/2</strong> and <strong>Matern 5/2</strong> kernels. For instance, the Matern 3/2 formulas become quite complex:</p>
+        <div class="math-block">
+            $$ K_{M3/2}(x_i, x_j) = \alpha^2 \left(1 + \frac{\sqrt{3}|x_i - x_j|}{\rho}\right) \exp\left(-\frac{\sqrt{3}|x_i - x_j|}{\rho}\right) $$
+            <br>
+            $$ K'_{M3/2}(x_i, x_j) = \alpha \alpha' \frac{3(x_i - x_j)}{\rho^2} \exp\left(-\frac{\sqrt{3}|x_i - x_j|}{\rho}\right) $$
+        </div>
+      </div>
+    </div>
+
+    <!-- ─ Row 6 ─ -->
+    <div class="note-row" id="s6">
+      <div class="cue-column">
+        <h2>6. Multidimensional Outputs</h2>
+        <ul>
+          <li>Multiple Genes = Multiple Dimensions</li>
+          <li>Correlated Outputs</li>
+          <li>Cholesky Factor $L$</li>
+        </ul>
+      </div>
+      <div class="content-column">
+        <h3>Handling Multiple Genes at Once</h3>
+        <p>A single cell doesn't just have one gene; it has thousands. If we modeled each gene with a completely separate GP, we would throw away massive amounts of biological information about how genes interact with each other (gene regulatory networks).</p>
+        
+        <p>DGP-LVM solves this using <strong>Multi-output GPs</strong>. The idea is to build a structure that allows information sharing <em>across dimensions</em>.</p>
+        
+        <ol>
+            <li>First, we set up $D$ independent univariate GPs $f_d(x)$, each with its own set of scaling hyperparameters $(\rho_d, \alpha_d, \alpha'_d, \sigma_d, \sigma'_d)$. Note that each gene is allowed to have a different smoothness ($\rho$) and scale ($\alpha$).</li>
+            <li>We then mathematically intertwine them using a $D \times D$ across-dimension correlation matrix $C$.</li>
+            <li>We take the Cholesky decomposition of $C$ to get a lower-triangular matrix $L$ (where $C = L L^T$).</li>
+        </ol>
+        
+        <p>The final, correlated GP predictions $\tilde{f}$ are obtained by multiplying the independent GPs by the Cholesky factor:</p>
+        <div class="math-block">
+          $$ \begin{pmatrix} \tilde{f}_1(x_i) \\ \dots \\ \tilde{f}_D(x_i) \end{pmatrix} = L \times \begin{pmatrix} f_1(x_i) \\ \dots \\ f_D(x_i) \end{pmatrix} $$
+        </div>
+        <p>This exact same matrix multiplication is applied to the derivative outputs $f'_d(x_i)$ to get $\tilde{f}'_d(x_i)$.</p>
+      </div>
+    </div>
+    
+    <!-- ─ Row 7 ─ -->
+    <div class="note-row" id="s7">
+      <div class="cue-column">
+        <h2>7. Latent Inputs (Pseudotime)</h2>
+        <ul>
+          <li>Unobserved $x$</li>
+          <li>Prior Measurements $\tilde{x}$</li>
+          <li>Latent GPs</li>
+        </ul>
+      </div>
+      <div class="content-column">
+        <h3>Finding the Missing Timeline</h3>
+        <p>Up until now, we have assumed we know the input $x$ (time). But in scRNA-seq, $x$ is <strong>pseudotime</strong>, which is entirely unobserved! This is why it's a Latent Variable Model (LVM).</p>
+        
+        <p>We do, however, have a noisy hint. In biological experiments, we know the "cell capture time" or "experimental time"—the literal hour the cell was frozen. This experimental time $\tilde{x}$ is a noisy, rough proxy for true developmental pseudotime $x$.</p>
+        
+        <p>We model this mathematically as a prior distribution, assuming the noisy observation $\tilde{x}$ is drawn from a Gaussian centered around the true latent time $x$, with a known measurement error $s$:</p>
+        <div class="math-block">
+            $$ \tilde{x}_i \sim \mathcal{N}(x_i, s^2) $$
+        </div>
+        <p>By defining $x$ as a parameter with this prior, the GP isn't just fitting a curve to data points; it is actively moving the data points horizontally along the x-axis to find the sequence that yields the most probabilistically likely smooth curves across all $D$ gene dimensions simultaneously!</p>
+      </div>
+    </div>
+
+    <!-- ─ Row 8 ─ -->
+    <div class="note-row" id="s8">
+      <div class="cue-column">
+        <h2>8. The Full DGP-LVM Model</h2>
+        <ul>
+          <li>Factorized Probability</li>
+          <li>Bayesian Inference via HMC</li>
+          <li>Empirical Success</li>
+        </ul>
+      </div>
+      <div class="content-column">
+        <h3>Putting It All Together</h3>
+        <p>The entire DGP-LVM framework can be expressed as a massive joint probability density. By marginalizing out the actual GP functions $f$ and $f'$ (a superpower of Gaussian math), we are left with a probability density that factorizes over dimensions $d$:</p>
+        
+        <div class="math-block">
+            $$ p(y, y', x, \theta) = \prod_{d=1}^D p(y_d | x, \theta_d) p(y'_d | x, \theta_d) p(x) p(\theta_d) $$
+        </div>
+        
+        <p>Where $\theta$ represents all our customized hyperparameters. We then use Bayes' rule and computationally heavy <strong>Hamiltonian Monte Carlo (HMC)</strong> via Stan to sample from the posterior distribution $p(x, \theta | y, y')$. This gives us not just a single best guess for the pseudotime $x$, but a full distribution representing our uncertainty.</p>
+
+        <div class="callout callout-blue">
+          <h4>Did the Scaling Modification Work?</h4>
+          <p>Yes, drastically. In the paper's simulation studies, models that included derivative information but <em>failed</em> to use the scaling modifications ($\alpha, \alpha'$) performed abysmally—often worse than models that ignored derivatives entirely.</p>
+          <p>By enabling the scaled derivatives, DGP-LVM reduced the Root Mean Squared Error (RMSE) of the latent input estimations by over <strong>30%</strong> compared to standard GPs. In a real-world cell-cycle case study, the model successfully adjusted experimental cell hours into tight, confident posterior pseudotime trajectories.</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- ─ Row 9 ─ -->
+    <div class="note-row" id="s9">
+      <div class="cue-column">
+        <h2>9. Master Concept Quiz</h2>
+        <ul>
+          <li>Test your understanding</li>
+          <li>Math, scale, and biology</li>
+        </ul>
+      </div>
+      <div class="content-column">
+        <h3>Let's verify what you've learned</h3>
+        
+        <details class="viz-wrap" style="margin-top: 1rem; cursor: pointer;">
+          <summary class="viz-title" style="font-size: 1.05rem; color: var(--accent); display: flex; align-items: center; justify-content: center; outline: none; margin-bottom: 0;">
+             Open The Final Exam
+          </summary>
+          
+          <div style="padding-top: 2rem; cursor: default; border-top: 1px solid var(--border); margin-top: 1rem;">
+            <div id="quiz-s9" style="display: flex; flex-direction: column; gap: 2rem;">
+              
+              <div class="quiz-q" data-ans="1">
+                <p style="font-weight: 700; font-size: 1rem; margin-bottom: 0.8rem; color: var(--ink);">1. Why is it mathematically valid to construct a joint covariance matrix for $f(x)$ and $f'(x)$ within a Gaussian Process?</p>
+                <div style="display: flex; flex-direction: column; gap: 0.5rem;">
+                  <label style="font-size: 0.9rem; cursor: pointer; padding: 0.8rem; border: 1px solid var(--border); border-radius: var(--r); background: var(--off); transition: all 0.2s; color: var(--ink-2);">
+                    <input type="radio" name="q9_1" value="0" style="margin-right: 0.5rem;"> Because Gaussian variables naturally compress into low-dimensional manifolds.
+                  </label>
+                  <label style="font-size: 0.9rem; cursor: pointer; padding: 0.8rem; border: 1px solid var(--border); border-radius: var(--r); background: var(--off); transition: all 0.2s; color: var(--ink-2);">
+                    <input type="radio" name="q9_1" value="1" style="margin-right: 0.5rem;"> Because differentiation is a linear operator, and applying a linear operator to a GP yields another GP.
+                  </label>
+                  <label style="font-size: 0.9rem; cursor: pointer; padding: 0.8rem; border: 1px solid var(--border); border-radius: var(--r); background: var(--off); transition: all 0.2s; color: var(--ink-2);">
+                    <input type="radio" name="q9_1" value="2" style="margin-right: 0.5rem;"> Because Hamiltonian Monte Carlo requires gradients to navigate the posterior space.
+                  </label>
+                  <label style="font-size: 0.9rem; cursor: pointer; padding: 0.8rem; border: 1px solid var(--border); border-radius: var(--r); background: var(--off); transition: all 0.2s; color: var(--ink-2);">
+                    <input type="radio" name="q9_1" value="3" style="margin-right: 0.5rem;"> Because RNA velocity acts as a regularizing prior on the length scale $\rho$.
+                  </label>
+                </div>
+              </div>
+
+              <div class="quiz-q" data-ans="3">
+                <p style="font-weight: 700; font-size: 1rem; margin-bottom: 0.8rem; color: var(--ink);">2. What is the fundamental problem that DGP-LVM's covariance modifications solve?</p>
+                <div style="display: flex; flex-direction: column; gap: 0.5rem;">
+                  <label style="font-size: 0.9rem; cursor: pointer; padding: 0.8rem; border: 1px solid var(--border); border-radius: var(--r); background: var(--off); transition: all 0.2s; color: var(--ink-2);">
+                    <input type="radio" name="q9_2" value="0" style="margin-right: 0.5rem;"> The lack of an analytical solution for inverting large matrices $O(N^3)$.
+                  </label>
+                  <label style="font-size: 0.9rem; cursor: pointer; padding: 0.8rem; border: 1px solid var(--border); border-radius: var(--r); background: var(--off); transition: all 0.2s; color: var(--ink-2);">
+                    <input type="radio" name="q9_2" value="1" style="margin-right: 0.5rem;"> The inability of GPs to handle multiple genes simultaneously.
+                  </label>
+                  <label style="font-size: 0.9rem; cursor: pointer; padding: 0.8rem; border: 1px solid var(--border); border-radius: var(--r); background: var(--off); transition: all 0.2s; color: var(--ink-2);">
+                    <input type="radio" name="q9_2" value="2" style="margin-right: 0.5rem;"> The fact that pseudotime is entirely unobserved and purely deterministic.
+                  </label>
+                  <label style="font-size: 0.9rem; cursor: pointer; padding: 0.8rem; border: 1px solid var(--border); border-radius: var(--r); background: var(--off); transition: all 0.2s; color: var(--ink-2);">
+                    <input type="radio" name="q9_2" value="3" style="margin-right: 0.5rem;"> The massive scale discrepancy caused by RNA velocity being a proportional estimate, not an exact mathematical derivative.
+                  </label>
+                </div>
+              </div>
+
+              <div class="quiz-q" data-ans="1">
+                <p style="font-weight: 700; font-size: 1rem; margin-bottom: 0.8rem; color: var(--ink);">3. In the modified SE covariance function, which scaling parameter(s) dictate the cross-covariance block $K'$ (between output and derivative)?</p>
+                <div style="display: flex; flex-direction: column; gap: 0.5rem;">
+                  <label style="font-size: 0.9rem; cursor: pointer; padding: 0.8rem; border: 1px solid var(--border); border-radius: var(--r); background: var(--off); transition: all 0.2s; color: var(--ink-2);">
+                    <input type="radio" name="q9_3" value="0" style="margin-right: 0.5rem;"> Only $\alpha^2$
+                  </label>
+                  <label style="font-size: 0.9rem; cursor: pointer; padding: 0.8rem; border: 1px solid var(--border); border-radius: var(--r); background: var(--off); transition: all 0.2s; color: var(--ink-2);">
+                    <input type="radio" name="q9_3" value="1" style="margin-right: 0.5rem;"> The product $\alpha \alpha'$
+                  </label>
+                  <label style="font-size: 0.9rem; cursor: pointer; padding: 0.8rem; border: 1px solid var(--border); border-radius: var(--r); background: var(--off); transition: all 0.2s; color: var(--ink-2);">
+                    <input type="radio" name="q9_3" value="2" style="margin-right: 0.5rem;"> Only $\alpha'^2$
+                  </label>
+                  <label style="font-size: 0.9rem; cursor: pointer; padding: 0.8rem; border: 1px solid var(--border); border-radius: var(--r); background: var(--off); transition: all 0.2s; color: var(--ink-2);">
+                    <input type="radio" name="q9_3" value="3" style="margin-right: 0.5rem;"> The Cholesky factor $L$
+                  </label>
+                </div>
+              </div>
+              
+              <div class="quiz-q" data-ans="2">
+                <p style="font-weight: 700; font-size: 1rem; margin-bottom: 0.8rem; color: var(--ink);">4. How does the model mathematically link multiple genes (dimensions) together?</p>
+                <div style="display: flex; flex-direction: column; gap: 0.5rem;">
+                  <label style="font-size: 0.9rem; cursor: pointer; padding: 0.8rem; border: 1px solid var(--border); border-radius: var(--r); background: var(--off); transition: all 0.2s; color: var(--ink-2);">
+                    <input type="radio" name="q9_4" value="0" style="margin-right: 0.5rem;"> By enforcing identical length scales ($\rho$) for all genes.
+                  </label>
+                  <label style="font-size: 0.9rem; cursor: pointer; padding: 0.8rem; border: 1px solid var(--border); border-radius: var(--r); background: var(--off); transition: all 0.2s; color: var(--ink-2);">
+                    <input type="radio" name="q9_4" value="1" style="margin-right: 0.5rem;"> By performing Bayesian marginalization on the test sets locally.
+                  </label>
+                  <label style="font-size: 0.9rem; cursor: pointer; padding: 0.8rem; border: 1px solid var(--border); border-radius: var(--r); background: var(--off); transition: all 0.2s; color: var(--ink-2);">
+                    <input type="radio" name="q9_4" value="2" style="margin-right: 0.5rem;"> By multiplying the independent dimension GPs by the Cholesky factor $L$ of a correlation matrix.
+                  </label>
+                  <label style="font-size: 0.9rem; cursor: pointer; padding: 0.8rem; border: 1px solid var(--border); border-radius: var(--r); background: var(--off); transition: all 0.2s; color: var(--ink-2);">
+                    <input type="radio" name="q9_4" value="3" style="margin-right: 0.5rem;"> By using experimental time directly without treating it as a noisy prior.
+                  </label>
+                </div>
+              </div>
+
+            </div>
+            
+            <button id="s9-quiz-btn" class="viz-btn" style="margin-top: 2rem;">Grade Exam</button>
+            <div id="s9-quiz-res" style="margin-top: 1.5rem; font-weight: 700; font-size: 1rem; display: none; padding: 1rem; border-radius: var(--r); text-align: center;"></div>
+          </div>
+        </details>
+        
+        <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const btn = document.getElementById('s9-quiz-btn');
+            const res = document.getElementById('s9-quiz-res');
+            if(!btn) return;
+            btn.addEventListener('click', () => {
+                let score = 0; let allAnswered = true;
+                const questions = document.getElementById('quiz-s9').querySelectorAll('.quiz-q');
+                questions.forEach(q => {
+                    const inputs = q.querySelectorAll('input[type="radio"]');
+                    const ans = q.getAttribute('data-ans'); let answered = false;
+                    inputs.forEach(input => {
+                        const label = input.parentElement;
+                        label.style.borderColor = 'var(--border)'; label.style.backgroundColor = 'var(--off)'; label.style.color = 'var(--ink-2)';
+                        if (input.checked) {
+                            answered = true;
+                            if (input.value === ans) score++;
+                            else { label.style.borderColor = '#ef4444'; label.style.backgroundColor = '#fef2f2'; label.style.color = '#991b1b'; }
+                        }
+                        if (input.value === ans && answered) { label.style.borderColor = 'var(--green)'; label.style.backgroundColor = 'var(--green-bg)'; label.style.color = '#166534'; }
+                    });
+                    if (!answered) allAnswered = false;
+                });
+                res.style.display = 'block';
+                if (!allAnswered) {
+                     res.style.backgroundColor = '#fffbeb'; res.style.color = '#92400e'; res.style.border = '1px solid #fde68a';
+                     res.innerHTML = "Please answer all 4 questions before checking!";
+                } else {
+                     res.style.backgroundColor = 'var(--green-bg)'; res.style.color = '#166534'; res.style.border = '1px solid var(--green-bd)';
+                     res.innerHTML = `You scored ${score} out of 4! ${score === 4 ? 'Perfect! You truly understand DGP-LVMs.' : 'Review the highlighted answers to see what you missed.'}`;
+                }
+            });
+        });
+        </script>
+
+      </div>
+    </div>
+
+  </article>
+</div>
+
+<script>
+  // Simple intersection observer for TOC
+  document.addEventListener('DOMContentLoaded', () => {
+    const observer = new IntersectionObserver((entries) => {
+      entries.forEach(entry => {
+        const id = entry.target.getAttribute('id');
+        const tocLink = document.querySelector(`.toc-list a[href="#${id}"]`);
+        if (entry.isIntersecting && tocLink) {
+          document.querySelectorAll('.toc-list a').forEach(a => a.classList.remove('active'));
+          tocLink.classList.add('active');
+        }
+      });
+    }, { rootMargin: '-10% 0px -80% 0px' });
+    
+    document.querySelectorAll('.note-row').forEach(row => {
+      observer.observe(row);
+    });
+
+    // Scroll progress bar
+    window.addEventListener('scroll', () => {
+      const winScroll = document.body.scrollTop || document.documentElement.scrollTop;
+      const height = document.documentElement.scrollHeight - document.documentElement.clientHeight;
+      const scrolled = (winScroll / height) * 100;
+      document.getElementById('progress').style.width = scrolled + '%';
+    });
+  });
+</script>
+
+</body>
+</html>
