@@ -1,520 +1,542 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" data-theme="light">
 
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Ali Mikaeili</title>
+  <title>Ali Mikaeili — AI Researcher</title>
   <meta name="description"
-    content="Ali Mikaeili — AI Researcher at Max Planck Institute for Brain Research, Frankfurt." />
-  <meta name="theme-color" content="#ffffff" />
+    content="Ali Mikaeili — AI researcher at the Max Planck Institute for Brain Research, working at the intersection of machine learning and neuroscience: connectomics, representation learning, and deformable brain registration." />
+  <meta name="author" content="Ali Mikaeili" />
+
+  <!-- Open Graph -->
+  <meta property="og:type" content="website" />
+  <meta property="og:title" content="Ali Mikaeili — AI Researcher" />
+  <meta property="og:description"
+    content="AI researcher at the Max Planck Institute for Brain Research — connectomics, representation learning, and deformable brain registration." />
+  <meta property="og:image" content="assets/profile.jpg" />
+  <meta name="twitter:card" content="summary" />
+
+  <meta name="theme-color" content="#ffffff" media="(prefers-color-scheme: light)" />
+  <meta name="theme-color" content="#100f0d" media="(prefers-color-scheme: dark)" />
+
+  <!-- Monogram favicon -->
+  <link rel="icon"
+    href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='14' fill='%231a1916'/%3E%3Ctext x='32' y='44' font-family='Georgia,serif' font-size='38' fill='%23fbfbf8' text-anchor='middle'%3EA%3C/text%3E%3C/svg%3E" />
+
+  <!-- No-flash theme init -->
+  <script>
+    (function () {
+      document.documentElement.classList.add('js');
+      try {
+        var t = localStorage.getItem('theme');
+        if (!t) t = matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
+        document.documentElement.setAttribute('data-theme', t);
+      } catch (e) { }
+    })();
+  </script>
+
   <link rel="preconnect" href="https://fonts.googleapis.com" />
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet" />
-  <link rel="stylesheet" href="style.css?v=4" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link
+    href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,400;0,9..144,500;0,9..144,600;1,9..144,400;1,9..144,500&family=Inter:wght@400;450;500;600&family=JetBrains+Mono:wght@400;500&display=swap"
+    rel="stylesheet" />
+  <link rel="stylesheet" href="style.css?v=5" />
+
+  <!-- Structured data -->
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "Person",
+    "name": "Ali Mikaeili",
+    "jobTitle": "AI Researcher",
+    "affiliation": {
+      "@type": "Organization",
+      "name": "Max Planck Institute for Brain Research"
+    },
+    "address": { "@type": "PostalAddress", "addressLocality": "Frankfurt", "addressCountry": "Germany" },
+    "email": "Ali.Mikaeili@brain.mpg.de",
+    "url": "https://github.com/alim98",
+    "sameAs": ["https://github.com/alim98", "https://linkedin.com/in/mikaeiliali"]
+  }
+  </script>
 </head>
 
 <body>
 
-  <div class="layout">
+  <a class="skip-link" href="#research">Skip to content</a>
 
-    <!-- ── SIDEBAR ── -->
-    <aside class="sidebar">
+  <!-- ───────────────── TOP BAR ───────────────── -->
+  <header class="topbar" id="topbar">
+    <div class="topbar-inner">
+      <a class="wordmark" href="#top" aria-label="Ali Mikaeili — home">
+        <span class="wordmark-mark">A<span>M</span></span>
+        <span class="wordmark-name">Ali Mikaeili</span>
+      </a>
 
-      <!-- Profile -->
-      <div class="profile-block">
-        <img class="avatar" src="assets/profile.jpg" alt="Ali Mikaeili" />
-        <div class="profile-text">
-          <h1>Ali Mikaeili</h1>
-          <p class="role">AI Researcher</p>
-        </div>
-      </div>
-
-      <!-- Status -->
-      <div class="status-row">
-        <span class="badge-live">
-          <span class="dot"></span>
-          Frankfurt, Germany
-        </span>
-      </div>
-
-      <!-- Current position logo -->
-      <div class="affil-block">
-        <img src="assets/mpi.png" alt="Max Planck Institute" class="affil-logo" />
-        <p class="affil-name">Dept. of Neural Systems<br /> Prof. Gilles Laurent</p>
-      </div>
-
-      <p class="bio">
-        Building intelligent systems at the intersection of AI and neuroscience — from synapse clustering to deformable
-        brain registration.
-      </p>
-
-      <!-- Nav -->
-      <nav class="side-nav" aria-label="Sections">
-        <button class="nav-btn active" data-panel="experience" aria-pressed="true">
-          <span>Experience</span><kbd>1</kbd>
-        </button>
-        <button class="nav-btn" data-panel="publications" aria-pressed="false">
-          <span>Publications</span><kbd>2</kbd>
-        </button>
-        <button class="nav-btn" data-panel="projects" aria-pressed="false">
-          <span>Projects</span><kbd>3</kbd>
-        </button>
-        <button class="nav-btn" data-panel="skills" aria-pressed="false">
-          <span>Skills &amp; Education</span><kbd>4</kbd>
-        </button>
-        <button class="nav-btn" data-panel="notes" aria-pressed="false">
-          <span>Notes</span><kbd>5</kbd>
-        </button>
+      <nav class="topnav" aria-label="Sections">
+        <a href="#research" data-spy="research">Research</a>
+        <a href="#experience" data-spy="experience">Experience</a>
+        <a href="#projects" data-spy="projects">Projects</a>
+        <a href="#notes" data-spy="notes">Notes</a>
+        <a href="#skills" data-spy="skills">CV</a>
       </nav>
 
-      <!-- Contact links -->
-      <div class="sidebar-links">
-        <a href="mailto:Ali.Mikaeili@brain.mpg.de" class="link-chip">
-          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
-            stroke-linecap="round" stroke-linejoin="round">
-            <path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z" />
-            <polyline points="22,6 12,13 2,6" />
-          </svg>
-          Email
-        </a>
-        <a href="https://github.com/alim98" target="_blank" rel="noopener" class="link-chip">
-          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
-            stroke-linecap="round" stroke-linejoin="round">
-            <path
-              d="M9 19c-5 1.5-5-2.5-7-3m14 6v-3.87a3.37 3.37 0 0 0-.94-2.61c3.14-.35 6.44-1.54 6.44-7A5.44 5.44 0 0 0 20 4.77 5.07 5.07 0 0 0 19.91 1S18.73.65 16 2.48a13.38 13.38 0 0 0-7 0C6.27.65 5.09 1 5.09 1A5.07 5.07 0 0 0 5 4.77a5.44 5.44 0 0 0-1.5 3.78c0 5.42 3.3 6.61 6.44 7A3.37 3.37 0 0 0 9 18.13V22" />
-          </svg>
-          GitHub
-        </a>
-        <a href="https://linkedin.com/in/mikaeiliali" target="_blank" rel="noopener" class="link-chip">
-          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
-            stroke-linecap="round" stroke-linejoin="round">
-            <path d="M16 8a6 6 0 0 1 6 6v7h-4v-7a2 2 0 0 0-2-2 2 2 0 0 0-2 2v7h-4v-7a6 6 0 0 1 6-6z" />
-            <rect x="2" y="9" width="4" height="12" />
-            <circle cx="4" cy="4" r="2" />
-          </svg>
-          LinkedIn
-        </a>
-      </div>
+      <button class="theme-toggle" id="theme-toggle" type="button" aria-label="Toggle dark mode">
+        <svg class="icon-sun" width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+          stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+          <circle cx="12" cy="12" r="4.2" />
+          <path d="M12 2v2.5M12 19.5V22M4.9 4.9l1.8 1.8M17.3 17.3l1.8 1.8M2 12h2.5M19.5 12H22M4.9 19.1l1.8-1.8M17.3 6.7l1.8-1.8" />
+        </svg>
+        <svg class="icon-moon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+          stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+          <path d="M21 12.8A9 9 0 1 1 11.2 3a7 7 0 0 0 9.8 9.8z" />
+        </svg>
+      </button>
+    </div>
+  </header>
 
-    </aside>
+  <main>
 
-    <!-- ── MAIN ── -->
-    <main class="main-panel" id="main-panel">
-
-      <!-- ─ EXPERIENCE ─ -->
-      <div class="panel active" id="panel-experience">
-        <div class="panel-header">
-          <h2>Experience</h2>
-          <span class="panel-meta">4 positions</span>
-        </div>
-
-        <div class="entries">
-
-          <div class="entry stagger">
-            <div class="entry-left">
-              <div class="org-logo-wrap">
-                <img src="assets/mpi.png" alt="MPI" class="org-logo" />
-              </div>
-              <div class="tline">
-                <div class="tdot active"></div>
-              </div>
-            </div>
-            <div class="entry-content">
-              <div class="entry-top">
-                <strong>Research Assistant</strong>
-                <span class="chip-green">Now</span>
-              </div>
-              <p class="entry-org">Max Planck Institute for Brain Research · Frankfurt</p>
-              <p class="entry-desc">Unsupervised synapse clustering via contrastive learning on 3D EM data. Cell
-                classification using Vision Transformers Prof. Gilles Laurent.</p>
-              <div class="entry-tags">
-                <span>Contrastive Learning</span><span>Vision Transformers</span><span>Connectomics</span>
-              </div>
-              <span class="entry-year">2024 – present</span>
-            </div>
+    <!-- ───────────────── HERO ───────────────── -->
+    <section class="hero" id="top">
+      <div class="hero-grid">
+        <div class="hero-text">
+          <div class="status reveal">
+            <span class="status-dot"></span>
+            Frankfurt, Germany · open to research collaborations
           </div>
 
-          <div class="entry stagger">
-            <div class="entry-left">
-              <div class="org-logo-wrap">
-                <img src="assets/mci.png" alt="MCI" class="org-logo" />
-              </div>
-              <div class="tline"></div>
-            </div>
-            <div class="entry-content">
-              <div class="entry-top"><strong>Data Analyst</strong></div>
-              <p class="entry-org">Hamrahe Aval (MCI), R&amp;D · Tehran</p>
-              <p class="entry-desc">TTS and speech emotion recognition for the GITEX exhibition. Product manager for the
-                Persian-Interactive Dog Robot.</p>
-              <div class="entry-tags">
-                <span>TTS</span><span>Speech Emotion</span><span>Product Management</span>
-              </div>
-              <span class="entry-year">2023 – 2024</span>
-            </div>
+          <h1 class="hero-name reveal">Ali<br />Mikaeili</h1>
+
+          <p class="hero-role reveal">
+            AI Researcher working at the <em>intersection</em> of machine&nbsp;learning and neuroscience.
+          </p>
+
+          <p class="hero-bio reveal">
+            I build learning systems for connectomics at the <strong>Max&nbsp;Planck Institute for Brain
+            Research</strong> — unsupervised synapse clustering and cell classification from 3D electron
+            microscopy. My work spans representation learning, medical image registration, and the question of how
+            artificial and biological intelligence inform one another.
+          </p>
+
+          <div class="hero-affil reveal">
+            <img src="assets/mpi.png" alt="" class="hero-affil-logo" />
+            <span>Dept. of Neural Systems · Prof.&nbsp;Gilles&nbsp;Laurent</span>
           </div>
 
-          <div class="entry stagger">
-            <div class="entry-left">
-              <div class="org-logo-wrap">
-                <img src="assets/ut.png" alt="University of Tehran" class="org-logo" />
-              </div>
-              <div class="tline"></div>
-            </div>
-            <div class="entry-content">
-              <div class="entry-top"><strong>Teaching Assistant</strong></div>
-              <p class="entry-org">University of Tehran · Dept. of CS &amp; EE</p>
-              <p class="entry-desc">Led four AI medical imaging research teams. Assisted in Statistical Inference and
-                Artificial Intelligence courses.</p>
-              <div class="entry-tags">
-                <span>Medical Imaging</span><span>Research Leadership</span><span>Deep Learning</span>
-              </div>
-              <span class="entry-year">2023 – 2024</span>
-            </div>
-          </div>
-
-          <div class="entry stagger">
-            <div class="entry-left">
-              <div class="org-logo-wrap letter-logo">PNU</div>
-              <div class="tline last"></div>
-            </div>
-            <div class="entry-content">
-              <div class="entry-top"><strong>Teaching Assistant</strong></div>
-              <p class="entry-org">Payame Noor University · Ardabil</p>
-              <p class="entry-desc">Data Structures, Algorithms, AI, and Operating Systems labs and assessments.</p>
-              <div class="entry-tags">
-                <span>Algorithms</span><span>AI</span><span>Operating Systems</span>
-              </div>
-              <span class="entry-year">2020 – 2023</span>
-            </div>
-          </div>
-
-        </div>
-      </div>
-
-      <!-- ─ PUBLICATIONS ─ -->
-      <div class="panel" id="panel-publications">
-        <div class="panel-header">
-          <h2>Publications</h2>
-          <span class="panel-meta">6 papers · 3 published</span>
-        </div>
-
-        <div class="pub-group">
-          <div class="pub-group-label">Published</div>
-          <div class="pub-list">
-
-            <a href="https://doi.org/10.1109/AREE63378.2025.10880261" target="_blank" rel="noopener"
-              class="pub-row stagger">
-              <span class="pub-n">01</span>
-              <div class="pub-body">
-                <p class="pub-title">Attention-Based Segmentation of Brain Tumors Using Feature Level Fusion and UNet
-                </p>
-                <p class="pub-byline">A. M. Barzili &amp; B. Moshiri</p>
-              </div>
-              <div class="pub-right">
-                <span class="pub-badge">IEEE · 2025</span>
-                <svg class="pub-ext" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor"
-                  stroke-width="2">
-                  <path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6" />
-                  <polyline points="15 3 21 3 21 9" />
-                  <line x1="10" y1="14" x2="21" y2="3" />
-                </svg>
-              </div>
-            </a>
-
-            <a href="https://doi.org/10.1109/AI2E64943.2025.10983511" target="_blank" rel="noopener"
-              class="pub-row stagger">
-              <span class="pub-n">02</span>
-              <div class="pub-body">
-                <p class="pub-title">Detection of Autism Spectrum Disorder Using Quantum Support Vector Machines</p>
-                <p class="pub-byline">Zadeh, Barzili et al.</p>
-              </div>
-              <div class="pub-right">
-                <span class="pub-badge">IEEE · 2025</span>
-                <svg class="pub-ext" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor"
-                  stroke-width="2">
-                  <path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6" />
-                  <polyline points="15 3 21 3 21 9" />
-                  <line x1="10" y1="14" x2="21" y2="3" />
-                </svg>
-              </div>
-            </a>
-
-            <a href="https://doi.org/10.48550/arXiv.2511.11625" target="_blank" rel="noopener" class="pub-row stagger">
-              <span class="pub-n">03</span>
-              <div class="pub-body">
-                <p class="pub-title">MedFedPure: Federated Framework with MAE Detection and Diffusion Purification</p>
-                <p class="pub-byline">Karami, Barzili et al.</p>
-              </div>
-              <div class="pub-right">
-                <span class="pub-badge">arXiv · 2025</span>
-                <svg class="pub-ext" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor"
-                  stroke-width="2">
-                  <path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6" />
-                  <polyline points="15 3 21 3 21 9" />
-                  <line x1="10" y1="14" x2="21" y2="3" />
-                </svg>
-              </div>
-            </a>
-
-          </div>
-        </div>
-
-        <div class="pub-group">
-          <div class="pub-group-label">Under Review</div>
-          <div class="pub-list dimmed-group">
-
-            <div class="pub-row stagger">
-              <span class="pub-n">04</span>
-              <div class="pub-body">
-                <p class="pub-title">SpikeReg: A Spiking-UNet for Iterative Deformable Brain Image Registration</p>
-                <p class="pub-byline">A. M. Barzili &amp; B. Moshiri</p>
-              </div>
-              <div class="pub-right"><span class="pub-badge pending">In Review</span></div>
-            </div>
-
-            <div class="pub-row stagger">
-              <span class="pub-n">05</span>
-              <div class="pub-body">
-                <p class="pub-title">LiquidReg: An Adaptive ODE Engine for Deformable Registration</p>
-                <p class="pub-byline">A. M. Barzili &amp; B. Moshiri</p>
-              </div>
-              <div class="pub-right"><span class="pub-badge pending">In Review</span></div>
-            </div>
-
-            <div class="pub-row stagger">
-              <span class="pub-n">06</span>
-              <div class="pub-body">
-                <p class="pub-title">Deep Learning Methods for Deformable Brain MRI Registration: A Systematic Review
-                </p>
-                <p class="pub-byline">Barzili, Firoozi et al.</p>
-              </div>
-              <div class="pub-right"><span class="pub-badge pending">In Review</span></div>
-            </div>
-
-          </div>
-        </div>
-      </div>
-
-      <!-- ─ PROJECTS ─ -->
-      <div class="panel" id="panel-projects">
-        <div class="panel-header">
-          <h2>Projects</h2>
-          <a href="https://github.com/alim98" target="_blank" rel="noopener" class="panel-ext-link">
-            github.com/alim98
-            <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-              <path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6" />
-              <polyline points="15 3 21 3 21 9" />
-              <line x1="10" y1="14" x2="21" y2="3" />
-            </svg>
-          </a>
-        </div>
-
-        <div class="proj-grid">
-          <div class="proj-card stagger" data-color="#6366f1">
-            <div class="proj-accent"></div>
-            <span class="proj-icon">🧠</span>
-            <h3>Synapse Clustering</h3>
-            <p>3D synapse analysis from electron microscopy data via contrastive learning (MPIBR).</p>
-            <div class="proj-chips"><span>Contrastive Learning</span><span>3D EM</span><span>PyTorch</span></div>
-          </div>
-
-          <div class="proj-card stagger" data-color="#f59e0b">
-            <div class="proj-accent"></div>
-            <span class="proj-icon">⚡</span>
-            <h3>SpikeReg</h3>
-            <p>Deformable brain image registration using Spiking Neural Networks — energy-efficient alternative.</p>
-            <div class="proj-chips"><span>SNN</span><span>Medical Imaging</span><span>UNet</span></div>
-          </div>
-
-          <div class="proj-card stagger" data-color="#06b6d4">
-            <div class="proj-accent"></div>
-            <span class="proj-icon">🌊</span>
-            <h3>LiquidReg</h3>
-            <p>Deformable registration via Liquid Time-constant Networks and continuous-time ODE solvers.</p>
-            <div class="proj-chips"><span>LTC</span><span>ODE</span><span>Diffeomorphic</span></div>
-          </div>
-
-          <div class="proj-card stagger" data-color="#10b981">
-            <div class="proj-accent"></div>
-            <span class="proj-icon">🔬</span>
-            <h3>Chromatin Classification</h3>
-            <p>3D nuclei classification from microscopy images using deep learning pipelines.</p>
-            <div class="proj-chips"><span>3D CNN</span><span>Cell Biology</span></div>
-          </div>
-
-          <div class="proj-card stagger" data-color="#ec4899">
-            <div class="proj-accent"></div>
-            <span class="proj-icon">🎤</span>
-            <h3>Speech Emotion Recognition</h3>
-            <p>Persian speech emotion detection using the Shemo database.</p>
-            <div class="proj-chips"><span>Audio ML</span><span>Persian NLP</span></div>
-          </div>
-
-          <div class="proj-card stagger" data-color="#8b5cf6">
-            <div class="proj-accent"></div>
-            <span class="proj-icon">💬</span>
-            <h3>Suicidal Ideation Detection</h3>
-            <p>BERT-based NLP model for mental health monitoring on social media.</p>
-            <div class="proj-chips"><span>BERT</span><span>NLP</span><span>Mental Health</span></div>
-          </div>
-        </div>
-      </div>
-
-      <!-- ─ SKILLS & EDUCATION ─ -->
-      <div class="panel" id="panel-skills">
-        <div class="panel-header">
-          <h2>Skills &amp; Education</h2>
-        </div>
-
-        <div class="se-grid">
-
-          <div class="se-block">
-            <div class="se-label">AI &amp; Machine Learning</div>
-            <div class="pill-group stagger">
-              <span class="pill">Representation Learning</span>
-              <span class="pill">Contrastive Learning</span>
-              <span class="pill">Spiking Neural Networks</span>
-              <span class="pill">Vision Transformers</span>
-              <span class="pill">Diffusion Models</span>
-              <span class="pill">GANs</span>
-              <span class="pill">NLP · BERT · RAG</span>
-              <span class="pill">VLMs</span>
-            </div>
-          </div>
-
-          <div class="se-block">
-            <div class="se-label">Neuroscience</div>
-            <div class="pill-group stagger">
-              <span class="pill">Connectomics</span>
-              <span class="pill">WebKnossos</span>
-              <span class="pill">Medical Image Analysis</span>
-              <span class="pill">Deformable Registration</span>
-            </div>
-          </div>
-
-          <div class="se-block">
-            <div class="se-label">Programming</div>
-            <div class="pill-group stagger">
-              <span class="pill">Python</span>
-              <span class="pill">C / C++</span>
-              <span class="pill">Java</span>
-              <span class="pill">Kotlin</span>
-              <span class="pill">Flutter</span>
-            </div>
-          </div>
-
-          <div class="se-block">
-            <div class="se-label">Frameworks &amp; Tools</div>
-            <div class="pill-group stagger">
-              <span class="pill">PyTorch</span>
-              <span class="pill">TensorFlow</span>
-              <span class="pill">Scikit-Learn</span>
-              <span class="pill">NumPy · Pandas</span>
-              <span class="pill">Docker</span>
-              <span class="pill">Git</span>
-              <span class="pill">Linux</span>
-              <span class="pill">LaTeX</span>
-            </div>
-          </div>
-
-          <div class="se-block">
-            <div class="se-label">Languages</div>
-            <div class="pill-group stagger">
-              <span class="pill">🇬🇧 English — Advanced</span>
-              <span class="pill">🇮🇷 Persian — Native</span>
-              <span class="pill">🇦🇿 Azerbaijani — Native</span>
-              <span class="pill">🇹🇷 Turkish — Advanced</span>
-            </div>
-          </div>
-
-          <div class="se-block edu-block">
-            <div class="se-label">Education</div>
-            <div class="edu-list">
-
-              <div class="edu-row stagger">
-                <img src="assets/ut.png" alt="University of Tehran" class="edu-logo" />
-                <div>
-                  <strong>M.Sc. AI &amp; Robotics</strong>
-                  <p>University of Tehran &middot; 2023–2025 &middot; 17/20</p>
-                  <p class="edu-note">Thesis: SpikeReg — A Spiking-UNet for Deformable Registration</p>
-                </div>
-              </div>
-
-              <div class="edu-row stagger">
-                <div class="edu-logo-placeholder">PNU</div>
-                <div>
-                  <strong>B.Eng. Computer Engineering</strong>
-                  <p>Payame Noor University &middot; 2020–2023 &middot; 16.5/20</p>
-                </div>
-              </div>
-
-              <div class="edu-row stagger">
-                <div class="edu-logo-placeholder">FU</div>
-                <div>
-                  <strong>B.Sc. Educational Sciences</strong>
-                  <p>Farhangian University &middot; 2017–2021 &middot; 17.5/20</p>
-                </div>
-              </div>
-
-            </div>
-          </div>
-
-        </div>
-      </div>
-
-      <!-- ─ NOTES ─ -->
-      <div class="panel" id="panel-notes">
-        <div class="panel-header">
-          <h2>Notes &amp; Resources</h2>
-          <span class="panel-meta">My study notes</span>
-        </div>
-
-        <div class="notes-grid">
-
-          <a href="gp/lectuers.html" class="note-card" target="_blank" rel="noopener">
-            <div class="note-card-top">
-              <div class="note-icon">∫</div>
-              <div class="note-meta">
-                <span class="note-tag">Gaussian Processes</span>
-                <span class="note-date">MLSS 2015 · Neil Lawrence</span>
-              </div>
-              <svg class="note-ext" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor"
-                stroke-width="2">
-                <path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6" />
-                <polyline points="15 3 21 3 21 9" />
-                <line x1="10" y1="14" x2="21" y2="3" />
+          <div class="hero-links reveal">
+            <a class="btn btn-primary" href="mailto:Ali.Mikaeili@brain.mpg.de">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                <rect x="2" y="4" width="20" height="16" rx="2" />
+                <path d="m22 7-10 6L2 7" />
               </svg>
-            </div>
-            <h3>Gaussian Processes: Intuition &amp; Mathematics</h3>
-            <p>Full synthesis of Neil Lawrence's GP lecture — from Laplace's Demon and the philosophy of probability,
-              through kernel functions and conditioning, to non-Gaussian likelihoods and parameter optimization.</p>
-            <div class="note-topics">
-              <span>Kernel Functions</span>
-              <span>Bayesian Inference</span>
-              <span>Marginalization</span>
-              <span>EP vs Variational</span>
-              <span>KaTeX Math</span>
-              <span>Interactive Demos</span>
-            </div>
-          </a>
-
-          <div class="note-card placeholder">
-            <div class="note-card-top">
-              <div class="note-icon" style="opacity:.3">+</div>
-            </div>
-            <h3 style="opacity:.4">More notes coming soon</h3>
-            <p style="opacity:.35">Currently studying and synthesizing additional lectures.</p>
+              Email
+            </a>
+            <a class="btn" href="https://github.com/alim98" target="_blank" rel="noopener">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                <path d="M9 19c-5 1.5-5-2.5-7-3m14 6v-3.87a3.37 3.37 0 0 0-.94-2.61c3.14-.35 6.44-1.54 6.44-7A5.44 5.44 0 0 0 20 4.77 5.07 5.07 0 0 0 19.91 1S18.73.65 16 2.48a13.38 13.38 0 0 0-7 0C6.27.65 5.09 1 5.09 1A5.07 5.07 0 0 0 5 4.77a5.44 5.44 0 0 0-1.5 3.78c0 5.42 3.3 6.61 6.44 7A3.37 3.37 0 0 0 9 18.13V22" />
+              </svg>
+              GitHub
+            </a>
+            <a class="btn" href="https://linkedin.com/in/mikaeiliali" target="_blank" rel="noopener">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                <path d="M16 8a6 6 0 0 1 6 6v7h-4v-7a2 2 0 0 0-2-2 2 2 0 0 0-2 2v7h-4v-7a6 6 0 0 1 6-6z" />
+                <rect x="2" y="9" width="4" height="12" />
+                <circle cx="4" cy="4" r="2" />
+              </svg>
+              LinkedIn
+            </a>
           </div>
+        </div>
 
+        <div class="hero-portrait reveal">
+          <img src="assets/profile.jpg" alt="Portrait of Ali Mikaeili" />
+          <div class="hero-portrait-tag">
+            <span class="hp-k">Focus</span>
+            <span class="hp-v">AI × Neuroscience</span>
+          </div>
         </div>
       </div>
+    </section>
 
-    </main>
-  </div>
+    <!-- ───────────────── RESEARCH ───────────────── -->
+    <section class="section" id="research" aria-labelledby="research-title">
+      <div class="section-head reveal">
+        <span class="section-num">01</span>
+        <h2 class="section-title" id="research-title">Selected Research</h2>
+        <span class="section-meta">5 papers · 4 published</span>
+      </div>
 
-  <div class="kbd-hint" id="kbd-hint">Press <kbd>1</kbd>–<kbd>5</kbd> to switch sections</div>
+      <div class="pub-block reveal">
+        <div class="pub-group-label">Published</div>
+        <ol class="pub-list">
 
-  <script src="script.js?v=4"></script>
+          <li>
+            <a class="pub" href="https://doi.org/10.1109/AREE63378.2025.10880261" target="_blank" rel="noopener">
+              <span class="pub-n">01</span>
+              <div class="pub-main">
+                <h3 class="pub-title">Attention-Based Segmentation of Brain Tumors Using Feature-Level Fusion and a
+                  UNet Architecture</h3>
+                <p class="pub-authors"><strong>A. M. Barzili</strong>, B. Moshiri</p>
+              </div>
+              <div class="pub-aside">
+                <span class="pub-venue">IEEE AREE</span>
+                <span class="pub-year">2025</span>
+                <svg class="pub-arrow" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                  stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                  <path d="M7 17 17 7M8 7h9v9" />
+                </svg>
+              </div>
+            </a>
+          </li>
+
+          <li>
+            <a class="pub" href="https://doi.org/10.1109/AI2E64943.2025.10983511" target="_blank" rel="noopener">
+              <span class="pub-n">02</span>
+              <div class="pub-main">
+                <h3 class="pub-title">Detection of Autism Spectrum Disorder Using Quantum Support Vector Machines</h3>
+                <p class="pub-authors">A. E. Zadeh, <strong>A. M. Barzili</strong>, M. R. Nemati, M. Khoshnevisan, et
+                  al.</p>
+              </div>
+              <div class="pub-aside">
+                <span class="pub-venue">IEEE AI2E</span>
+                <span class="pub-year">2025</span>
+                <svg class="pub-arrow" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                  stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                  <path d="M7 17 17 7M8 7h9v9" />
+                </svg>
+              </div>
+            </a>
+          </li>
+
+          <li>
+            <a class="pub" href="https://doi.org/10.48550/arXiv.2511.11625" target="_blank" rel="noopener">
+              <span class="pub-n">03</span>
+              <div class="pub-main">
+                <h3 class="pub-title">MedFedPure: A Medical Federated Framework with MAE-Based Detection and Diffusion
+                  Purification for Inference-Time Attacks</h3>
+                <p class="pub-authors">M. Karami, M. R. Nemati, A. Kazemi, <strong>A. M. Barzili</strong>, et al.</p>
+              </div>
+              <div class="pub-aside">
+                <span class="pub-venue">arXiv</span>
+                <span class="pub-year">2025</span>
+                <svg class="pub-arrow" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                  stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                  <path d="M7 17 17 7M8 7h9v9" />
+                </svg>
+              </div>
+            </a>
+          </li>
+
+          <li>
+            <a class="pub" href="https://arxiv.org/abs/2605.25144" target="_blank" rel="noopener">
+              <span class="pub-n">04</span>
+              <div class="pub-main">
+                <h3 class="pub-title">SpikeReg: Energy-Efficient 3D Deformable Medical Image Registration with
+                  Spiking Neural Networks</h3>
+                <p class="pub-authors"><strong>A. M. Barzili</strong>, B. Moshiri, H. Azadegan, M.-R. A. Dehaqani</p>
+              </div>
+              <div class="pub-aside">
+                <span class="pub-venue">arXiv</span>
+                <span class="pub-year">2026</span>
+                <svg class="pub-arrow" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                  stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                  <path d="M7 17 17 7M8 7h9v9" />
+                </svg>
+              </div>
+            </a>
+          </li>
+
+        </ol>
+      </div>
+
+      <div class="pub-block reveal">
+        <div class="pub-group-label">Under Review</div>
+        <ol class="pub-list" start="5">
+
+          <li>
+            <div class="pub pub-static">
+              <span class="pub-n">05</span>
+              <div class="pub-main">
+                <h3 class="pub-title">LiquidReg: An Adaptive ODE Engine for Deformable Registration</h3>
+                <p class="pub-authors"><strong>A. M. Barzili</strong>, B. Moshiri</p>
+              </div>
+              <div class="pub-aside"><span class="pub-status">In review</span></div>
+            </div>
+          </li>
+
+        </ol>
+      </div>
+    </section>
+
+    <!-- ───────────────── EXPERIENCE ───────────────── -->
+    <section class="section" id="experience" aria-labelledby="experience-title">
+      <div class="section-head reveal">
+        <span class="section-num">02</span>
+        <h2 class="section-title" id="experience-title">Experience</h2>
+        <span class="section-meta">4 positions</span>
+      </div>
+
+      <ol class="timeline">
+
+        <li class="tl-item reveal">
+          <div class="tl-rail"><span class="tl-dot tl-dot-live"></span></div>
+          <div class="tl-logo"><img src="assets/mpi.png" alt="Max Planck Institute" /></div>
+          <div class="tl-body">
+            <div class="tl-top">
+              <h3>Research Assistant</h3>
+              <span class="chip-live">Now</span>
+            </div>
+            <p class="tl-org">Max Planck Institute for Brain Research · Frankfurt</p>
+            <p class="tl-desc">Unsupervised synapse clustering via contrastive learning on 3D electron-microscopy
+              data, and cell classification with Vision Transformers, under Prof.&nbsp;Gilles&nbsp;Laurent.</p>
+            <div class="tag-row">
+              <span>Contrastive Learning</span><span>Vision Transformers</span><span>Connectomics</span>
+            </div>
+          </div>
+          <span class="tl-year">2024 — present</span>
+        </li>
+
+        <li class="tl-item reveal">
+          <div class="tl-rail"><span class="tl-dot"></span></div>
+          <div class="tl-logo"><img src="assets/mci.png" alt="Hamrahe Aval" /></div>
+          <div class="tl-body">
+            <div class="tl-top"><h3>Data Analyst</h3></div>
+            <p class="tl-org">Hamrahe Aval (MCI), R&amp;D · Tehran</p>
+            <p class="tl-desc">Text-to-speech and speech emotion recognition for the GITEX exhibition; product manager
+              for the Persian interactive dog-robot project.</p>
+            <div class="tag-row">
+              <span>TTS</span><span>Speech Emotion</span><span>Product Management</span>
+            </div>
+          </div>
+          <span class="tl-year">2023 — 2024</span>
+        </li>
+
+        <li class="tl-item reveal">
+          <div class="tl-rail"><span class="tl-dot"></span></div>
+          <div class="tl-logo"><img src="assets/ut.png" alt="University of Tehran" /></div>
+          <div class="tl-body">
+            <div class="tl-top"><h3>Teaching Assistant</h3></div>
+            <p class="tl-org">University of Tehran · Dept. of CS &amp; EE</p>
+            <p class="tl-desc">Led four AI medical-imaging research teams; assisted in Statistical Inference and
+              Artificial Intelligence courses.</p>
+            <div class="tag-row">
+              <span>Medical Imaging</span><span>Research Leadership</span><span>Deep Learning</span>
+            </div>
+          </div>
+          <span class="tl-year">2023 — 2024</span>
+        </li>
+
+        <li class="tl-item reveal">
+          <div class="tl-rail tl-rail-last"><span class="tl-dot"></span></div>
+          <div class="tl-logo tl-logo-letter">PNU</div>
+          <div class="tl-body">
+            <div class="tl-top"><h3>Teaching Assistant</h3></div>
+            <p class="tl-org">Payame Noor University · Ardabil</p>
+            <p class="tl-desc">Data Structures, Algorithms, Artificial Intelligence, and Operating Systems labs and
+              assessments.</p>
+            <div class="tag-row">
+              <span>Algorithms</span><span>AI</span><span>Operating Systems</span>
+            </div>
+          </div>
+          <span class="tl-year">2020 — 2023</span>
+        </li>
+
+      </ol>
+    </section>
+
+    <!-- ───────────────── PROJECTS ───────────────── -->
+    <section class="section" id="projects" aria-labelledby="projects-title">
+      <div class="section-head reveal">
+        <span class="section-num">03</span>
+        <h2 class="section-title" id="projects-title">Projects</h2>
+        <a class="section-meta section-link" href="https://github.com/alim98" target="_blank" rel="noopener">
+          github.com/alim98
+          <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+            stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+            <path d="M7 17 17 7M8 7h9v9" />
+          </svg>
+        </a>
+      </div>
+
+      <div class="proj-grid">
+
+        <article class="proj reveal" style="--c:#6366f1">
+          <span class="proj-icon">🦑</span>
+          <h3>Cuttlefish Synapse Clustering</h3>
+          <p>Clustering and analyzing 3D synapse structures from cuttlefish electron-microscopy data via contrastive
+            learning (MPIBR).</p>
+          <div class="tag-row"><span>Contrastive Learning</span><span>3D EM</span><span>PyTorch</span></div>
+        </article>
+
+        <article class="proj reveal" style="--c:#f59e0b">
+          <span class="proj-icon">⚡</span>
+          <h3>SpikeReg</h3>
+          <p>Deformable brain registration with Spiking Neural Networks — an energy-efficient alternative.</p>
+          <div class="tag-row"><span>SNN</span><span>Medical Imaging</span><span>UNet</span></div>
+        </article>
+
+        <article class="proj reveal" style="--c:#06b6d4">
+          <span class="proj-icon">🌊</span>
+          <h3>LiquidReg</h3>
+          <p>Deformable registration via Liquid Time-constant Networks and continuous-time ODE solvers.</p>
+          <div class="tag-row"><span>LTC</span><span>ODE</span><span>Diffeomorphic</span></div>
+        </article>
+
+      </div>
+    </section>
+
+    <!-- ───────────────── NOTES ───────────────── -->
+    <section class="section" id="notes" aria-labelledby="notes-title">
+      <div class="section-head reveal">
+        <span class="section-num">04</span>
+        <h2 class="section-title" id="notes-title">Notes &amp; Writing</h2>
+        <span class="section-meta">study notes</span>
+      </div>
+
+      <div class="notes-grid">
+
+        <a class="note reveal" href="gp/lectuers.html" target="_blank" rel="noopener">
+          <div class="note-top">
+            <span class="note-glyph">∫</span>
+            <div class="note-kicker">
+              <span class="note-kicker-tag">Gaussian Processes</span>
+              <span class="note-kicker-src">MLSS 2015 · Neil Lawrence</span>
+            </div>
+            <svg class="note-arrow" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+              stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+              <path d="M7 17 17 7M8 7h9v9" />
+            </svg>
+          </div>
+          <h3>Gaussian Processes: Intuition &amp; Mathematics</h3>
+          <p>A full synthesis of Neil Lawrence's GP lecture — from Laplace's Demon and the philosophy of probability,
+            through kernel functions and conditioning, to non-Gaussian likelihoods and parameter optimization.</p>
+          <div class="tag-row">
+            <span>Kernel Functions</span><span>Bayesian Inference</span><span>Marginalization</span><span>EP vs
+              Variational</span><span>Interactive Demos</span>
+          </div>
+        </a>
+
+        <div class="note note-placeholder reveal">
+          <div class="note-top"><span class="note-glyph note-glyph-dim">+</span></div>
+          <h3 class="dim">More notes coming soon</h3>
+          <p class="dim">Currently studying and synthesizing additional lectures.</p>
+        </div>
+
+      </div>
+    </section>
+
+    <!-- ───────────────── SKILLS & EDUCATION ───────────────── -->
+    <section class="section" id="skills" aria-labelledby="skills-title">
+      <div class="section-head reveal">
+        <span class="section-num">05</span>
+        <h2 class="section-title" id="skills-title">Skills &amp; Education</h2>
+      </div>
+
+      <div class="se-grid">
+
+        <div class="se-block reveal">
+          <div class="se-label">AI &amp; Machine Learning</div>
+          <div class="tag-row tag-row-lg">
+            <span>Representation Learning</span><span>Contrastive Learning</span><span>Spiking Neural
+              Networks</span><span>Vision Transformers</span><span>Diffusion Models</span><span>GANs</span><span>NLP
+              · BERT · RAG</span><span>VLMs</span>
+          </div>
+        </div>
+
+        <div class="se-block reveal">
+          <div class="se-label">Neuroscience</div>
+          <div class="tag-row tag-row-lg">
+            <span>Connectomics</span><span>WebKnossos</span><span>Medical Image Analysis</span><span>Deformable
+              Registration</span>
+          </div>
+        </div>
+
+        <div class="se-block reveal">
+          <div class="se-label">Programming</div>
+          <div class="tag-row tag-row-lg">
+            <span>Python</span><span>C / C++</span><span>Java</span><span>Kotlin</span><span>Flutter</span>
+          </div>
+        </div>
+
+        <div class="se-block reveal">
+          <div class="se-label">Frameworks &amp; Tools</div>
+          <div class="tag-row tag-row-lg">
+            <span>PyTorch</span><span>TensorFlow</span><span>Scikit-Learn</span><span>NumPy ·
+              Pandas</span><span>Docker</span><span>Git</span><span>Linux</span><span>LaTeX</span>
+          </div>
+        </div>
+
+        <div class="se-block reveal">
+          <div class="se-label">Languages</div>
+          <div class="tag-row tag-row-lg">
+            <span>🇬🇧 English — Advanced</span><span>🇮🇷 Persian — Native</span><span>🇦🇿 Azerbaijani —
+              Native</span><span>🇹🇷 Turkish — Advanced</span>
+          </div>
+        </div>
+
+        <div class="se-block se-edu reveal">
+          <div class="se-label">Education</div>
+          <div class="edu-list">
+
+            <div class="edu-row">
+              <img src="assets/ut.png" alt="University of Tehran" class="edu-logo" />
+              <div>
+                <strong>M.Sc. Artificial Intelligence &amp; Robotics</strong>
+                <p>University of Tehran · 2023–2025 · 17/20</p>
+                <p class="edu-note">Thesis — SpikeReg: A Spiking-UNet for Deformable Registration</p>
+              </div>
+            </div>
+
+            <div class="edu-row">
+              <span class="edu-logo edu-logo-letter">PNU</span>
+              <div>
+                <strong>B.Eng. Computer Engineering</strong>
+                <p>Payame Noor University · 2020–2023 · 16.5/20</p>
+              </div>
+            </div>
+
+            <div class="edu-row">
+              <span class="edu-logo edu-logo-letter">FU</span>
+              <div>
+                <strong>B.Sc. Educational Sciences</strong>
+                <p>Farhangian University · 2017–2021 · 17.5/20</p>
+              </div>
+            </div>
+
+          </div>
+        </div>
+
+      </div>
+    </section>
+
+    <!-- ───────────────── FOOTER ───────────────── -->
+    <footer class="footer" id="contact">
+      <div class="footer-grid">
+        <div>
+          <p class="footer-kicker">Get in touch</p>
+          <a class="footer-mail" href="mailto:Ali.Mikaeili@brain.mpg.de">Ali.Mikaeili@brain.mpg.de</a>
+          <p class="footer-loc">Max Planck Institute for Brain Research · Frankfurt, Germany</p>
+        </div>
+        <nav class="footer-links" aria-label="Elsewhere">
+          <a href="https://github.com/alim98" target="_blank" rel="noopener">GitHub</a>
+          <a href="https://linkedin.com/in/mikaeiliali" target="_blank" rel="noopener">LinkedIn</a>
+          <a href="mailto:Ali.Mikaeili@brain.mpg.de">Email</a>
+        </nav>
+      </div>
+      <div class="footer-base">
+        <span>© <span id="year">2026</span> Ali Mikaeili</span>
+        <span>Made with coffee and questionable CSS</span>
+      </div>
+    </footer>
+
+  </main>
+
+  <script src="script.js?v=5"></script>
 </body>
 
 </html>
