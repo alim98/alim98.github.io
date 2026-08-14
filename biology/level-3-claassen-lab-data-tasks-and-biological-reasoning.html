@@ -1,0 +1,38 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Level 3 — Claassen Lab Data, Tasks & Biological Reasoning</title>
+<meta name="description" content="Interactive guide to the data modalities, computational tasks, statistics, and biological reasoning relevant to Manfred Claassen's single-cell and spatial systems-medicine research.">
+<style>body{margin:0;font-family:Inter,system-ui,sans-serif;color:#687066;background:#fff}#loading{max-width:760px;margin:12vh auto;padding:2rem;font-size:1rem}</style>
+</head>
+<body>
+<div id="loading">Loading Level 3 — Claassen Lab Data, Tasks &amp; Biological Reasoning…</div>
+<script>
+(async()=>{
+  const paths=[
+    'assets/level3/part0.txt','assets/level3/part1.txt','assets/level3/part2.txt',
+    'assets/level3/part3.txt','assets/level3/part4.txt','assets/level3/part5.txt'
+  ];
+  const chunks=await Promise.all(paths.map(async path=>{
+    const response=await fetch(path);
+    if(!response.ok) throw new Error(`Could not load ${path}`);
+    return response.text();
+  }));
+  const b64=chunks.join('').replace(/\s+/g,'');
+  const bytes=Uint8Array.from(atob(b64),c=>c.charCodeAt(0));
+  const stream=new Blob([bytes]).stream().pipeThrough(new DecompressionStream('gzip'));
+  const html=await new Response(stream).text();
+  const parsed=new DOMParser().parseFromString(html,'text/html');
+  const scripts=[...parsed.querySelectorAll('script')].map(script=>script.textContent);
+  parsed.querySelectorAll('script').forEach(script=>script.remove());
+  document.head.innerHTML=parsed.head.innerHTML;
+  document.body.innerHTML=parsed.body.innerHTML;
+  for(const code of scripts){ (0,eval)(code); }
+})().catch(error=>{
+  document.body.innerHTML=`<pre style="white-space:pre-wrap;padding:2rem;font:14px/1.5 system-ui;color:#9a3e39">Could not load notebook: ${String(error)}</pre>`;
+});
+</script>
+</body>
+</html>
