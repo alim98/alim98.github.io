@@ -1,0 +1,54 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Dataset School</title>
+<meta name="robots" content="noindex, nofollow">
+<meta name="description" content="Interactive courses that teach one single-cell or spatial dataset at a time, on the real data.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;750&family=JetBrains+Mono:wght@400;500&display=fallback">
+<link rel="stylesheet" href="assets/portal.css">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='7' fill='%2312233D'/%3E%3Ccircle cx='11' cy='12' r='3.2' fill='%231F5FD1'/%3E%3Ccircle cx='21' cy='15' r='3.2' fill='%23B45309'/%3E%3Ccircle cx='14' cy='22' r='3.2' fill='%231BAF7A'/%3E%3C/svg%3E">
+</head>
+<body>
+<header class="topbar">
+  <div class="topbar-in">
+    <a class="brand" href="#">
+      <svg class="brand-mark" viewBox="0 0 32 32" aria-hidden="true">
+        <rect width="32" height="32" rx="7" fill="rgba(255,255,255,.12)"></rect>
+        <circle cx="11" cy="12" r="3.4" fill="#6c9bff"></circle>
+        <circle cx="21" cy="15" r="3.4" fill="#e8a04a"></circle>
+        <circle cx="14" cy="22" r="3.4" fill="#4cc98a"></circle>
+      </svg>
+      Dataset School
+    </a>
+    <nav class="crumbs" id="crumbs" aria-label="Breadcrumb"></nav>
+    <span class="spacer"></span>
+    <button class="iconbtn" id="themebtn" type="button" aria-label="Switch between light and dark">Theme</button>
+  </div>
+</header>
+<div id="app"><div class="loading">Loading…</div></div>
+
+<script src="assets/portal.js"></script>
+<script src="assets/selftest.js"></script>
+<script src="datasets/meylan/m_data.js"></script>
+<script src="datasets/meylan/m_umap.js"></script>
+<script src="datasets/meylan/m_tissue.js"></script>
+<script src="datasets/meylan/m_lab.js"></script>
+<script src="datasets/meylan/m_hero.js"></script>
+<script src="datasets/meylan/course_1.js"></script>
+<script src="datasets/meylan/course_2.js"></script>
+<script src="datasets/meylan/course_3.js"></script>
+<script src="datasets/meylan/course_4.js"></script>
+<script>
+  DS.upcoming = [
+    { title: 'GBM-Space: Visium across one tumour', short: 'Many sections per tumour, whole transcriptome, spots instead of cells.', facts: ['97 sections', '12 tumours'] },
+    { title: 'Wound-response organoids', short: 'Patient-derived tumour organoids under hypoxia and plasma, over four timepoints.', facts: ['40 sections', '366 genes'] }
+  ];
+  document.getElementById('themebtn').addEventListener('click', DS.toggleTheme);
+  DS.start();
+</script>
+</body>
+</html>
